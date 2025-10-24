@@ -16,6 +16,10 @@ use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\TeacherHomeController;
+use App\Http\Controllers\StudentHomeController;
+use App\Http\Controllers\ChatController;
 
 
 Route::get('/', function () {
@@ -47,16 +51,13 @@ Route::middleware([IsStudent::class])->group(function () {
 //homepagee//
 
 Route::middleware([IsTeacher::class])->group(function () {
-    Route::get('/teacher/home', function () {
-        return view('teacher.home');
-    })->name('teacher.home');
+    Route::get('/teacher/home', [TeacherHomeController::class, 'index'])->name('teacher.home');
 });
 
 Route::middleware([IsStudent::class])->group(function () {
-    Route::get('/student/home', function () {
-        return view('student.home');
-    })->name('student.home');
+    Route::get('/student/home', [StudentHomeController::class, 'index'])->name('student.home');
 });
+
 
 //homepagee//
 
@@ -121,33 +122,57 @@ Route::middleware([IsTeacher::class])
         Route::delete('materials/{id}', [MaterialController::class, 'destroy'])->name('materials.destroy');
         Route::get('materials/{id}/download', [MaterialController::class, 'download'])->name('materials.download');
 
-        // =====================
-        // 🧩 QUIZZES SECTION
-        // =====================
-        Route::get('quizzes', [QuizController::class, 'index'])->name('quizzes.index');           // List all quizzes
-        Route::get('quizzes/create', [QuizController::class, 'create'])->name('quizzes.create');  // Create form
-        Route::post('quizzes', [QuizController::class, 'store'])->name('quizzes.store');          // Save quiz
-        Route::get('quizzes/{quiz}/edit', [QuizController::class, 'edit'])->name('quizzes.edit'); // Edit form
-        Route::put('quizzes/{quiz}', [QuizController::class, 'update'])->name('quizzes.update');  // Update
-        Route::delete('quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy'); // Delete
+        // QUIZZES
+        Route::get('quizzes', [QuizController::class, 'index'])->name('quizzes.index');
+        Route::get('quizzes/create', [QuizController::class, 'create'])->name('quizzes.create');
+        Route::post('quizzes', [QuizController::class, 'store'])->name('quizzes.store');
+        Route::get('quizzes/{quiz}/edit', [QuizController::class, 'edit'])->name('quizzes.edit');
+        Route::put('quizzes/{quiz}', [QuizController::class, 'update'])->name('quizzes.update');
+        Route::delete('quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
 
-        // =====================
-        // ❓ QUESTIONS SECTION
-        // =====================
+        // QUESTIONS
+        Route::get('quizzes/{quiz}/questions', [QuestionController::class, 'index'])->name('questions.index');
         Route::get('quizzes/{quiz}/questions/create', [QuestionController::class, 'create'])->name('questions.create');
         Route::post('quizzes/{quiz}/questions', [QuestionController::class, 'store'])->name('questions.store');
-        Route::get('questions/{question}/edit', [QuestionController::class, 'edit'])->name('questions.edit');
-        Route::put('questions/{question}', [QuestionController::class, 'update'])->name('questions.update');
-        Route::delete('questions/{question}', [QuestionController::class, 'destroy'])->name('questions.destroy');
+        Route::delete('quizzes/{quiz}/questions/{question}', [QuestionController::class, 'destroy'])->name('questions.destroy');
+
+       // Announcements (Teacher)
+        Route::get('announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
+        Route::get('announcements/create', [AnnouncementController::class, 'create'])->name('announcements.create');
+        Route::post('announcements', [AnnouncementController::class, 'store'])->name('announcements.store');
+        Route::get('announcements/{announcement}/edit', [AnnouncementController::class, 'edit'])->name('announcements.edit');
+        Route::put('announcements/{announcement}', [AnnouncementController::class, 'update'])->name('announcements.update');
+        Route::delete('announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('announcements.destroy');
+
     });
 
-
-
-
 // Student routes (only students)
-Route::middleware([IsStudent::class])->prefix('student')->name('student.')->group(function () {
-    Route::get('materials', [MaterialController::class, 'studentIndex'])->name('materials.index');
-    Route::get('materials/{id}/download', [MaterialController::class, 'download'])->name('materials.download');
+    Route::middleware([IsStudent::class])
+    ->prefix('student')
+    ->name('student.')
+    ->group(function () {
+
+        // Student materials
+        Route::get('materials', [MaterialController::class, 'studentIndex'])->name('materials.index');
+        Route::get('materials/{id}/download', [MaterialController::class, 'download'])->name('materials.download');
+
+         // Student quizzes
+        Route::get('quizzes', [QuizController::class, 'studentIndex'])->name('quizzes.index');
+        Route::get('quizzes/{quiz}', [QuizController::class, 'show'])->name('quizzes.show');
+        Route::post('quizzes/{quiz}/submit', [QuizController::class, 'submit'])->name('quizzes.submit');
+
+       //annoucements
+        Route::get('announcements', [AnnouncementController::class, 'studentIndex'])->name('announcements.index');
+    });
+
+    Route::middleware(['auth'])->group(function () {
+    // Chat list
+    Route::get('chat', [ChatController::class, 'list'])->name('chat.list');
+    // Chat with specific user
+    Route::get('chat/{user}', [ChatController::class, 'show'])->name('chat.show');
+    // Send message
+    Route::post('chat/{user}', [ChatController::class, 'send'])->name('chat.send');
 });
+
 
 

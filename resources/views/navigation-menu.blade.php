@@ -58,6 +58,25 @@
     @endauth
 </div>
 
+            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+    @auth
+        @php
+            $chatRoute = route('chat.list');
+            $unreadCount = $unreadCount ?? 0;
+        @endphp
+
+        <x-nav-link href="{{ $chatRoute }}" :active="request()->routeIs('chat.*')" class="relative flex items-center space-x-1">
+            <i class="fas fa-comment"></i>
+            <span>Chat</span> <!-- Add label to match Dashboard text -->
+            @if($unreadCount > 0)
+                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+                    {{ $unreadCount }}
+                </span>
+            @endif
+        </x-nav-link>
+    @endauth
+</div>
+
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">

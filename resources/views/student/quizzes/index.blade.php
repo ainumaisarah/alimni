@@ -4,7 +4,11 @@
 <div class="container mx-auto">
     <h2 class="text-2xl font-bold mb-4">My Quizzes</h2>
 
-<a href="{{ route('teacher.quizzes.create') }}">Create New Quiz</a>
+    @if(session('success'))
+        <div class="bg-green-100 text-green-800 p-3 rounded mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
 
     @if($quizzes->count() > 0)
         <table class="min-w-full bg-white border rounded shadow">
@@ -18,25 +22,28 @@
             </thead>
             <tbody>
                 @foreach($quizzes as $quiz)
+                @php
+                    // Get latest attempt by this student
+                    $result = $quiz->results()->where('student_id', auth()->id())->latest()->first();
+                @endphp
                 <tr>
                     <td class="px-4 py-2 border">{{ $quiz->title }}</td>
                     <td class="px-4 py-2 border">{{ $quiz->subject->name ?? 'N/A' }}</td>
                     <td class="px-4 py-2 border">{{ $quiz->classroom->name ?? 'N/A' }}</td>
                     <td class="px-4 py-2 border">
-                        <a href="{{ route('teacher.questions.index', $quiz->id) }}" class="text-blue-500 mr-2">View Questions</a>
-                        <a href="{{ route('teacher.quizzes.edit', $quiz->id) }}" class="text-green-500 mr-2">Edit</a>
-                        <form action="{{ route('teacher.quizzes.destroy', $quiz->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Delete this quiz?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="text-red-600">Delete</button>
-                        </form>
+                        @if($result)
+                            <a href="{{ route('student.quizzes.show', $quiz->id) }}" class="bg-yellow-400 text-black px-3 py-1 rounded">Review Quiz</a>
+                            <span class="text-green-600 ml-2">Score: {{ $result->score }}/{{ $quiz->questions->count() }}</span>
+                        @else
+                            <a href="{{ route('student.quizzes.show', $quiz->id) }}" class="bg-blue-500 text-white px-3 py-1 rounded">Take Quiz</a>
+                        @endif
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
     @else
-        <p class="mt-4 text-gray-500">You have not created any quizzes yet.</p>
+        <p class="mt-4 text-gray-500">No quizzes available for your class yet.</p>
     @endif
 </div>
 @endsection

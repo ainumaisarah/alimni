@@ -6,12 +6,11 @@
 
     @if($announcements->count() > 0)
         @foreach($announcements as $announcement)
-            <div class="mb-3 p-3 border rounded bg-gray-50">
+            <div class="mb-4 p-4 border rounded shadow bg-yellow-50">
                 <h3 class="font-semibold">{{ $announcement->title }}</h3>
                 <p>{{ $announcement->message }}</p>
                 <small class="text-gray-500">
-                    Posted by {{ $announcement->teacher->name ?? 'Unknown' }} •
-                    {{ $announcement->created_at->diffForHumans() }}
+                    Posted by {{ $announcement->teacher->name }} on {{ $announcement->created_at->format('d M Y, H:i') }}
                 </small>
             </div>
         @endforeach
