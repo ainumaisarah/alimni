@@ -5,27 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Subject extends Model
+class Material extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
+        'title',
+        'description',
+        'file_path',
         'classroom_id',
         'teacher_id',
     ];
 
-    /**
-     * Each subject belongs to a classroom.
-     */
     public function classroom()
     {
         return $this->belongsTo(Classroom::class);
     }
 
-    /**
-     * Each subject is taught by a teacher.
-     */
     public function teacher()
     {
         return $this->belongsTo(User::class, 'teacher_id');

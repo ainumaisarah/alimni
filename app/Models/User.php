@@ -76,4 +76,10 @@ public function classroom()
     return $this->belongsTo(Classroom::class);
 }
 
+public function subjects()
+{
+    return $this->hasMany(Subject::class, 'teacher_id');
+}
+
+
 }

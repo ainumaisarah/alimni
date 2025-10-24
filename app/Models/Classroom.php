@@ -31,6 +31,10 @@ class Classroom extends Model
         return $this->hasMany(\App\Models\User::class)->where('role', 'student');
     }
 
+    public function subjects()
+    {
+    return $this->hasMany(Subject::class);
+    }
 
 
 }

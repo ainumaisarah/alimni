@@ -5,29 +5,34 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Subject extends Model
+class Quiz extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'classroom_id',
+        'title',
+        'subject_id',
         'teacher_id',
+        'classroom_id'
     ];
 
-    /**
-     * Each subject belongs to a classroom.
-     */
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class);
+    }
+
     public function classroom()
     {
         return $this->belongsTo(Classroom::class);
     }
 
-    /**
-     * Each subject is taught by a teacher.
-     */
     public function teacher()
     {
         return $this->belongsTo(User::class, 'teacher_id');
+    }
+
+    public function questions()
+    {
+        return $this->hasMany(Question::class);
     }
 }
