@@ -33,7 +33,7 @@ class Classroom extends Model
 
     public function subjects()
     {
-    return $this->hasMany(Subject::class);
+    return $this->hasMany(Subject::class, 'classroom_id');
     }
 
 

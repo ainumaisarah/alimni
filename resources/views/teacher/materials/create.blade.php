@@ -11,35 +11,47 @@
     @endif
 
     <form action="{{ route('teacher.materials.store') }}" method="POST" enctype="multipart/form-data">
-        @csrf
+    @csrf
 
-        <div class="mb-4">
-            <label class="block mb-1">Title</label>
-            <input type="text" name="title" class="w-full border rounded p-2" required>
-        </div>
+    <div class="mb-3">
+        <label>Classroom</label>
+        <select name="classroom_id" class="w-full border p-2 rounded" required>
+            @foreach($classrooms as $classroom)
+                <option value="{{ $classroom->id }}" {{ isset($classroomId) && $classroomId == $classroom->id ? 'selected' : '' }}>
+                    {{ $classroom->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-        <div class="mb-4">
-            <label class="block mb-1">Classroom</label>
-            <select name="classroom_id" class="w-full border rounded p-2" required>
-                <option value="">-- Select Classroom --</option>
-                @foreach($classrooms as $c)
-                    <option value="{{ $c->id }}">{{ $c->name }}</option>
-                @endforeach
-            </select>
-        </div>
+    <div class="mb-3">
+        <label>Subject</label>
+        <select name="subject_id" class="w-full border p-2 rounded" required>
+            @foreach($subjects as $subject)
+                <option value="{{ $subject->id }}" {{ isset($subjectId) && $subjectId == $subject->id ? 'selected' : '' }}>
+                    {{ $subject->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
 
-        <div class="mb-4">
-            <label class="block mb-1">Description</label>
-            <textarea name="description" class="w-full border rounded p-2"></textarea>
-        </div>
+    <div class="mb-3">
+        <label>Title</label>
+        <input type="text" name="title" class="w-full border p-2 rounded" required>
+    </div>
 
-        <div class="mb-4">
-            <label class="block mb-1">File (optional)</label>
-            <input type="file" name="file" class="w-full">
-        </div>
+    <div class="mb-3">
+        <label>Description</label>
+        <textarea name="description" class="w-full border p-2 rounded" rows="4"></textarea>
+    </div>
 
-        <button class="bg-green-600 text-white px-4 py-2 rounded">Upload</button>
-        <a href="{{ route('teacher.materials.index') }}" class="ml-2">Cancel</a>
-    </form>
+    <div class="mb-3">
+        <label>File</label>
+        <input type="file" name="file" class="w-full border p-2 rounded" required>
+    </div>
+
+    <button type="submit" class="bg-green-500 text-black px-4 py-2 rounded">Upload</button>
+</form>
+
 </div>
 @endsection

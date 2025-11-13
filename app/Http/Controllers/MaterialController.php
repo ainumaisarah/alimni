@@ -29,38 +29,44 @@ class MaterialController extends Controller
     }
 
     // Show create form (teacher)
-    public function create()
+    public function create(Request $request)
     {
-    $classrooms = Classroom::where('teacher_id', Auth::id())->get();
-    return view('teacher.materials.create', compact('classrooms'));
+    $classroomId = $request->input('classroom_id');
+    $subjectId = $request->input('subject_id');
+
+    $classrooms = Classroom::all(); // optional: filter to teacher's classes
+    $subjects = Subject::where('teacher_id', auth()->id())->get();
+
+    return view('teacher.materials.create', compact('classrooms', 'subjects', 'classroomId', 'subjectId'));
     }
+
 
 
     // Store uploaded file (teacher)
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'classroom_id' => 'required|exists:classrooms,id',
-            'file' => 'nullable|file|max:10240', // 10MB
-            'description' => 'nullable|string',
-        ]);
+    $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'file' => 'required|file',
+        'classroom_id' => 'required|exists:classrooms,id',
+        'subject_id' => 'required|exists:subjects,id',
+    ]);
 
-        $filePath = null;
-        if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('materials', 'public'); // stores in storage/app/public/materials
-        }
+    $filePath = $request->file('file')->store('materials', 'public');
 
-        Material::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'file_path' => $filePath,
-            'classroom_id' => $request->classroom_id,
-            'teacher_id' => Auth::id(),
-        ]);
+    Material::create([
+        'title' => $request->title,
+        'description' => $request->description,
+        'file_path' => $filePath,
+        'classroom_id' => $request->classroom_id,
+        'subject_id' => $request->subject_id,
+        'teacher_id' => auth()->id(),
+    ]);
 
-        return redirect()->route('teacher.materials.index')->with('success', 'Material uploaded.');
+    return redirect()->back()->with('success', 'Material uploaded successfully!');
     }
+
 
     // Download (teacher or student)
     public function download($id)

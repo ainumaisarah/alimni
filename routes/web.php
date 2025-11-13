@@ -20,6 +20,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\TeacherHomeController;
 use App\Http\Controllers\StudentHomeController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ClassPageController;
 
 
 Route::get('/', function () {
@@ -129,6 +130,7 @@ Route::middleware([IsTeacher::class])
         Route::get('quizzes/{quiz}/edit', [QuizController::class, 'edit'])->name('quizzes.edit');
         Route::put('quizzes/{quiz}', [QuizController::class, 'update'])->name('quizzes.update');
         Route::delete('quizzes/{quiz}', [QuizController::class, 'destroy'])->name('quizzes.destroy');
+        Route::get('quizzes/{quiz}', [QuizController::class, 'show'])->name('quizzes.show');
 
         // QUESTIONS
         Route::get('quizzes/{quiz}/questions', [QuestionController::class, 'index'])->name('questions.index');
@@ -174,5 +176,16 @@ Route::middleware([IsTeacher::class])
     Route::post('chat/{user}', [ChatController::class, 'send'])->name('chat.send');
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/classes', [ClassPageController::class, 'index'])->name('classes.index');
+});
+
+// Teacher class page
+Route::get('/teacher/classes', [ClassPageController::class, 'index'])->name('teacher.classes.index');
+Route::get('/teacher/classes/subject/{subjectId}', [ClassPageController::class, 'showSubject'])->name('teacher.classes.subject.show');
+
+// Student class page
+Route::get('/student/classes', [ClassPageController::class, 'index'])->name('student.classes.index');
+Route::get('/student/classes/subject/{subjectId}', [ClassPageController::class, 'showSubject'])->name('student.classes.subject.show');
 
 

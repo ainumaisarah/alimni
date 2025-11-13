@@ -30,4 +30,16 @@ class Subject extends Model
     {
         return $this->belongsTo(User::class, 'teacher_id');
     }
+
+    // Subject.php
+    public function materials()
+    {
+        return $this->hasMany(Material::class, 'subject_id');
+    }
+
+    public function quizzes()
+    {
+        return $this->hasMany(Quiz::class);
+    }
+
 }
