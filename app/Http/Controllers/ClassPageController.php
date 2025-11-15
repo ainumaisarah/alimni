@@ -7,50 +7,29 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Classroom;
 use App\Models\Subject;
 
-
 class ClassPageController extends Controller
 {
+    // List all classes for the user
     public function index()
     {
-    $user = Auth::user();
+        $user = Auth::user();
+        $role = $user->role;
 
-    // For Teachers
-    if ($user->hasRole('teacher')) {
-        $groups = [];
-        $classes = Classroom::with(['subjects' => function($q) use ($user) {
-            $q->where('teacher_id', $user->id)->with('teacher');
-        }])->get();
+        $classes = collect();
 
-        foreach ($classes as $class) {
-            foreach ($class->subjects as $subject) {
-                $groups[] = [
-                    'class' => $class,
-                    'subject' => $subject,
-                ];
-            }
-        }
+        if($role === 'Teacher') {
+    $teacherId = $user->id;
 
-        return view('classes.index', compact('groups'))->with('role', 'Teacher');
+    // get all class IDs where this teacher has subjects
+    $classIds = Subject::where('teacher_id', $teacherId)->pluck('classroom_id')->unique();
+
+    // fetch the classrooms
+    $classes = Classroom::whereIn('id', $classIds)->get();
     }
 
-    // For Students
-    if ($user->hasRole('student')) {
-        $class = $user->classroom()->with('subjects.teacher')->first();
 
-        $groups = [];
-        foreach ($class->subjects as $subject) {
-            $groups[] = [
-                'class' => $class,
-                'subject' => $subject,
-            ];
-        }
-
-        return view('classes.index', compact('groups'))->with('role', 'Student');
+        return view('classes.index', compact('classes', 'role'));
     }
-
-    return redirect()->route('dashboard')->with('error', 'Only teachers or students can view classes.');
-    }
-
 
     public function showSubject($subjectId)
 {
@@ -67,5 +46,6 @@ class ClassPageController extends Controller
         'classroomId' => $subject->classroom_id
     ]);
 }
+
 
 }
