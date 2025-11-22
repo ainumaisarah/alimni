@@ -12,6 +12,7 @@ class ScheduleController extends Controller
 {
     public function index()
     {
+        // Load schedules with classrooms and teachers
         $schedules = Schedule::with(['classroom', 'teacher'])->get();
         return view('admin.schedules.index', compact('schedules'));
     }
@@ -24,13 +25,12 @@ class ScheduleController extends Controller
         return view('admin.schedules.create', compact('classrooms', 'teachers'));
     }
 
-
     public function store(Request $request)
     {
         $validated = $request->validate([
             'classroom_id' => 'required|exists:classrooms,id',
             'teacher_id' => 'required|exists:users,id',
-            'subject' => 'required|string|max:255',
+            'subject' => 'required|string|max:255', // still a simple text column
             'day' => 'required|string|max:50',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
@@ -38,17 +38,17 @@ class ScheduleController extends Controller
 
         Schedule::create($validated);
 
-        return redirect()->route('admin.schedules.index')->with('success', 'Schedule created successfully.');
+        return redirect()->route('admin.schedules.index')
+                         ->with('success', 'Schedule created successfully.');
     }
 
-
-    // In your Admin/ScheduleController.php (or wherever your schedules logic is)
     public function destroy($id)
     {
         $schedule = Schedule::findOrFail($id);
         $schedule->delete();
 
-        return redirect()->route('admin.schedules.index')->with('success', 'Schedule deleted successfully.');
+        return redirect()->route('admin.schedules.index')
+                         ->with('success', 'Schedule deleted successfully.');
     }
 
     public function home()
@@ -71,7 +71,7 @@ class ScheduleController extends Controller
         $validated = $request->validate([
             'classroom_id' => 'required|exists:classrooms,id',
             'teacher_id' => 'required|exists:users,id',
-            'subject' => 'required|string|max:255',
+            'subject' => 'required|string|max:255', // still a simple text column
             'day' => 'required|string|max:50',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
@@ -80,8 +80,7 @@ class ScheduleController extends Controller
         $schedule = Schedule::findOrFail($id);
         $schedule->update($validated);
 
-        return redirect()->route('admin.schedules.index')->with('success', 'Schedule updated successfully.');
+        return redirect()->route('admin.schedules.index')
+                         ->with('success', 'Schedule updated successfully.');
     }
-
-
 }

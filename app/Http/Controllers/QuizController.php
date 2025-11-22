@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Quiz;
-use App\Models\Subject;
 use App\Models\Classroom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,31 +10,30 @@ use App\Models\QuizResult;
 
 class QuizController extends Controller
 {
+    // Teacher: list own quizzes
     public function index()
     {
-    $quizzes = Quiz::where('teacher_id', auth()->id())->get(); // only teacher's quizzes
-    return view('teacher.quizzes.index', compact('quizzes'));
+        $quizzes = Quiz::where('teacher_id', auth()->id())->get(); // only teacher's quizzes
+        return view('teacher.quizzes.index', compact('quizzes'));
     }
 
+    // Show create form
     public function create()
     {
-    $teacherId = Auth::id();
+        // Only classrooms that this teacher teaches in
+        $classrooms = Classroom::where('teacher_id', auth()->id())->get();
 
-    // Only subjects taught by this teacher
-    $subjects = Subject::where('teacher_id', $teacherId)->get();
+        // Check if a classroom_id is passed from the Classes page
+        $classroomId = request()->query('classroom_id');
 
-    // Only classrooms that this teacher teaches in
-    $classrooms = Classroom::where('teacher_id', $teacherId)->get();
-
-    return view('teacher.quizzes.create', compact('subjects', 'classrooms'));
+        return view('teacher.quizzes.create', compact('classrooms', 'classroomId'));
     }
 
-
+    // Store a new quiz
     public function store(Request $request)
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'subject_id' => 'required|exists:subjects,id',
             'classroom_id' => 'required|exists:classrooms,id',
         ]);
 
@@ -46,13 +44,14 @@ class QuizController extends Controller
         return redirect()->route('teacher.quizzes.index')->with('success', 'Quiz created successfully!');
     }
 
+    // Delete a quiz
     public function destroy(Quiz $quiz)
     {
         $quiz->delete();
         return redirect()->route('teacher.quizzes.index')->with('success', 'Quiz deleted successfully.');
     }
 
-// List all quizzes for the student
+    // List all quizzes for the student
     public function studentIndex()
     {
         $student = auth()->user();
@@ -63,40 +62,80 @@ class QuizController extends Controller
     // Show the quiz questions
     public function show(Quiz $quiz)
     {
-    $student = auth()->user();
+        $student = auth()->user();
 
-    // Get previous attempt
-    $result = $quiz->results()->where('student_id', $student->id)->latest()->first();
+        // Get previous attempt
+        $result = $quiz->results()->where('student_id', $student->id)->latest()->first();
 
-    $questions = $quiz->questions()->get();
+        $questions = $quiz->questions()->get();
 
-    return view('student.quizzes.show', compact('quiz', 'questions', 'result'));
+        return view('student.quizzes.show', compact('quiz', 'questions', 'result'));
     }
+
     // Handle quiz submission
     public function submit(Request $request, Quiz $quiz)
     {
-    $answers = $request->input('answers', []);
-    $student = auth()->user();
+        $answers = $request->input('answers', []);
+        $student = auth()->user();
 
-    $score = 0;
+        $score = 0;
 
-    foreach ($quiz->questions as $question) {
-        $studentAnswer = $answers[$question->id] ?? null;
-        if ($studentAnswer && strtoupper($studentAnswer) === strtoupper($question->correct_answer)) {
-            $score++;
+        foreach ($quiz->questions as $question) {
+            $studentAnswer = $answers[$question->id] ?? null;
+            if ($studentAnswer && strtoupper($studentAnswer) === strtoupper($question->correct_answer)) {
+                $score++;
+            }
         }
+
+        // Save to quiz_results table
+        QuizResult::create([
+            'quiz_id' => $quiz->id,
+            'student_id' => $student->id,
+            'answers' => $answers,
+            'score' => $score,
+        ]);
+
+        return redirect()->route('student.quizzes.index')
+                         ->with('success', "You scored $score out of ".$quiz->questions->count()."!");
     }
 
-    // Save to quiz_results table
-    QuizResult::create([
-        'quiz_id' => $quiz->id,
-        'student_id' => $student->id,
-        'answers' => $answers,
-        'score' => $score,
-    ]);
+        // Show edit form for a quiz
+    public function edit(Quiz $quiz)
+    {
+        $user = auth()->user();
 
-    return redirect()->route('student.quizzes.index')
-                     ->with('success', "You scored $score out of ".$quiz->questions->count()."!");
+        // Ensure the teacher owns this quiz
+        if ($quiz->teacher_id !== $user->id) {
+            abort(403, "Unauthorized - Only the owner can edit this quiz.");
+        }
+
+        // Only classrooms that this teacher teaches in
+        $classrooms = Classroom::where('teacher_id', $user->id)->get();
+
+        // Eager load questions for this quiz
+        $quiz->load('questions');
+
+        return view('teacher.quizzes.edit', compact('quiz', 'classrooms'));
+    }
+
+    // Update the quiz
+    public function update(Request $request, Quiz $quiz)
+    {
+        $user = auth()->user();
+
+        if ($quiz->teacher_id !== $user->id) {
+            abort(403, "Unauthorized - Only the owner can update this quiz.");
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'classroom_id' => 'required|exists:classrooms,id',
+        ]);
+
+        $quiz->update($validated);
+
+        return redirect()->route('teacher.quizzes.index')
+                        ->with('success', 'Quiz updated successfully!');
     }
 
 }

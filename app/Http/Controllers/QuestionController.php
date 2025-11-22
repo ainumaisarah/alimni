@@ -22,27 +22,59 @@ class QuestionController extends Controller
     }
 
     public function store(Request $request, Quiz $quiz)
-{
-    $request->validate([
-        'question_text' => 'required|string|max:1000',
-        'option_a' => 'required|string|max:255',
-        'option_b' => 'required|string|max:255',
-        'option_c' => 'required|string|max:255',
-        'option_d' => 'required|string|max:255',
-        'correct_answer' => 'required|in:A,B,C,D',
-    ]);
+    {
+        $request->validate([
+            'question_text' => 'required|string|max:1000',
+            'option_a' => 'required|string|max:255',
+            'option_b' => 'required|string|max:255',
+            'option_c' => 'required|string|max:255',
+            'option_d' => 'required|string|max:255',
+            'correct_answer' => 'required|in:A,B,C,D',
+        ]);
 
-    $quiz->questions()->create([
-        'question_text' => $request->question_text,
-        'option_a' => $request->option_a,
-        'option_b' => $request->option_b,
-        'option_c' => $request->option_c,
-        'option_d' => $request->option_d,
-        'correct_answer' => $request->correct_answer,
-    ]);
+        $quiz->questions()->create([
+            'question_text' => $request->question_text,
+            'option_a' => $request->option_a,
+            'option_b' => $request->option_b,
+            'option_c' => $request->option_c,
+            'option_d' => $request->option_d,
+            'correct_answer' => $request->correct_answer,
+        ]);
 
-    return redirect()->route('teacher.questions.index', $quiz->id)
-                     ->with('success', 'Question added successfully!');
-}
+        return redirect()->route('teacher.questions.index', $quiz->id)
+                        ->with('success', 'Question added successfully!');
+    }
+
+    // Show edit form for a specific question
+    public function edit(Question $question)
+    {
+        $quiz = $question->quiz; // get the parent quiz
+        return view('teacher.questions.edit', compact('quiz', 'question'));
+    }
+
+    // Handle update request
+    public function update(Request $request, Question $question)
+    {
+        $request->validate([
+            'question_text' => 'required|string|max:1000',
+            'option_a' => 'required|string|max:255',
+            'option_b' => 'required|string|max:255',
+            'option_c' => 'required|string|max:255',
+            'option_d' => 'required|string|max:255',
+            'correct_answer' => 'required|in:A,B,C,D',
+        ]);
+
+        $question->update([
+            'question_text' => $request->question_text,
+            'option_a' => $request->option_a,
+            'option_b' => $request->option_b,
+            'option_c' => $request->option_c,
+            'option_d' => $request->option_d,
+            'correct_answer' => $request->correct_answer,
+        ]);
+
+        return redirect()->route('teacher.questions.index', $question->quiz->id)
+                        ->with('success', 'Question updated successfully!');
+    }
 
 }

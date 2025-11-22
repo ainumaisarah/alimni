@@ -15,7 +15,6 @@ class Material extends Model
         'file_path',
         'classroom_id',
         'teacher_id',
-        'subject_id',
     ];
 
     public function classroom()
@@ -28,8 +27,5 @@ class Material extends Model
         return $this->belongsTo(User::class, 'teacher_id');
     }
 
-    public function subject()
-    {
-        return $this->belongsTo(Subject::class);
-    }
+
 }

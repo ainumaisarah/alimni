@@ -3,49 +3,71 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Classroom;
-use App\Models\Subject;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Schedule;
+
 
 class ClassPageController extends Controller
 {
-    // List all classes for the user
     public function index()
     {
         $user = Auth::user();
         $role = $user->role;
 
-        $classes = collect();
+            if ($role === 'teacher') {
+        // Get all schedules assigned to this teacher
+        $schedules = Schedule::with('classroom')
+            ->where('teacher_id', $user->id)
+            ->get();
 
-        if($role === 'Teacher') {
-    $teacherId = $user->id;
+        // Get unique classrooms from these schedules
+        $classes = $schedules->pluck('classroom')->unique('id');
 
-    // get all class IDs where this teacher has subjects
-    $classIds = Subject::where('teacher_id', $teacherId)->pluck('classroom_id')->unique();
 
-    // fetch the classrooms
-    $classes = Classroom::whereIn('id', $classIds)->get();
+        // Pass a flag to view to know teacher can create
+        $canCreate = true;
+    } else {
+        // Student
+        $classes = Classroom::with(['schedules'])
+            ->where('id', $user->classroom_id)
+            ->get();
+
+        $canCreate = false;
     }
 
+    return view('classes.index', compact('classes', 'role', 'canCreate'));
 
-        return view('classes.index', compact('classes', 'role'));
     }
 
-    public function showSubject($subjectId)
-{
-    $user = Auth::user();
-    $subject = Subject::with('teacher', 'materials', 'quizzes')->findOrFail($subjectId);
+    public function showClass(Classroom $class)
+    {
+        $user = Auth::user();
+        $role = strtolower($user->role);
 
-    if ($user->hasRole('student') && $user->classroom_id !== $subject->classroom_id) {
-        return redirect()->back()->with('error', 'You cannot access this subject.');
+        if ($role === 'teacher') {
+        // Teacher only sees their own materials/quizzes
+        $materials = $class->materials()->where('teacher_id', $user->id)->get();
+        $quizzes = $class->quizzes()->where('teacher_id', $user->id)->get();
+
+        foreach ($quizzes as $quiz) {
+            $quiz->result = null;
+        }
+
+        } else {
+            // Student sees ALL materials/quizzes for the class
+            $materials = $class->materials()->get();
+            $quizzes = $class->quizzes()->get();
+
+             foreach ($quizzes as $quiz) {
+                $quiz->result = $quiz->results()
+                    ->where('student_id', $user->id)
+                    ->first();
+            }
+        }
+
+
+        return view('classes.show', compact('class', 'materials', 'quizzes', 'role'));
     }
-
-    return view('classes.subject', [
-        'subject' => $subject,
-        'role' => $user->role,
-        'classroomId' => $subject->classroom_id
-    ]);
-}
-
 
 }

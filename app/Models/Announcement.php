@@ -12,7 +12,6 @@ class Announcement extends Model
     protected $fillable = [
         'teacher_id',
         'classroom_id',
-        'subject_id',
         'title',
         'message',
     ];
@@ -25,7 +24,4 @@ class Announcement extends Model
         return $this->belongsTo(Classroom::class);
     }
 
-    public function subject() {
-        return $this->belongsTo(Subject::class);
-    }
 }

@@ -28,12 +28,22 @@ class Classroom extends Model
 
     public function students()
     {
-        return $this->hasMany(\App\Models\User::class)->where('role', 'student');
+    return $this->hasMany(User::class, 'classroom_id')->where('role', 'student');
     }
 
     public function subjects()
     {
     return $this->hasMany(Subject::class, 'classroom_id');
+    }
+
+    public function materials()
+    {
+        return $this->hasMany(\App\Models\Material::class);
+    }
+
+    public function quizzes()
+    {
+        return $this->hasMany(\App\Models\Quiz::class);
     }
 
 

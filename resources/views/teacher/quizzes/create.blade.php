@@ -18,19 +18,13 @@
         </div>
 
         <div class="mb-4">
-            <label class="block font-semibold mb-1">Subject</label>
-            <select name="subject_id" class="w-full border p-2 rounded" required>
-                @foreach ($subjects as $subject)
-                    <option value="{{ $subject->id }}">{{ $subject->name }}</option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="mb-4">
             <label class="block font-semibold mb-1">Classroom</label>
             <select name="classroom_id" class="w-full border p-2 rounded" required>
                 @foreach ($classrooms as $classroom)
-                    <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
+                    <option value="{{ $classroom->id }}"
+                        @if(isset($classroomId) && $classroomId == $classroom->id) selected @endif>
+                        {{ $classroom->name }}
+                    </option>
                 @endforeach
             </select>
         </div>

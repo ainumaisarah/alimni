@@ -30,21 +30,11 @@
             </div>
 
             <div class="mb-3">
-                <label class="block font-semibold mb-1">Classroom (optional)</label>
+                <label class="block font-semibold mb-1">Classroom</label>
                 <select name="classroom_id" class="w-full border p-2 rounded">
                     <option value="">All Classes</option>
                     @foreach($classrooms as $classroom)
                         <option value="{{ $classroom->id }}">{{ $classroom->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="mb-3">
-                <label class="block font-semibold mb-1">Subject (optional)</label>
-                <select name="subject_id" class="w-full border p-2 rounded">
-                    <option value="">All Subjects</option>
-                    @foreach($subjects as $subject)
-                        <option value="{{ $subject->id }}">{{ $subject->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -56,7 +46,7 @@
     <div class="bg-white p-6 rounded shadow">
     <h3 class="text-xl font-semibold mb-3">Recent Announcements</h3>
 
-    @if($announcements->count() > 0)
+        @if($announcements->count() > 0)
         @foreach($announcements as $announcement)
             <div class="border p-3 rounded mb-2 flex justify-between items-start">
                 <div>
@@ -64,6 +54,11 @@
                     <p>{{ $announcement->message }}</p>
                     <small class="text-gray-500">
                         Posted on {{ $announcement->created_at->format('d M Y, H:i') }}
+                        @if($announcement->classroom)
+                            &bull; Class: {{ $announcement->classroom->name }}
+                        @else
+                            &bull; All Classes
+                        @endif
                     </small>
                 </div>
                 <div class="space-x-2">

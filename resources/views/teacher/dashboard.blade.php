@@ -15,7 +15,6 @@
         <table class="w-full border-collapse border border-gray-300">
             <thead>
                 <tr>
-                    <th class="border px-4 py-2">Subject</th>
                     <th class="border px-4 py-2">Classroom</th>
                     <th class="border px-4 py-2">Day</th>
                     <th class="border px-4 py-2">Start Time</th>
@@ -25,7 +24,6 @@
             <tbody>
                 @foreach($schedules as $schedule)
                     <tr>
-                        <td class="border px-4 py-2">{{ $schedule->subject }}</td>
                         <td class="border px-4 py-2">{{ $schedule->classroom->name }}</td>
                         <td class="border px-4 py-2">{{ $schedule->day }}</td>
                         <td class="border px-4 py-2">{{ $schedule->start_time }}</td>

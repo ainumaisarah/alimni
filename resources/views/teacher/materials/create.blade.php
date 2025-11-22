@@ -16,23 +16,13 @@
     <div class="mb-3">
         <label>Classroom</label>
         <select name="classroom_id" class="w-full border p-2 rounded" required>
-            @foreach($classrooms as $classroom)
-                <option value="{{ $classroom->id }}" {{ isset($classroomId) && $classroomId == $classroom->id ? 'selected' : '' }}>
-                    {{ $classroom->name }}
+            @foreach($classrooms as $room)
+                <option value="{{ $room->id }}" @if(isset($classroomId) && $classroomId == $room->id) selected @endif>
+                    {{ $room->name }}
                 </option>
             @endforeach
         </select>
-    </div>
 
-    <div class="mb-3">
-        <label>Subject</label>
-        <select name="subject_id" class="w-full border p-2 rounded" required>
-            @foreach($subjects as $subject)
-                <option value="{{ $subject->id }}" {{ isset($subjectId) && $subjectId == $subject->id ? 'selected' : '' }}>
-                    {{ $subject->name }}
-                </option>
-            @endforeach
-        </select>
     </div>
 
     <div class="mb-3">

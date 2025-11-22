@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Announcement;
 use App\Models\Classroom;
-use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,33 +13,30 @@ class AnnouncementController extends Controller
     public function create()
     {
         $teacherId = Auth::id();
-        $classrooms = Classroom::all(); // Or filter by teacher
-        $subjects = Subject::where('teacher_id', $teacherId)->get();
+        // Only show classrooms the teacher is assigned to
+        $classrooms = Classroom::where('teacher_id', $teacherId)->get();
 
-        return view('teacher.announcements.create', compact('classrooms', 'subjects'));
+        return view('teacher.announcements.create', compact('classrooms'));
     }
 
     // Store announcement
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'title' => 'required|string|max:255',
-        'message' => 'required|string',
-        'classroom_id' => 'nullable|exists:classrooms,id',
-        'subject_id' => 'nullable|exists:subjects,id',
-    ]);
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'message' => 'required|string',
+            'classroom_id' => 'nullable|exists:classrooms,id',
+        ]);
 
-    Announcement::create([
-        'teacher_id' => Auth::id(),
-        'title' => $validated['title'],
-        'message' => $validated['message'],
-        'classroom_id' => $validated['classroom_id'] ?? null,
-        'subject_id' => $validated['subject_id'] ?? null,
-    ]);
+        Announcement::create([
+            'teacher_id' => Auth::id(),
+            'title' => $validated['title'],
+            'message' => $validated['message'],
+            'classroom_id' => $validated['classroom_id'] ?? null,
+        ]);
 
-    return redirect()->route('teacher.home')->with('success', 'Announcement posted!');
-}
-
+        return redirect()->route('teacher.home')->with('success', 'Announcement posted!');
+    }
 
     // List all announcements for teacher
     public function index()
@@ -64,10 +60,10 @@ class AnnouncementController extends Controller
     public function edit(Announcement $announcement)
     {
         $teacherId = auth()->id();
-        $subjects = Subject::where('teacher_id', $teacherId)->get();
+        // Only show classrooms the teacher is assigned to
         $classrooms = Classroom::where('teacher_id', $teacherId)->get();
 
-        return view('teacher.announcements.edit', compact('announcement', 'subjects', 'classrooms'));
+        return view('teacher.announcements.edit', compact('announcement', 'classrooms'));
     }
 
     // Update the announcement
@@ -76,13 +72,12 @@ class AnnouncementController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'message' => 'required|string',
-            'subject_id' => 'nullable|exists:subjects,id',
             'classroom_id' => 'nullable|exists:classrooms,id',
         ]);
 
         $announcement->update($validated);
 
-    return redirect()->route('teacher.home')->with('success', 'Announcement updated!');
+        return redirect()->route('teacher.home')->with('success', 'Announcement updated!');
     }
 
     // Delete
@@ -91,5 +86,4 @@ class AnnouncementController extends Controller
         $announcement->delete();
         return redirect()->route('teacher.home')->with('success', 'Announcement deleted!');
     }
-
 }

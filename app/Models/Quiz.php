@@ -11,15 +11,10 @@ class Quiz extends Model
 
     protected $fillable = [
         'title',
-        'subject_id',
         'teacher_id',
         'classroom_id'
     ];
 
-    public function subject()
-    {
-        return $this->belongsTo(Subject::class);
-    }
 
     public function classroom()
     {

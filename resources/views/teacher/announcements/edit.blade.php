@@ -19,7 +19,7 @@
         </div>
 
         <div class="mb-4">
-            <label class="block font-semibold mb-1">Classroom (optional)</label>
+            <label class="block font-semibold mb-1">Classroom</label>
             <select name="classroom_id" class="w-full border p-2 rounded">
                 <option value="">All Classes</option>
                 @foreach($classrooms as $classroom)
@@ -30,19 +30,8 @@
             </select>
         </div>
 
-        <div class="mb-4">
-            <label class="block font-semibold mb-1">Subject (optional)</label>
-            <select name="subject_id" class="w-full border p-2 rounded">
-                <option value="">All Subjects</option>
-                @foreach($subjects as $subject)
-                    <option value="{{ $subject->id }}" {{ $announcement->subject_id == $subject->id ? 'selected' : '' }}>
-                        {{ $subject->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
 
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Update Announcement</button>
+        <button type="submit" class="bg-blue-500 text-blue px-4 py-2 rounded">Update Announcement</button>
     </form>
 </div>
 @endsection

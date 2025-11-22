@@ -44,7 +44,6 @@
                                 @if (isset($scheduleMatrix[$day][$time]))
                                     @foreach ($scheduleMatrix[$day][$time] as $sched)
                                         <div class="mb-2 p-1 bg-blue-100 rounded">
-                                            <div class="font-semibold">{{ $sched->subject }}</div>
                                             <div class="text-sm text-gray-700">{{ $sched->teacher->name }}</div>
                                             <div class="text-xs text-gray-600">
                                                 {{ \Carbon\Carbon::parse($sched->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($sched->end_time)->format('H:i') }}

@@ -11,7 +11,6 @@ use App\Http\Controllers\TeacherDashboardController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ScheduleController;
-use App\Http\Controllers\Admin\SubjectController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\QuestionController;
@@ -20,6 +19,7 @@ use App\Http\Controllers\TeacherHomeController;
 use App\Http\Controllers\StudentHomeController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClassPageController;
+use App\Http\Controllers\Admin\StudentImportController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -57,7 +57,6 @@ Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(func
     Route::resource('classrooms', ClassroomController::class);
     Route::resource('schedules', ScheduleController::class);
     Route::resource('users', UserController::class)->only(['index', 'edit', 'update', 'destroy']);
-    Route::resource('subjects', SubjectController::class);
 
     // Enrollment
     Route::get('users/{user}/enroll', [UserController::class, 'edit'])->name('users.enroll');
@@ -67,6 +66,10 @@ Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(func
 
     // Overview
     Route::get('classroom-overview', [ClassroomController::class, 'overview'])->name('classrooms.overview');
+
+    Route::get('students/import', [StudentImportController::class, 'showForm'])->name('students.import');
+    Route::post('students/import', [StudentImportController::class, 'import'])->name('students.import.post');
+
 });
 
 // Chat routes (shared)
@@ -79,18 +82,24 @@ Route::middleware(['auth'])->group(function () {
 // Materials & Quizzes (Teacher)
 Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->name('teacher.')->group(function () {
     // Materials
-    Route::get('materials', [MaterialController::class, 'teacherIndex'])->name('materials.index');
-    Route::get('materials/create', [MaterialController::class, 'create'])->name('materials.create');
-    Route::post('materials', [MaterialController::class, 'store'])->name('materials.store');
-    Route::delete('materials/{id}', [MaterialController::class, 'destroy'])->name('materials.destroy');
-    Route::get('materials/{id}/download', [MaterialController::class, 'download'])->name('materials.download');
+Route::get('materials', [MaterialController::class, 'teacherIndex'])->name('materials.index');
+Route::get('materials/create', [MaterialController::class, 'create'])->name('materials.create');
+Route::post('materials', [MaterialController::class, 'store'])->name('materials.store');
+
+// IMPORTANT: this must exist
+Route::get('materials/{id}/download', [MaterialController::class, 'download'])
+    ->name('materials.download');
+
+Route::delete('materials/{id}', [MaterialController::class, 'destroy'])->name('materials.destroy');
 
     // Quizzes & Questions
     Route::resource('quizzes', QuizController::class);
     Route::get('quizzes/{quiz}/questions', [QuestionController::class, 'index'])->name('questions.index');
     Route::get('quizzes/{quiz}/questions/create', [QuestionController::class, 'create'])->name('questions.create');
     Route::post('quizzes/{quiz}/questions', [QuestionController::class, 'store'])->name('questions.store');
-    Route::delete('quizzes/{quiz}/questions/{question}', [QuestionController::class, 'destroy'])->name('questions.destroy');
+    Route::get('questions/{question}/edit', [QuestionController::class, 'edit'])->name('questions.edit');
+    Route::put('questions/{question}', [QuestionController::class, 'update'])->name('questions.update');
+    Route::delete('questions/{question}', [QuestionController::class, 'destroy'])->name('questions.destroy');
 
     // Announcements
     Route::resource('announcements', AnnouncementController::class)->except(['show']);
@@ -116,3 +125,6 @@ Route::middleware(['auth'])->group(function () {
     // Show a class and its subjects
     Route::get('/classes/{class}', [ClassPageController::class, 'showClass'])->name('classes.show');
 });
+
+
+
