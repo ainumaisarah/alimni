@@ -12,9 +12,9 @@ class UserController extends Controller
     // List all students
     public function index()
     {
-        $students = User::where('role', 'student')->with('classroom')->get();
+        // Eager load the classrooms relationship
+        $students = User::where('role', 'student')->with('classrooms')->get();
 
-        // Count all classrooms (or modify as needed)
         $classroomCount = Classroom::count();
 
         return view('admin.users.index', compact('students', 'classroomCount'));
@@ -29,19 +29,21 @@ class UserController extends Controller
         return view('admin.users.edit', compact('student', 'classrooms'));
     }
 
-    // Update student's classroom assignment
     public function update(Request $request, $id)
     {
         $request->validate([
-            'classroom_id' => 'nullable|exists:classrooms,id',
+            'classrooms' => 'nullable|array',
+            'classrooms.*' => 'exists:classrooms,id',
         ]);
 
         $student = User::findOrFail($id);
-        $student->classroom_id = $request->classroom_id;
-        $student->save();
+
+        // Sync multiple classrooms
+        $student->classrooms()->sync($request->classrooms ?? []);
 
         return redirect()->route('admin.users.index')->with('success', 'Student enrollment updated successfully.');
     }
+
 
     public function showClassroomEnrollForm()
     {
@@ -51,16 +53,20 @@ class UserController extends Controller
         return view('admin.users.classroom-enroll', compact('classrooms', 'students'));
     }
 
-    public function enrollStudentsToClassroom(Request $request, $classroomId)
+    public function enrollStudentsToClassroom(Request $request, Classroom $classroom)
     {
-        $classroom = \App\Models\Classroom::findOrFail($classroomId);
+        $request->validate([
+            'students' => 'required|array',
+            'students.*' => 'exists:users,id',
+        ]);
 
-        // Update each selected student's classroom
-        \App\Models\User::whereIn('id', $request->student_ids)
-            ->update(['classroom_id' => $classroom->id]);
+        // Sync selected students to classroom
+        $classroom->students()->sync($request->students);
 
-        return redirect()->route('admin.dashboard')->with('success', 'Students enrolled successfully!');
+        return redirect()->route('admin.classrooms.show', $classroom->id)
+                        ->with('success', 'Students enrolled successfully.');
     }
+
 
     public function destroy($id)
     {

@@ -19,7 +19,11 @@
         <tbody>
             @forelse($classrooms as $classroom)
                 <tr>
-                    <td class="border border-gray-300 px-4 py-2">{{ $classroom->name }}</td>
+                    <td class="border border-gray-300 px-4 py-2">
+                        <a href="{{ route('admin.classrooms.show', $classroom->id) }}" class="text-blue-600 hover:underline">
+                            {{ $classroom->name }}
+                        </a>
+                    </td>
                     <td class="border border-gray-300 px-4 py-2">{{ $classroom->teacher->name ?? 'N/A' }}</td>
                     <td class="border border-gray-300 px-4 py-2 flex gap-2">
                         <a href="{{ route('admin.classrooms.edit', $classroom->id) }}" class="bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded text-sm">Edit</a>

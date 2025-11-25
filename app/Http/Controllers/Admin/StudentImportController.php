@@ -13,15 +13,12 @@ class StudentImportController extends Controller
 {
     public function showForm()
     {
-        return view('admin.students.import'); // Blade for upload form
+        return view('admin.students.import');
     }
 
     public function import(Request $request)
     {
-        $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls,csv',
-        ]);
-
+        $request->validate(['file' => 'required|file|mimes:xlsx,xls,csv']);
         $file = $request->file('file');
 
         try {
@@ -33,36 +30,39 @@ class StudentImportController extends Controller
             $errors = [];
 
             foreach ($rows as $index => $row) {
-                if ($index === 0) continue; // Skip header row
+                if ($index === 0) continue; // skip header
 
-                [$name, $username, $password, $className, $teacherUsername] = $row;
+                [$name, $username, $password, $classNames, $teacherUsername] = $row;
 
                 try {
                     // Find or create teacher
                     $teacher = User::firstOrCreate(
                         ['username' => $teacherUsername, 'role' => 'teacher'],
-                        [
-                            'name' => $teacherUsername,
-                            'password' => Hash::make('defaultpassword'), // You can change default
-                        ]
+                        ['name' => $teacherUsername, 'password' => Hash::make('defaultpassword')]
                     );
 
-                    // Find or create class and assign teacher
-                    $class = Classroom::updateOrCreate(
-                        ['name' => $className],
-                        ['teacher_id' => $teacher->id]
+                    $classList = array_map('trim', explode(',', $classNames));
+
+                    // Use default password if blank
+                    $password = $password ?: 'alimni123';
+
+                    // Create or find student first
+                    $student = User::updateOrCreate(
+                        ['username' => $username, 'role' => 'student'],
+                        ['name' => $name, 'password' => Hash::make($password)]
                     );
 
-                    // Create or update student
-                    User::updateOrCreate(
-                        ['username' => $username],
-                        [
-                            'name' => $name,
-                            'password' => Hash::make($password),
-                            'role' => 'student',
-                            'classroom_id' => $class->id,
-                        ]
-                    );
+                    foreach ($classList as $className) {
+                        $class = Classroom::firstOrCreate(
+                            ['name' => $className],
+                            ['teacher_id' => $teacher->id]
+                        );
+
+                        // Attach student to class (pivot)
+                        if (!$student->classrooms->contains($class->id)) {
+                            $student->classrooms()->attach($class->id);
+                        }
+                    }
 
                     $createdStudents++;
 
@@ -72,9 +72,7 @@ class StudentImportController extends Controller
             }
 
             $message = "$createdStudents students imported successfully.";
-            if (count($errors) > 0) {
-                $message .= " But some errors occurred: " . implode(' | ', $errors);
-            }
+            if ($errors) $message .= " But some errors occurred: " . implode(' | ', $errors);
 
             return redirect()->back()->with('success', $message);
 

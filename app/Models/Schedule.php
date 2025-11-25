@@ -27,21 +27,4 @@ class Schedule extends Model
         return $this->belongsTo(\App\Models\Classroom::class);
     }
 
-    public function schedules()
-    {
-        if ($this->role === 'Teacher') {
-            return $this->hasMany(Schedule::class, 'teacher_id');
-        } else {
-            return $this->hasManyThrough(
-                Schedule::class,
-                Classroom::class,
-                'id', // Classroom primary key
-                'classroom_id', // Schedule foreign key
-                'classroom_id', // User's classroom_id
-                'id'
-            );
-        }
-    }
-
-
 }

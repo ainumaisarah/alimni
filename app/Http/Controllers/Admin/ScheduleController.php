@@ -30,7 +30,6 @@ class ScheduleController extends Controller
         $validated = $request->validate([
             'classroom_id' => 'required|exists:classrooms,id',
             'teacher_id' => 'required|exists:users,id',
-            'subject' => 'required|string|max:255', // still a simple text column
             'day' => 'required|string|max:50',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
@@ -71,7 +70,6 @@ class ScheduleController extends Controller
         $validated = $request->validate([
             'classroom_id' => 'required|exists:classrooms,id',
             'teacher_id' => 'required|exists:users,id',
-            'subject' => 'required|string|max:255', // still a simple text column
             'day' => 'required|string|max:50',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',

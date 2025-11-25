@@ -32,17 +32,25 @@ class QuizController extends Controller
     // Store a new quiz
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'classroom_id' => 'required|exists:classrooms,id',
         ]);
 
-        $validated['teacher_id'] = Auth::id();
+        // Save quiz
+        $quiz = new Quiz();
+        $quiz->title = $request->title;
+        $quiz->description = $request->description;
+        $quiz->classroom_id = $request->classroom_id;
+        $quiz->teacher_id = auth()->id();
+        $quiz->save();
 
-        Quiz::create($validated);
-
-        return redirect()->route('teacher.quizzes.index')->with('success', 'Quiz created successfully!');
+        // Redirect back to classroom page
+        return redirect()->route('classes.show', $request->classroom_id)
+                        ->with('success', 'Quiz created successfully!');
     }
+
 
     // Delete a quiz
     public function destroy(Quiz $quiz)
@@ -64,12 +72,20 @@ class QuizController extends Controller
     {
         $student = auth()->user();
 
-        // Get previous attempt
+        // Get latest attempt
         $result = $quiz->results()->where('student_id', $student->id)->latest()->first();
 
+        // Get all questions
         $questions = $quiz->questions()->get();
 
-        return view('student.quizzes.show', compact('quiz', 'questions', 'result'));
+        // Determine answered questions
+        $answeredCount = $result ? count($result->answers ?? []) : 0;
+        $totalCount = $questions->count();
+
+        // Determine if the student can retake
+        $canRetake = !$result || ($answeredCount < $totalCount);
+
+        return view('student.quizzes.show', compact('quiz', 'questions', 'result', 'canRetake'));
     }
 
     // Handle quiz submission
@@ -119,7 +135,7 @@ class QuizController extends Controller
     }
 
     // Update the quiz
-    public function update(Request $request, Quiz $quiz)
+   public function update(Request $request, Quiz $quiz)
     {
         $user = auth()->user();
 
@@ -132,10 +148,35 @@ class QuizController extends Controller
             'classroom_id' => 'required|exists:classrooms,id',
         ]);
 
+        // Update quiz info
         $quiz->update($validated);
 
+        // OPTION 1: Reset all student attempts
+        if ($quiz->results()->exists()) {
+            $quiz->results()->delete();
+        }
+
         return redirect()->route('teacher.quizzes.index')
-                        ->with('success', 'Quiz updated successfully!');
+                        ->with('success', 'Quiz updated successfully! All student attempts have been reset.');
     }
+
+    // Show quiz results for teacher
+    public function results(Quiz $quiz)
+    {
+        // Get latest attempt per student
+        $results = $quiz->results()
+            ->with('student')
+            ->get()
+            ->groupBy('student_id')
+            ->map(function ($attempts) {
+                // Get the latest submission
+                return $attempts->sortByDesc('created_at')->first();
+            });
+
+        $questions = $quiz->questions()->get();
+
+        return view('teacher.quizzes.results', compact('quiz', 'results', 'questions'));
+    }
+
 
 }

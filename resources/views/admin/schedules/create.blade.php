@@ -22,7 +22,7 @@
             <select name="classroom_id" id="classroom_id" class="w-full border rounded px-3 py-2" required>
                 <option value="" disabled selected>Select a classroom</option>
                 @foreach($classrooms as $classroom)
-                    <option value="{{ $classroom->id }}" {{ old('classroom_id') == $classroom->id ? 'selected' : '' }}>
+                    <option value="{{ $classroom->id }}" data-teacher="{{ $classroom->teacher_id }}">
                         {{ $classroom->name }}
                     </option>
                 @endforeach
@@ -34,16 +34,9 @@
             <select name="teacher_id" id="teacher_id" class="w-full border rounded px-3 py-2" required>
                 <option value="" disabled selected>Select a teacher</option>
                 @foreach($teachers as $teacher)
-                    <option value="{{ $teacher->id }}" {{ old('teacher_id') == $teacher->id ? 'selected' : '' }}>
-                        {{ $teacher->name }}
-                    </option>
+                    <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
                 @endforeach
             </select>
-        </div>
-
-        <div class="mb-4">
-            <label for="subject" class="block font-medium mb-1">Subject</label>
-            <input type="text" name="subject" id="subject" value="{{ old('subject') }}" class="w-full border rounded px-3 py-2" required>
         </div>
 
         <div class="mb-4">
@@ -69,4 +62,23 @@
         <button type="submit" class="bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700">Create Schedule</button>
     </form>
 </div>
+
+{{-- Auto-select teacher JS --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const classroomSelect = document.getElementById('classroom_id');
+        const teacherSelect = document.getElementById('teacher_id');
+
+        classroomSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const teacherId = selectedOption.getAttribute('data-teacher');
+
+            if (teacherId) {
+                teacherSelect.value = teacherId;
+            } else {
+                teacherSelect.value = ""; // reset if no teacher
+            }
+        });
+    });
+</script>
 @endsection

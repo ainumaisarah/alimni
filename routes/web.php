@@ -101,6 +101,7 @@ Route::delete('materials/{id}', [MaterialController::class, 'destroy'])->name('m
     Route::put('questions/{question}', [QuestionController::class, 'update'])->name('questions.update');
     Route::delete('questions/{question}', [QuestionController::class, 'destroy'])->name('questions.destroy');
 
+    Route::get('quizzes/{quiz}/results', [QuizController::class, 'results'])->name('quizzes.results');
     // Announcements
     Route::resource('announcements', AnnouncementController::class)->except(['show']);
 });

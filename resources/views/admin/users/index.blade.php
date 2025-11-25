@@ -23,7 +23,11 @@
             <tr class="hover:bg-gray-50">
                 <td class="border border-gray-300 px-4 py-2">{{ $student->name }}</td>
                 <td class="border border-gray-300 px-4 py-2">
-                    {{ $student->classroom ? $student->classroom->name : 'Not enrolled' }}
+                    @if($student->classrooms->count())
+                        {{ $student->classrooms->pluck('name')->join(', ') }}
+                    @else
+                        Not enrolled
+                    @endif
                 </td>
                 <td class="border border-gray-300 px-4 py-2">
                     <a href="{{ route('admin.users.edit', $student->id) }}" class="text-blue-600 hover:underline mr-3">Edit</a>

@@ -20,26 +20,31 @@
         <button type="submit" class="btn btn-primary">Upload & Import</button>
     </form>
 
-    <div class="mt-4">
-        <p>Excel file format should be:</p>
-        <table class="table table-bordered w-50">
-            <thead>
+   <div class="mt-4">
+    <p class="mb-2">Excel file format should be:</p>
+    <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-300 divide-y divide-gray-200">
+            <thead class="bg-gray-100">
                 <tr>
-                    <th>Name</th>
-                    <th>Username</th>
-                    <th>Password</th>
-                    <th>Class</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">name</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">username</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">password</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">class_name</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">teacher_username</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="bg-white divide-y divide-gray-200">
                 <tr>
-                    <td>John Doe</td>
-                    <td>john123</td>
-                    <td>secret</td>
-                    <td>Class A</td>
+                    <td class="px-4 py-2 border">John Doe</td>
+                    <td class="px-4 py-2 border">john123</td>
+                    <td class="px-4 py-2 border">secret</td>
+                    <td class="px-4 py-2 border">1A Science</td>
+                    <td class="px-4 py-2 border">ainumai</td>
                 </tr>
             </tbody>
         </table>
     </div>
+</div>
+
 </div>
 @endsection

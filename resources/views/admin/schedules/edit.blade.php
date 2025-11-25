@@ -45,11 +45,6 @@
         </div>
 
         <div class="mb-4">
-            <label for="subject" class="block font-medium mb-1">Subject</label>
-            <input type="text" name="subject" id="subject" value="{{ old('subject', $schedule->subject) }}" class="w-full border rounded px-3 py-2" required>
-        </div>
-
-        <div class="mb-4">
             <label for="day" class="block font-medium mb-1">Day</label>
             <select name="day" id="day" class="w-full border rounded px-3 py-2" required>
                 <option value="" disabled>Select a day</option>

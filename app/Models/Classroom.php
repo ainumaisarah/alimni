@@ -9,12 +9,7 @@ class Classroom extends Model
 {
     use HasFactory;
 
-    // ✅ Add the fields you want to allow for mass assignment
-    protected $fillable = [
-        'name',
-        'description',
-        'teacher_id',
-    ];
+    protected $fillable = ['name', 'description', 'teacher_id'];
 
     public function teacher()
     {
@@ -26,14 +21,15 @@ class Classroom extends Model
         return $this->hasMany(\App\Models\Schedule::class);
     }
 
+    // Students → many-to-many
     public function students()
     {
-    return $this->hasMany(User::class, 'classroom_id')->where('role', 'student');
+        return $this->belongsToMany(User::class, 'classroom_user')->where('role', 'student');
     }
 
     public function subjects()
     {
-    return $this->hasMany(Subject::class, 'classroom_id');
+        return $this->hasMany(Subject::class, 'classroom_id');
     }
 
     public function materials()
@@ -45,6 +41,5 @@ class Classroom extends Model
     {
         return $this->hasMany(\App\Models\Quiz::class);
     }
-
-
 }
+

@@ -36,14 +36,18 @@
         <ul class="mb-4">
             @foreach($quiz->questions as $question)
                 <li class="mb-2 flex justify-between items-center border-b py-1">
-                    <span>{{ $question->text }}</span>
+                    <span>{{ $question->question_text }}</span>
                     <div class="space-x-2">
                         <a href="{{ route('teacher.questions.edit', $question->id) }}" class="text-blue-600">Edit</a>
 
-                        <form action="{{ route('teacher.questions.destroy', $question->id) }}" method="POST" class="inline">
+                        <form action="{{ route('teacher.questions.destroy', $question->id) }}"
+                            method="POST" class="inline">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="text-red-600" onclick="return confirm('Delete this question?')">Delete</button>
+                            <button type="submit" class="text-red-600"
+                                    onclick="return confirm('Delete this question?')">
+                                Delete
+                            </button>
                         </form>
                     </div>
                 </li>

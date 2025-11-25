@@ -72,4 +72,12 @@ class ClassroomController extends Controller
             return view('admin.classrooms.overview', compact('classrooms'));
         }
 
+    public function show($id)
+    {
+        // Load classroom with teacher and students
+        $classroom = Classroom::with(['teacher', 'students'])->findOrFail($id);
+
+        return view('admin.classrooms.show', compact('classroom'));
+    }
+
 }

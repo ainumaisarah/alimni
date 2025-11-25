@@ -61,18 +61,25 @@ class MaterialController extends Controller
             'classroom_id' => 'required|exists:classrooms,id',
         ]);
 
-        $filePath = $request->file('file')->store('materials', 'public');
+        // Save material
+        $material = new Material();
+        $material->title = $request->title;
+        $material->description = $request->description;
+        $material->classroom_id = $request->classroom_id;
+        $material->teacher_id = auth()->id();
 
-        Material::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'file_path' => $filePath,
-            'classroom_id' => $request->classroom_id,
-            'teacher_id' => auth()->id(),
-        ]);
+        if ($request->hasFile('file')) {
+            // Save the uploaded file path into file_path column
+            $material->file_path = $request->file('file')->store('materials', 'public');
+        }
 
-        return redirect()->back()->with('success', 'Material uploaded successfully!');
-    }
+        $material->save();
+
+        // Redirect back to classroom page with success message
+        return redirect()->route('classes.show', $request->classroom_id)
+                        ->with('success', 'Material uploaded successfully!');
+}
+
 
     // Download (teacher or student)
     public function download($id)

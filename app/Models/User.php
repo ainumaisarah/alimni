@@ -12,32 +12,15 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens;
+    use HasApiTokens, HasFactory, HasProfilePhoto, Notifiable, TwoFactorAuthenticatable;
 
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory;
-    use HasProfilePhoto;
-    use Notifiable;
-    use TwoFactorAuthenticatable;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'username',
         'role',
         'password',
-        'classroom_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
@@ -45,20 +28,8 @@ class User extends Authenticatable
         'two_factor_secret',
     ];
 
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array<int, string>
-     */
-    protected $appends = [
-        'profile_photo_url',
-    ];
+    protected $appends = ['profile_photo_url'];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -68,14 +39,19 @@ class User extends Authenticatable
     }
 
     public function hasRole($role)
-{
-    return $this->role === $role;  // Assuming you store role as a string column 'role'
-}
+    {
+        return $this->role === $role;
+    }
 
-public function classroom()
-{
-    return $this->hasMany(Classroom::class, 'teacher_id');
-}
+    // Teacher → has many classrooms
+    public function teachingClasses()
+    {
+        return $this->hasMany(Classroom::class, 'teacher_id');
+    }
 
-
+    // Student → belongs to many classrooms
+    public function classrooms()
+    {
+        return $this->belongsToMany(Classroom::class, 'classroom_user');
+    }
 }

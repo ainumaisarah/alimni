@@ -8,19 +8,18 @@
         <p>You are not assigned to a class or there are no schedules yet.</p>
     @else
         @php
-            // Define days in order (adjust if your schedule uses other days)
+            // Define days in order
             $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-            // Define time slots (you can expand/change this)
+            // Define time slots
             $timeSlots = [
                 '08:00', '09:00', '10:00', '11:00', '12:00',
                 '13:00', '14:00', '15:00', '16:00',
             ];
 
-            // Group schedules by day and start_time for quick lookup
+            // Group schedules by day and start_time
             $scheduleMatrix = [];
             foreach ($schedules as $schedule) {
-                // normalize time (e.g. 08:00:00 to 08:00)
                 $start = \Carbon\Carbon::parse($schedule->start_time)->format('H:i');
                 $scheduleMatrix[$schedule->day][$start][] = $schedule;
             }
@@ -44,10 +43,8 @@
                                 @if (isset($scheduleMatrix[$day][$time]))
                                     @foreach ($scheduleMatrix[$day][$time] as $sched)
                                         <div class="mb-2 p-1 bg-blue-100 rounded">
-                                            <div class="text-sm text-gray-700">{{ $sched->teacher->name }}</div>
-                                            <div class="text-xs text-gray-600">
-                                                {{ \Carbon\Carbon::parse($sched->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($sched->end_time)->format('H:i') }}
-                                            </div>
+                                            <div class="font-semibold text-gray-800">{{ $sched->classroom->name ?? 'N/A' }}</div>
+                                            <div class="text-sm text-gray-700">{{ $sched->teacher->name ?? 'N/A' }}</div>
                                         </div>
                                     @endforeach
                                 @else

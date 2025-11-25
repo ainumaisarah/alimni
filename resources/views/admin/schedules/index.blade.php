@@ -17,7 +17,6 @@
             <tr>
                 <th class="border border-gray-300 px-4 py-2">Classroom</th>
                 <th class="border border-gray-300 px-4 py-2">Teacher</th>
-                <th class="border border-gray-300 px-4 py-2">Subject</th>
                 <th class="border border-gray-300 px-4 py-2">Day</th>
                 <th class="border border-gray-300 px-4 py-2">Start Time</th>
                 <th class="border border-gray-300 px-4 py-2">End Time</th>
@@ -29,7 +28,6 @@
                 <tr>
                     <td class="border border-gray-300 px-4 py-2">{{ $schedule->classroom->name }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ $schedule->teacher->name }}</td>
-                    <td class="border border-gray-300 px-4 py-2">{{ $schedule->subject }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ $schedule->day }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ $schedule->start_time }}</td>
                     <td class="border border-gray-300 px-4 py-2">{{ $schedule->end_time }}</td>

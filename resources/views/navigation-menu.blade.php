@@ -11,80 +11,59 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-    {{-- Optional: main site home link --}}
-                        <!-- <x-nav-link href="{{ url('/') }}" :active="request()->is('/')">
-                            {{ __('Home') }}
-                        </x-nav-link>-->
-
-                        @if (Auth::check())
-                            @if (Auth::user()->hasRole('admin'))
-                                <x-nav-link href="{{ route('admin.home') }}" :active="request()->routeIs('admin.home')">
-                                    {{ __('Schedule') }}
-                                </x-nav-link>
-                            @elseif (Auth::user()->hasRole('teacher'))
-                                <x-nav-link href="{{ route('teacher.home') }}" :active="request()->routeIs('teacher.home')">
-                                    {{ __('Home') }}
-                                </x-nav-link>
-                            @elseif (Auth::user()->hasRole('student'))
-                                <x-nav-link href="{{ route('student.home') }}" :active="request()->routeIs('student.home')">
-                                    {{ __('Home') }}
-                                </x-nav-link>
-                            @endif
-                        @endif
-                    </div>
-
-
-
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-    <!--<x-nav-link href="{{ url('/') }}" :active="request()->is('/')">
-        {{ __('Home') }}
-    </x-nav-link>-->
+<div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
 
     @auth
-        @if (Auth::user()->hasRole('admin'))
+        @php
+            $user = Auth::user();
+        @endphp
+
+        {{-- Admin Links --}}
+        @if($user->hasRole('admin'))
             <x-nav-link href="{{ route('admin.dashboard') }}" :active="request()->routeIs('admin.dashboard')">
                 {{ __('Dashboard') }}
             </x-nav-link>
-        @elseif (Auth::user()->hasRole('teacher'))
+            <x-nav-link href="{{ route('admin.classrooms.index') }}" :active="request()->routeIs('classes.index')">
+                {{ __('Classes') }}
+            </x-nav-link>
+            <x-nav-link href="{{ route('admin.schedules.index') }}" :active="request()->routeIs('admin.home')">
+                {{ __('Schedule') }}
+            </x-nav-link>
+
+        {{-- Teacher Links --}}
+        @elseif($user->hasRole('teacher'))
+            <x-nav-link href="{{ route('teacher.home') }}" :active="request()->routeIs('teacher.home')">
+                {{ __('Home') }}
+            </x-nav-link>
             <x-nav-link href="{{ route('teacher.dashboard') }}" :active="request()->routeIs('teacher.dashboard')">
                 {{ __('Dashboard') }}
             </x-nav-link>
-        @elseif (Auth::user()->hasRole('student'))
+            <!-- Classes -->
+                <x-nav-link href="{{ route('classes.index') }}" :active="request()->routeIs('classes.index')">
+                    {{ __('Classes') }}
+                </x-nav-link>
+            <x-nav-link href="{{ route('chat.list') }}" :active="request()->routeIs('chat.*')">
+                {{ __('Chat') }}
+            </x-nav-link>
+
+        {{-- Student Links --}}
+        @elseif($user->hasRole('student'))
+            <x-nav-link href="{{ route('student.home') }}" :active="request()->routeIs('student.home')">
+                {{ __('Home') }}
+            </x-nav-link>
             <x-nav-link href="{{ route('student.dashboard') }}" :active="request()->routeIs('student.dashboard')">
                 {{ __('Dashboard') }}
             </x-nav-link>
+            <!-- Classes -->
+                <x-nav-link href="{{ route('classes.index') }}" :active="request()->routeIs('classes.index')">
+                    {{ __('Classes') }}
+                </x-nav-link>
+            <x-nav-link href="{{ route('chat.list') }}" :active="request()->routeIs('chat.*')">
+                {{ __('Chat') }}
+            </x-nav-link>
         @endif
     @endauth
-
-<!-- Classes -->
-<div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-    <x-nav-link href="{{ route('classes.index') }}" :active="request()->routeIs('classes.index')">
-        {{ __('Classes') }}
-    </x-nav-link>
 </div>
-
-</div>
-
-            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-    @auth
-        @php
-            $chatRoute = route('chat.list');
-            $unreadCount = $unreadCount ?? 0;
-        @endphp
-
-        <x-nav-link href="{{ $chatRoute }}" :active="request()->routeIs('chat.*')" class="relative flex items-center space-x-1">
-            <i class="fas fa-comment"></i>
-            <span>Chat</span> <!-- Add label to match Dashboard text -->
-            @if($unreadCount > 0)
-                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
-                    {{ $unreadCount }}
-                </span>
-            @endif
-        </x-nav-link>
-    @endauth
-</div>
-
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">

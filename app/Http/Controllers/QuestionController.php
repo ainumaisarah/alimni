@@ -41,6 +41,9 @@ class QuestionController extends Controller
             'correct_answer' => $request->correct_answer,
         ]);
 
+        // Reset attempts because quiz structure changed
+        $quiz->results()->delete();
+
         return redirect()->route('teacher.questions.index', $quiz->id)
                         ->with('success', 'Question added successfully!');
     }
@@ -73,8 +76,25 @@ class QuestionController extends Controller
             'correct_answer' => $request->correct_answer,
         ]);
 
+        // Reset all quiz attempts when a question is updated
+        $question->quiz->results()->delete();
+
         return redirect()->route('teacher.questions.index', $question->quiz->id)
                         ->with('success', 'Question updated successfully!');
     }
+
+    public function destroy(Question $question)
+    {
+        $question->delete();
+
+        $question->quiz->results()->delete();
+        $question->delete();
+
+        return redirect()
+            ->route('teacher.quizzes.edit', $question->quiz_id)
+            ->with('success', 'Question deleted successfully!');
+    }
+
+
 
 }

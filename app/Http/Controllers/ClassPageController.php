@@ -15,26 +15,26 @@ class ClassPageController extends Controller
         $user = Auth::user();
         $role = $user->role;
 
-            if ($role === 'teacher') {
-        // Get all schedules assigned to this teacher
-        $schedules = Schedule::with('classroom')
-            ->where('teacher_id', $user->id)
-            ->get();
+        if ($role === 'teacher') {
+    // Teacher
+            $directClasses = Classroom::where('teacher_id', $user->id)->get();
 
-        // Get unique classrooms from these schedules
-        $classes = $schedules->pluck('classroom')->unique('id');
+            // Classes via schedules
+            $scheduledClasses = Schedule::with('classroom')
+                ->where('teacher_id', $user->id)
+                ->get()
+                ->pluck('classroom')
+                ->unique('id');
 
+            // Merge both
+            $classes = $directClasses->merge($scheduledClasses)->unique('id');
 
-        // Pass a flag to view to know teacher can create
-        $canCreate = true;
-    } else {
-        // Student
-        $classes = Classroom::with(['schedules'])
-            ->where('id', $user->classroom_id)
-            ->get();
-
-        $canCreate = false;
-    }
+            $canCreate = true;
+        } else {
+            // Student: fetch all classrooms via pivot table
+            $classes = $user->classrooms()->with('schedules')->get();
+            $canCreate = false;
+        }
 
     return view('classes.index', compact('classes', 'role', 'canCreate'));
 
@@ -46,28 +46,16 @@ class ClassPageController extends Controller
         $role = strtolower($user->role);
 
         if ($role === 'teacher') {
-        // Teacher only sees their own materials/quizzes
-        $materials = $class->materials()->where('teacher_id', $user->id)->get();
-        $quizzes = $class->quizzes()->where('teacher_id', $user->id)->get();
-
-        foreach ($quizzes as $quiz) {
-            $quiz->result = null;
-        }
-
+            $materials = $class->materials()->where('teacher_id', $user->id)->get();
+            $quizzes = $class->quizzes()->where('teacher_id', $user->id)->get();
         } else {
-            // Student sees ALL materials/quizzes for the class
             $materials = $class->materials()->get();
             $quizzes = $class->quizzes()->get();
-
-             foreach ($quizzes as $quiz) {
-                $quiz->result = $quiz->results()
-                    ->where('student_id', $user->id)
-                    ->first();
-            }
         }
-
 
         return view('classes.show', compact('class', 'materials', 'quizzes', 'role'));
     }
+
+
 
 }

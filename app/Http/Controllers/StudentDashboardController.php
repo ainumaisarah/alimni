@@ -12,16 +12,16 @@ class StudentDashboardController extends Controller
     {
         $student = auth()->user();
 
-        // Assuming each student belongs to one classroom via classroom_id
-        if (!$student->classroom_id) {
-            return view('student.dashboard', ['schedules' => collect()]);
-        }
+        // Get the IDs of classrooms this student belongs to
+        $classroomIds = $student->classrooms()->pluck('classroom_id');
 
-        $schedules = Schedule::where('classroom_id', $student->classroom_id)
-            ->with('teacher')
-            ->get();
+        // Get schedules for these classrooms
+        $schedules = Schedule::with(['teacher', 'classroom'])
+                            ->whereIn('classroom_id', $classroomIds)
+                            ->get();
 
         return view('student.dashboard', compact('schedules'));
     }
+
 }
 

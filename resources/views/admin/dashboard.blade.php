@@ -11,7 +11,6 @@
            <div>
                 <a href="{{ route('admin.classrooms.index') }}" class="text-blue-500 underline">Manage</a><br>
                 <a href="{{ route('admin.classrooms.overview') }}" class="btn btn-primary">Classroom Overview</a><br>
-                <a href="{{ route('admin.classroom.enroll') }}" class="text-blue-600 hover:underline">Enroll Students to Classroom</a>
             </div>
         </div>
         <div class="bg-white p-4 rounded shadow">
@@ -22,8 +21,12 @@
         <div class="bg-white p-4 rounded shadow">
             <h3 class="text-lg font-semibold">Students</h3>
             <p>{{ $studentCount }}</p>
-            <a href="{{ route('admin.users.index') }}" class="text-blue-600 hover:underline">Manage</a>
+            <a href="{{ route('admin.users.index') }}" class="text-blue-600 hover:underline">Manage</a><br>
+            <a href="{{ route('admin.students.import') }}" class="text-blue-500 hover:underline mt-2 inline-block">
+                Import Students via Excel
+            </a>
         </div>
+
     </div>
 </div>
 @endsection

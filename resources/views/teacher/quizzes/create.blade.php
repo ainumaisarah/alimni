@@ -20,13 +20,13 @@
         <div class="mb-4">
             <label class="block font-semibold mb-1">Classroom</label>
             <select name="classroom_id" class="w-full border p-2 rounded" required>
-                @foreach ($classrooms as $classroom)
-                    <option value="{{ $classroom->id }}"
-                        @if(isset($classroomId) && $classroomId == $classroom->id) selected @endif>
-                        {{ $classroom->name }}
-                    </option>
-                @endforeach
-            </select>
+            @foreach($classrooms as $classroom)
+                <option value="{{ $classroom->id }}"
+                    @if(isset($classroomId) && $classroomId == $classroom->id) selected @endif>
+                    {{ $classroom->name }}
+                </option>
+            @endforeach
+        </select>
         </div>
 
         <button type="submit" class="bg-green-500 text-black px-4 py-2 rounded">Create Quiz</button>

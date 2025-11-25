@@ -15,30 +15,56 @@
             <thead>
                 <tr class="bg-gray-100">
                     <th class="px-4 py-2 border">Title</th>
-                    <th class="px-4 py-2 border">Subject</th>
                     <th class="px-4 py-2 border">Classroom</th>
                     <th class="px-4 py-2 border">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($quizzes as $quiz)
+
                 @php
-                    // Get latest attempt by this student
-                    $result = $quiz->results()->where('student_id', auth()->id())->latest()->first();
+                    // Student's latest result
+                    $result = $quiz->results()
+                        ->where('student_id', auth()->id())
+                        ->latest()
+                        ->first();
+
+                    // Determine total current questions
+                    $currentTotal = $quiz->questions->count();
+
+                    // Determine answered question count (only from latest attempt)
+                    $answeredTotal = $result ? count($result->answers ?? []) : 0;
+
+                    // Determine if teacher updated quiz (student has not answered all)
+                    $needsRetake = (!$result) || ($answeredTotal < $currentTotal);
                 @endphp
+
                 <tr>
                     <td class="px-4 py-2 border">{{ $quiz->title }}</td>
-                    <td class="px-4 py-2 border">{{ $quiz->subject->name ?? 'N/A' }}</td>
                     <td class="px-4 py-2 border">{{ $quiz->classroom->name ?? 'N/A' }}</td>
                     <td class="px-4 py-2 border">
-                        @if($result)
-                            <a href="{{ route('student.quizzes.show', $quiz->id) }}" class="bg-yellow-400 text-black px-3 py-1 rounded">Review Quiz</a>
-                            <span class="text-green-600 ml-2">Score: {{ $result->score }}/{{ $quiz->questions->count() }}</span>
+
+                        {{-- Student must retake because teacher added questions --}}
+                        @if($needsRetake)
+                            <a href="{{ route('student.quizzes.show', $quiz->id) }}"
+                               class="bg-blue-500 text-black px-3 py-1 rounded">
+                                Take Quiz
+                            </a>
+
+                        {{-- Student already completed latest version — show review --}}
                         @else
-                            <a href="{{ route('student.quizzes.show', $quiz->id) }}" class="bg-blue-500 text-white px-3 py-1 rounded">Take Quiz</a>
+                            <a href="{{ route('student.quizzes.show', $quiz->id) }}"
+                               class="bg-yellow-400 text-black px-3 py-1 rounded">
+                                Review Quiz
+                            </a>
+                            <span class="text-green-600 ml-2">
+                                Score: {{ $result->score }}/{{ $quiz->questions->count() }}
+                            </span>
                         @endif
+
                     </td>
                 </tr>
+
                 @endforeach
             </tbody>
         </table>
