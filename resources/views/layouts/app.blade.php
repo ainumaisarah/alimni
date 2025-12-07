@@ -11,10 +11,43 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <!-- Styles -->
         @livewireStyles
+
+        <!-- PWA  -->
+    <meta name="theme-color" content="#6777ef"/>
+    <link rel="apple-touch-icon" href="{{ asset('logo.png') }}">
+    <link rel="manifest" href="{{ asset('/manifest.json') }}">
+
     </head>
 
     <body class="pl-64">
         <x-banner />
+<!--
+        <button id="pwa-install-btn" style="display:none; position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 8px; z-index: 1000;">
+        Install App
+        </button>
+
+        <script>
+        let deferredPrompt;
+        const btnAdd = document.getElementById('pwa-install-btn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            btnAdd.style.display = 'block';
+        });
+
+        btnAdd.addEventListener('click', () => {
+            if (!deferredPrompt) return;
+
+            deferredPrompt.prompt();
+
+            deferredPrompt.userChoice.then(() => {
+                deferredPrompt = null;
+                btnAdd.style.display = 'none';
+            });
+        });
+        </script> -->
+
 
         <div class="content">
             @livewire('navigation-menu')
@@ -37,5 +70,17 @@
         @stack('modals')
 
         @livewireScripts
+
+        <script src="{{ asset('pwa-install.js') }}"></script>
+        <script src="{{ asset('/sw.js') }}"></script>
+        <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/sw.js")
+                .then((reg) => console.log("Service Worker registered:", reg))
+                .catch((err) => console.error("SW registration failed:", err));
+        }
+        </script>
+
     </body>
 </html>
+
