@@ -1,15 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto px-4 py-6">
-    <h2 class="text-2xl font-bold mb-6">Classroom Overview</h2>
+<div class="page-container">
+    <h2>Classroom Overview</h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach ($classrooms as $classroom)
-            <div class="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
-                <div class="bg-blue-100 px-4 py-2 font-semibold text-lg">
+            <div class="app-card">
+                <h3>
                     {{ $classroom->name }}
-                </div>
+                </h3>
 
                 <div class="p-4 space-y-3">
                     <!-- Teacher Section -->
@@ -40,7 +40,7 @@
                                 @endforeach
                             </ul>
                         @else
-                            <p class="text-gray-400">No students enrolled</p>
+                            <p class="empty-message">No students enrolled</p>
                         @endif
                     </div>
                 </div>

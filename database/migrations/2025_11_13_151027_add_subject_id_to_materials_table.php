@@ -16,11 +16,14 @@ return new class extends Migration
         });
     }
 
-    public function down()
-    {
-        Schema::table('materials', function (Blueprint $table) {
+    public function down(): void
+{
+    Schema::table('materials', function (Blueprint $table) {
+        if (Schema::hasColumn('materials', 'subject_id')) {
             $table->dropColumn('subject_id');
-        });
-    }
+        }
+    });
+}
+
 
 };

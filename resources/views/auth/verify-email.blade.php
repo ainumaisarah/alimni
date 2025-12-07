@@ -1,8 +1,9 @@
 <x-guest-layout>
-    <x-authentication-card>
-        <x-slot name="logo">
-            <x-authentication-card-logo />
-        </x-slot>
+    <div class="auth-container">
+        <!-- Logo -->
+        <div class="platform-logo mb-6">
+            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="mx-auto">
+        </div>
 
         <div class="mb-4 text-sm text-gray-600">
             {{ __('Before continuing, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}
@@ -41,5 +42,5 @@
                 </form>
             </div>
         </div>
-    </x-authentication-card>
+    </div>
 </x-guest-layout>

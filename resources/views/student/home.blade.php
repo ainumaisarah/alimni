@@ -1,22 +1,22 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto">
-    <h2 class="text-2xl font-bold mb-4">Announcements</h2>
+<div class="page-container">
+    <h2>Announcements</h2>
 
     @if($announcements->count() > 0)
         @foreach($announcements as $announcement)
-            <div class="mb-3 p-3 border rounded bg-gray-50">
-                <h3 class="font-semibold">{{ $announcement->title }}</h3>
+            <div class="info-card">
+                <h3>{{ $announcement->title }}</h3>
                 <p>{{ $announcement->message }}</p>
-                <small class="text-gray-500">
+                <small class="info-meta">
                     Posted by {{ $announcement->teacher->name ?? 'Unknown' }} •
                     {{ $announcement->created_at->diffForHumans() }}
                 </small>
             </div>
         @endforeach
     @else
-        <p class="text-gray-500">No announcements yet.</p>
+        <p class="empty-message">No announcements yet.</p>
     @endif
 </div>
 @endsection

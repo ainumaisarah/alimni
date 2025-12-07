@@ -9,37 +9,29 @@ class Classroom extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'teacher_id'];
-
-    public function teacher()
-    {
-        return $this->belongsTo(User::class, 'teacher_id');
-    }
-
-    public function schedules()
-    {
-        return $this->hasMany(\App\Models\Schedule::class);
-    }
-
-    // Students → many-to-many
-    public function students()
-    {
-        return $this->belongsToMany(User::class, 'classroom_user')->where('role', 'student');
-    }
-
-    public function subjects()
-    {
-        return $this->hasMany(Subject::class, 'classroom_id');
-    }
-
     public function materials()
     {
-        return $this->hasMany(\App\Models\Material::class);
+        return $this->hasMany(Material::class);
     }
 
     public function quizzes()
     {
-        return $this->hasMany(\App\Models\Quiz::class);
+        return $this->hasMany(Quiz::class);
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(Assignment::class);
+    }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+
+    // Add this
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class);
     }
 }
-

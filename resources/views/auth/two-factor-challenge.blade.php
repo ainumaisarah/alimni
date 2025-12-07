@@ -1,15 +1,16 @@
 <x-guest-layout>
-    <x-authentication-card>
-        <x-slot name="logo">
-            <x-authentication-card-logo />
-        </x-slot>
+    <div class="auth-container">
+        <!-- Logo -->
+        <div class="platform-logo mb-6">
+            <img src="{{ asset('images/logo.png') }}" alt="Logo" class="mx-auto">
+        </div>
 
         <div x-data="{ recovery: false }">
-            <div class="mb-4 text-sm text-gray-600" x-show="! recovery">
+            <div class="mb-4 text-sm text-black" x-show="! recovery">
                 {{ __('Please confirm access to your account by entering the authentication code provided by your authenticator application.') }}
             </div>
 
-            <div class="mb-4 text-sm text-gray-600" x-cloak x-show="recovery">
+            <div class="mb-4 text-sm text-black" x-cloak x-show="recovery">
                 {{ __('Please confirm access to your account by entering one of your emergency recovery codes.') }}
             </div>
 
@@ -48,11 +49,11 @@
                         {{ __('Use an authentication code') }}
                     </button>
 
-                    <x-button class="ms-4">
+                    <x-button type="submit" class="login-button">
                         {{ __('Log in') }}
                     </x-button>
                 </div>
             </form>
         </div>
-    </x-authentication-card>
+    </div>
 </x-guest-layout>

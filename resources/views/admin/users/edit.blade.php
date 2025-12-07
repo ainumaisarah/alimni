@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="max-w-2xl mx-auto p-6 bg-white rounded shadow">
-    <h2 class="text-xl font-semibold mb-4">Enroll Student: {{ $student->name }}</h2>
+<div class="page-container">
+    <h2>Enroll Student: {{ $student->name }}</h2>
 
     <form action="{{ route('admin.users.update', $student->id) }}" method="POST">
         @csrf
@@ -20,10 +20,10 @@
         </select>
 
         @error('classroom_id')
-            <p class="text-red-600 mb-4">{{ $message }}</p>
+            <p class="error-alert mb-4">{{ $message }}</p>
         @enderror
 
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        <button type="submit" class="btn-primary">
             Save Enrollment
         </button>
     </form>

@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-4">
+<div class="page-container mt-4">
     <h2 class="mb-4">Import Students</h2>
 
     @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+        <div class="success-alert mb-4">{{ session('success') }}</div>
     @endif
     @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
+        <div class="error-alert mb-4">{{ session('error') }}</div>
     @endif
 
     <form action="{{ route('admin.students.import.post') }}" method="POST" enctype="multipart/form-data">

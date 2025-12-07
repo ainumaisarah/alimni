@@ -1,18 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6">
-    <h2 class="text-xl font-semibold text-gray-800 leading-tight mb-4">
-        Teacher Dashboard
-    </h2>
-    <p class="mb-6">Welcome, {{ auth()->user()->name }}!</p>
+<div class="schedule-container">
+    <h2> Teacher Dashboard</h2>
 
-    <h3 class="text-lg font-medium mb-2">Your Teaching Schedule</h3>
+    <p>Welcome, {{ auth()->user()->name }}!</p>
+<br>
+    <h3>Your Teaching Schedule</h3>
 
     @if ($schedules->isEmpty())
         <p>You have not been assigned to any schedules yet.</p>
     @else
-        <table class="w-full border-collapse border border-gray-300">
+        <table>
             <thead>
                 <tr>
                     <th class="border px-4 py-2">Classroom</th>

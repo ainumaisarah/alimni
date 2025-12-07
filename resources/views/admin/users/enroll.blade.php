@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6 max-w-lg mx-auto">
-    <h2 class="text-xl font-semibold mb-4">Enroll {{ $user->name }} in a Classroom</h2>
+<div class="psge-container">
+    <h2>Enroll {{ $user->name }} in a Classroom</h2>
 
     @if ($errors->any())
-        <div class="mb-4 text-red-600">
+        <div class="error-alert mb-4">
             <ul>
                 @foreach ($errors->all() as $error)
                     <li>- {{ $error }}</li>
@@ -18,7 +18,7 @@
         @csrf
         @method('PUT')
 
-        <div class="mb-4">
+        <div class="app-card">
             <label for="classroom_id" class="block font-medium mb-1">Select Classroom</label>
             <select name="classroom_id" id="classroom_id" class="w-full border rounded px-3 py-2" required>
                 <option value="" disabled selected>Select a classroom</option>
@@ -30,7 +30,7 @@
             </select>
         </div>
 
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Enroll Student</button>
+        <button type="submit" class="btn-primary">Enroll Student</button>
     </form>
 </div>
 @endsection

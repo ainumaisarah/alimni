@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6">
-    <h2 class="text-xl font-semibold mb-4">{{ $classroom->name }}</h2>
+<div class="page-container">
+    <h2>{{ $classroom->name }}</h2>
 
     <p><strong>Teacher:</strong> {{ $classroom->teacher->name ?? 'N/A' }}</p>
-
-    <h3 class="mt-4 font-semibold">Students:</h3>
+    <div class = "mt-4 app-card">
+    <h3>Students:</h3>
     @if($classroom->students && $classroom->students->count())
         <ul class="list-disc pl-5 mt-2">
             @foreach($classroom->students as $student)
@@ -17,7 +17,7 @@
         <p>No students enrolled in this class.</p>
     @endif
 
-    <h3 class="mt-6 font-semibold">Enroll Students</h3>
+    {{--<h3 class="mt-4 font-semibold">Enroll Students</h3>  --}}
     <form action="{{ route('admin.classroom.enroll.submit', $classroom->id) }}" method="POST">
         @csrf
 
@@ -31,13 +31,13 @@
                 </option>
             @endforeach
         </select>
-
-        <button type="submit" class="mt-3 bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700">
+        </div>
+        <button type="submit" class="btn-primary">
             Enroll Selected Students
         </button>
     </form>
 
-    <a href="{{ route('admin.classrooms.index') }}" class="mt-4 inline-block bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">
+    <a href="{{ route('admin.classrooms.index') }}" class="btn-secondary">
         Back to Classes
     </a>
 </div>

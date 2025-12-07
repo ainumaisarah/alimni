@@ -1,37 +1,37 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6">
-    <h2 class="text-xl font-semibold mb-4">Manage Classrooms</h2>
+<div class="page-container">
+    <h2>Manage Classrooms</h2>
 
-    <a href="{{ route('admin.classrooms.create') }}" class="bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700">
+    <a href="{{ route('admin.classrooms.create') }}" class="btn-primary mb-4">
         + Create Classroom
     </a>
 
-    <table class="mt-4 w-full border-collapse border border-gray-300">
+    <table>
         <thead>
             <tr>
-                <th class="border border-gray-300 px-4 py-2">Classroom Name</th>
-                <th class="border border-gray-300 px-4 py-2">Teacher</th>
-                <th class="border border-gray-300 px-4 py-2">Actions</th>
+                <th>Classroom Name</th>
+                <th>Teacher</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             @forelse($classrooms as $classroom)
                 <tr>
-                    <td class="border border-gray-300 px-4 py-2">
-                        <a href="{{ route('admin.classrooms.show', $classroom->id) }}" class="text-blue-600 hover:underline">
+                    <td>
+                        <a href="{{ route('admin.classrooms.show', $classroom->id) }}" class="hover:underline">
                             {{ $classroom->name }}
                         </a>
                     </td>
-                    <td class="border border-gray-300 px-4 py-2">{{ $classroom->teacher->name ?? 'N/A' }}</td>
+                    <td>{{ $classroom->teacher->name ?? 'N/A' }}</td>
                     <td class="border border-gray-300 px-4 py-2 flex gap-2">
-                        <a href="{{ route('admin.classrooms.edit', $classroom->id) }}" class="bg-yellow-400 hover:bg-yellow-500 text-black px-3 py-1 rounded text-sm">Edit</a>
+                        <a href="{{ route('admin.classrooms.edit', $classroom->id) }}" class="btn-secondary">Edit</a>
 
                         <form action="{{ route('admin.classrooms.destroy', $classroom->id) }}" method="POST" onsubmit="return confirm('Delete this classroom?');">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">Delete</button>
+                            <button type="submit" class="btn-danger">Delete</button>
                         </form>
                     </td>
                 </tr>

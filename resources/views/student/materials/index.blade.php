@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6">
-    <h2 class="text-xl font-bold mb-4">Class Materials</h2>
+<div class="page-container">
+    <h2>Class Materials</h2>
 
-    <table class="w-full border">
+    <table>
         <thead>
-            <tr class="bg-gray-100">
+            <tr>
                 <th class="px-4 py-2">Title</th>
                 <th class="px-4 py-2">Teacher</th>
                 <th class="px-4 py-2">Uploaded</th>
@@ -28,7 +28,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="4" class="text-center py-4">No materials available.</td></tr>
+            <tr><td colspan="4" class="empty-message">No materials available.</td></tr>
             @endforelse
         </tbody>
     </table>

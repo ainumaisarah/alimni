@@ -1,11 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto">
-    <h2 class="text-2xl font-bold mb-4">Add Question to: {{ $quiz->title }}</h2>
+<div class="page-container p-6">
+
+    <h2 class="mb-4">Add Question to: {{ $quiz->title }}</h2>
 
     @if ($errors->any())
-        <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+        <div class="error-alert mb-4">
             <ul>
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -14,7 +15,7 @@
         </div>
     @endif
 
-    <form action="{{ route('teacher.questions.store', $quiz->id) }}" method="POST" class="bg-white p-6 rounded shadow-md">
+    <form action="{{ route('teacher.questions.store', $quiz->id) }}" method="POST" class="info-card">
         @csrf
 
         <div class="mb-4">
@@ -52,7 +53,9 @@
             </select>
         </div>
 
-        <button type="submit" class="bg-blue-500 text-black px-4 py-2 rounded">Add Question</button>
+        <button type="submit" class="btn-primary">
+            Add Question
+        </button>
     </form>
 </div>
 @endsection

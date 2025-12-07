@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="p-6">
-    <h2 class="text-xl font-bold mb-4">Enroll Students to Classroom</h2>
+<div class="page-container">
+    <h2>Enroll Students to Classroom</h2>
 
     @foreach ($classrooms as $classroom)
         <div class="mb-6 p-4 border rounded">
@@ -20,7 +20,7 @@
                     @endforeach
                 </div>
 
-                <button type="submit" class="mt-4 bg-blue-600 text-blue px-4 py-2 rounded hover:bg-blue-700">
+                <button type="submit" class="btn-primry">
                     Enroll Selected Students
                 </button>
             </form>

@@ -1,16 +1,16 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto">
-    <h2 class="text-2xl font-bold mb-4">Quiz Results: {{ $quiz->title }}</h2>
+<div class="page-container">
+    <h2 class="mb-4">Quiz Results: {{ $quiz->title }}</h2>
 
     @if($results->isEmpty())
-        <p class="text-gray-500">No students have attempted this quiz yet.</p>
+        <p class="empty-message">No students have attempted this quiz yet.</p>
     @else
         @foreach($results as $result)
-            <div class="mb-6 p-4 border rounded shadow">
-                <h3 class="text-lg font-semibold">Student: {{ $result->student->name }}</h3>
-                <p class="font-medium mb-4">Score: {{ $result->score }}/{{ $questions->count() }}</p>
+            <div class="info-card">
+                <h3 class="mb-2">Student: {{ $result->student->name }}</h3>
+                <p class="info-meta mb-3">Score: {{ $result->score }}/{{ $questions->count() }}</p>
 
                 @foreach($questions as $question)
                     @php
@@ -18,7 +18,7 @@
                         $correctAnswer = strtoupper($question->correct_answer);
                     @endphp
 
-                    <div class="mb-3 p-3 border rounded">
+                    <div class="info-card mb-2 p-3">
                         <p class="font-semibold mb-2">{{ $loop->iteration }}. {{ $question->question_text }}</p>
 
                         <ul class="ml-4 mb-2 list-disc">

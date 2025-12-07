@@ -8,12 +8,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class IsTeacher
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next)
     {
         if (auth()->check() && auth()->user()->role === 'teacher') {
             return $next($request);
         }
 
-        abort(403, 'Unauthorized - Only teachers can access this page.');
+        abort(403, 'Unauthorized');
     }
 }

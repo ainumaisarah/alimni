@@ -21,14 +21,27 @@ return new class extends Migration
     }
 
     public function down(): void
-    {
-        Schema::table('schedules', function (Blueprint $table) {
-            // 1️⃣ Restore 'subject' column
+{
+    Schema::table('schedules', function (Blueprint $table) {
+        // 1️⃣ Restore 'subject' column only if it does NOT exist
+        if (!Schema::hasColumn('schedules', 'subject')) {
             $table->string('subject')->after('teacher_id');
+        }
 
-            // 2️⃣ Drop the foreign key
-            $table->dropForeign(['subject_id']);
+        // 2️⃣ Drop the foreign key safely
+        if (Schema::hasColumn('schedules', 'subject_id')) {
+            $sm = Schema::getConnection()->getDoctrineSchemaManager();
+            $foreignKeys = $sm->listTableForeignKeys('schedules');
+            foreach ($foreignKeys as $fk) {
+                if ($fk->getLocalColumns()[0] === 'subject_id') {
+                    $table->dropForeign($fk->getName());
+                }
+            }
+
             $table->dropColumn('subject_id');
-        });
-    }
+        }
+    });
+}
+
+
 };

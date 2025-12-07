@@ -20,7 +20,16 @@ use App\Http\Controllers\StudentHomeController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClassPageController;
 use App\Http\Controllers\Admin\StudentImportController;
+use App\Http\Controllers\ChannelController;
+use App\Http\Controllers\AssignmentController;
 
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// Welcome page
 Route::get('/', function () {
     return view('welcome');
 });
@@ -29,7 +38,7 @@ Route::get('/', function () {
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
 
-// Dashboard routes
+// Dashboard routes (authenticated users)
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
 
     Route::get('/dashboard', function () {
@@ -69,7 +78,6 @@ Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(func
 
     Route::get('students/import', [StudentImportController::class, 'showForm'])->name('students.import');
     Route::post('students/import', [StudentImportController::class, 'import'])->name('students.import.post');
-
 });
 
 // Chat routes (shared)
@@ -79,18 +87,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('chat/{user}', [ChatController::class, 'send'])->name('chat.send');
 });
 
-// Materials & Quizzes (Teacher)
+// Teacher Materials & Quizzes
 Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->name('teacher.')->group(function () {
     // Materials
-Route::get('materials', [MaterialController::class, 'teacherIndex'])->name('materials.index');
-Route::get('materials/create', [MaterialController::class, 'create'])->name('materials.create');
-Route::post('materials', [MaterialController::class, 'store'])->name('materials.store');
-
-// IMPORTANT: this must exist
-Route::get('materials/{id}/download', [MaterialController::class, 'download'])
-    ->name('materials.download');
-
-Route::delete('materials/{id}', [MaterialController::class, 'destroy'])->name('materials.destroy');
+    Route::get('materials', [MaterialController::class, 'teacherIndex'])->name('materials.index');
+    Route::get('materials/create', [MaterialController::class, 'create'])->name('materials.create');
+    Route::post('materials', [MaterialController::class, 'store'])->name('materials.store');
+    Route::get('materials/{id}/download', [MaterialController::class, 'download'])->name('materials.download');
+    Route::delete('materials/{id}', [MaterialController::class, 'destroy'])->name('materials.destroy');
 
     // Quizzes & Questions
     Route::resource('quizzes', QuizController::class);
@@ -100,13 +104,13 @@ Route::delete('materials/{id}', [MaterialController::class, 'destroy'])->name('m
     Route::get('questions/{question}/edit', [QuestionController::class, 'edit'])->name('questions.edit');
     Route::put('questions/{question}', [QuestionController::class, 'update'])->name('questions.update');
     Route::delete('questions/{question}', [QuestionController::class, 'destroy'])->name('questions.destroy');
-
     Route::get('quizzes/{quiz}/results', [QuizController::class, 'results'])->name('quizzes.results');
+
     // Announcements
     Route::resource('announcements', AnnouncementController::class)->except(['show']);
 });
 
-// Materials & Quizzes (Student)
+// Student Materials & Quizzes
 Route::middleware(['auth', IsStudent::class])->prefix('student')->name('student.')->group(function () {
     Route::get('materials', [MaterialController::class, 'studentIndex'])->name('materials.index');
     Route::get('materials/{id}/download', [MaterialController::class, 'download'])->name('materials.download');
@@ -118,14 +122,66 @@ Route::middleware(['auth', IsStudent::class])->prefix('student')->name('student.
     Route::get('announcements', [AnnouncementController::class, 'studentIndex'])->name('announcements.index');
 });
 
-// Classes / categorical Teams-style
-Route::middleware(['auth'])->group(function () {
+// Classes / Teams-style pages
+Route::middleware(['auth'])->prefix('classes')->group(function () {
     // List all classes
-    Route::get('/classes', [ClassPageController::class, 'index'])->name('classes.index');
+    Route::get('/', [ClassPageController::class, 'index'])->name('classes.index');
 
-    // Show a class and its subjects
-    Route::get('/classes/{class}', [ClassPageController::class, 'showClass'])->name('classes.show');
+    // Specific routes first
+    Route::get('/{class}/materials', [ClassPageController::class, 'materials'])->name('classes.materials');
+    Route::get('/{class}/assignment', [ClassPageController::class, 'assignment'])->name('classes.assignment');
+    Route::get('/{class}/quiz', [ClassPageController::class, 'quiz'])->name('classes.quiz');
+    Route::get('/{class}/channel', [ChannelController::class, 'show'])->name('channel.show');
+
+    // Posts & Comments
+    Route::post('/{class}/post', [ClassPageController::class, 'storePost'])->name('channel.post');
+    Route::post('/post/{post}/comment', [ClassPageController::class, 'storeComment'])->name('channel.comment');
+
+    // Generic class page (catch-all) - must be last
+    Route::get('/{class}', [ClassPageController::class, 'showClass'])->name('classes.show');
 });
 
+//delete/edit post
+Route::put('/channel/post/{post}', [ClassPageController::class, 'update'])->name('channel.post.update');
+Route::delete('/channel/post/{post}', [ClassPageController::class, 'destroy'])->name('channel.post.delete');
 
+// Update comment
+Route::put('/channel/comment/{comment}', [ClassPageController::class, 'updateComment'])->name('channel.comment.update');
+
+// Delete comment
+Route::delete('/channel/comment/{comment}', [ClassPageController::class, 'destroyComment'])->name('channel.comment.delete');
+
+// Materials
+Route::get('/classes/{class}/materials', [ClassPageController::class, 'materials'])
+    ->name('classes.materials');
+
+// Quizzes
+Route::get('/classes/{class}/quizzes', [ClassPageController::class, 'quizzes'])
+    ->name('classes.quizzes');
+// Assignment page for a class
+Route::get('/classes/{class}/assignment', [ClassPageController::class, 'assignment'])
+    ->name('classes.assignment');
+
+
+//Assignment
+// Teacher routes
+Route::middleware(['auth', IsTeacher::class])->group(function () {
+    Route::get('/assignments/create/{classroom_id}', [AssignmentController::class, 'create'])->name('teacher.assignments.create');
+    Route::post('/assignments/store', [AssignmentController::class, 'store'])->name('teacher.assignments.store');
+    Route::get('/assignments/edit/{assignment}', [AssignmentController::class, 'edit'])->name('teacher.assignments.edit');
+    Route::put('/assignments/update/{assignment}', [AssignmentController::class, 'update'])->name('teacher.assignments.update');
+    Route::delete('/assignments/delete/{assignment}', [AssignmentController::class, 'destroy'])->name('teacher.assignments.destroy');
+});
+;
+
+Route::middleware(['auth', \App\Http\Middleware\IsTeacher::class])->prefix('teacher')->group(function () {
+    Route::get('/assignments/download/{assignment}', [AssignmentController::class, 'download'])
+        ->name('teacher.assignments.download');
+});
+
+// Student routes
+Route::middleware(['auth', IsStudent::class])->group(function () {
+    Route::get('/assignments/download/{assignment}', [AssignmentController::class, 'download'])->name('student.assignments.download');
+    Route::post('/assignments/submit/{assignment}', [AssignmentController::class, 'submit'])->name('student.assignments.submit');
+});
 

@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mx-auto">
-    <h2 class="text-2xl font-bold mb-4">{{ $quiz->title }}</h2>
+<div class="page-container">
+    <h2>{{ $quiz->title }}</h2>
 
    @if($result && !$canRetake)
-        <div class="bg-green-100 text-green-800 p-3 rounded mb-4 font-semibold">
+        <div class="success-alert mb-4">
             You already submitted this quiz. Score: {{ $result->score }}/{{ $quiz->questions->count() }}
         </div>
     @endif
@@ -14,8 +14,8 @@
     @csrf
 
     @foreach($questions as $question)
-    <div class="mb-4 p-4 border rounded shadow-sm">
-        <p class="font-semibold text-lg mb-2">{{ $loop->iteration }}. {{ $question->question_text }}</p>
+    <div class="app-card">
+        <p>{{ $loop->iteration }}. {{ $question->question_text }}</p>
 
         @php
             $prevAnswer = strtoupper($result->answers[$question->id] ?? '');
@@ -53,7 +53,7 @@
     @endforeach
 
     @if($canRetake)
-        <button type="submit" class="bg-blue-500 text-black px-4 py-2 rounded hover:bg-blue-600 transition">
+        <button type="submit" class="btn-primary">
             Submit Quiz
         </button>
     @endif
