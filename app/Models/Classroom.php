@@ -9,6 +9,11 @@ class Classroom extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'teacher_id', // include if you assign teacher when importing
+    ];
+
     public function materials()
     {
         return $this->hasMany(Material::class);
