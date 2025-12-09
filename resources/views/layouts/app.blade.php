@@ -15,7 +15,7 @@
         <!-- PWA  -->
     <meta name="theme-color" content="#6777ef"/>
     <link rel="apple-touch-icon" href="{{ asset('logo.png') }}">
-    <link rel="manifest" href="{{ asset('/manifest.json') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
 
     </head>
 
@@ -71,14 +71,13 @@
 
         @livewireScripts
 
-        <script src="{{ asset('pwa-install.js') }}"></script>
         <script src="{{ asset('/sw.js') }}"></script>
         <script>
-        if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("/sw.js")
-                .then((reg) => console.log("Service Worker registered:", reg))
-                .catch((err) => console.error("SW registration failed:", err));
-        }
+            if (!navigator.serviceWorker.controller) {
+                navigator.serviceWorker.register("/sw.js").then(function (reg) {
+                    console.log("Service worker has been registered for scope: " + reg.scope);
+                });
+            }
         </script>
 
     </body>

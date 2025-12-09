@@ -184,4 +184,3 @@ Route::middleware(['auth', IsStudent::class])->group(function () {
     Route::get('/assignments/download/{assignment}', [AssignmentController::class, 'download'])->name('student.assignments.download');
     Route::post('/assignments/submit/{assignment}', [AssignmentController::class, 'submit'])->name('student.assignments.submit');
 });
-
