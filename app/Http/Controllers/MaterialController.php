@@ -107,4 +107,18 @@ class MaterialController extends Controller
         $material->delete();
         return redirect()->route('teacher.materials.index')->with('success', 'Material deleted.');
     }
+
+    public function view($id)
+    {
+        $material = Material::findOrFail($id);
+
+        $filePath = storage_path('app/public/' . $material->file_path);
+
+        if (!file_exists($filePath)) {
+            abort(404, 'File not found.');
+        }
+
+        return response()->file($filePath);
+    }
+
 }

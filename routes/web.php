@@ -95,6 +95,8 @@ Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->name('teacher.
     Route::post('materials', [MaterialController::class, 'store'])->name('materials.store');
     Route::get('materials/{id}/download', [MaterialController::class, 'download'])->name('materials.download');
     Route::delete('materials/{id}', [MaterialController::class, 'destroy'])->name('materials.destroy');
+    Route::get('materials/{id}/view', [MaterialController::class, 'view'])->name('materials.view');
+
 
     // Quizzes & Questions
     Route::resource('quizzes', QuizController::class);
