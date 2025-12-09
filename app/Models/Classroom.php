@@ -34,9 +34,19 @@ class Classroom extends Model
         return $this->hasMany(Post::class);
     }
 
-    // Add this
     public function schedules()
     {
         return $this->hasMany(Schedule::class);
     }
+
+    public function students()
+    {
+        return $this->belongstoMany(User::class, 'classroom_user');
+    }
+
+    public function teacher()
+    {
+        return $this->belongsTo(User::class, 'teacher_id');
+    }
+
 }

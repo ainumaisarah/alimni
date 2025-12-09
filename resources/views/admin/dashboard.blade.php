@@ -10,7 +10,7 @@
             <p class = "text-lg font-bold">{{ $classroomCount }}</p>
            <div>
                 <a href="{{ route('admin.classrooms.index') }}" class="btn-secondary">Manage</a><br>
-                <a style="font-size: 14px; font-weight: 500; color: #f9fafa;" href="{{ route('admin.classrooms.overview') }}" class="btn btn-primary mt-2 inline-block">Classroom Overview</a><br>
+                <!--<a style="font-size: 14px; font-weight: 500; color: #f9fafa;" href="{{ route('admin.classrooms.overview') }}" class="btn btn-primary mt-2 inline-block">Classroom Overview</a><br>-->
             </div>
         </div>
         <div class="app-card">
