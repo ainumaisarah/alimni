@@ -59,5 +59,45 @@
     @endif
 </form>
 
+<script src="{{ asset('/offlineQuizzes.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const quiz = {
+        id: {{ $quiz->id }},
+        title: "{{ $quiz->title }}",
+        questions: @json($questions)
+    };
+
+    if (navigator.onLine) {
+        saveQuizOffline(quiz);
+    }
+
+    const form = document.querySelector('form');
+
+    // <-- REPLACE your old form submit handler with this one
+    form.addEventListener('submit', async (e) => {
+        if (!navigator.onLine) {
+            e.preventDefault();
+            const answers = Object.fromEntries(new FormData(form).entries());
+
+            await saveSubmissionOffline({
+                quiz_id: quiz.id,
+                answers: answers,
+                timestamp: new Date().toISOString()
+            });
+
+            if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                const registration = await navigator.serviceWorker.ready;
+                await registration.sync.register('sync-submissions');
+                console.log('Background sync registered for offline quiz submission.');
+            }
+
+            alert('You are offline. Your answers are saved and will be submitted when back online.');
+            form.reset();
+        }
+    });
+});
+</script>
+
 </div>
 @endsection
