@@ -2,104 +2,143 @@
 
 @section('content')
 <div class="class-container">
-<nav class="class-nav">
-        <h2><a href="{{ route('classes.show', $class->id) }}" class="font-semibold text-lg">
-            {{ $class->name }}
-        </a></h2>
+    <nav class="class-nav">
+        <h2>
+            <a href="{{ route('classes.show', $class->id) }}" class="font-semibold text-lg">
+                {{ $class->name }}
+            </a>
+        </h2>
         <div class="class-menu">
             <a href="{{ route('classes.materials', $class->id) }}"
-                class="{{ request()->routeIs('classes.materials') ? 'active' : '' }}"> Materials </a>
-             <a href="{{ route('classes.assignment', $class->id) }}"
-                class="{{ request()->routeIs('classes.assignment') ? 'active' : '' }}"> Assignment </a>
+               class="{{ request()->routeIs('classes.materials') ? 'active' : '' }}">Materials</a>
+            <a href="{{ route('classes.assignment', $class->id) }}"
+               class="{{ request()->routeIs('classes.assignment') ? 'active' : '' }}">Assignment</a>
             <a href="{{ route('classes.quizzes', $class->id) }}"
-                class="{{ request()->routeIs('classes.quizzes') ? 'active' : '' }}"> Quiz </a>
+               class="{{ request()->routeIs('classes.quizzes') ? 'active' : '' }}">Quiz</a>
         </div>
-</nav>
+    </nav>
 
-@if(session('success'))
-    <div class="succes-alert">
-        {{ session('success') }}
-    </div>
-@endif
+    @if(session('success'))
+        <div class="succes-alert">
+            {{ session('success') }}
+        </div>
+    @endif
 
-<div class="classbox">
-<h3 style="font-size: 22px; font-weight: 650; color: #171818;">
-    Assignments
-</h3>
+    <div class="classbox">
+        <h3 style="font-size: 22px; font-weight: 650; color: #171818;">Assignments</h3>
 
-{{-- Teacher: Create new assignment --}}
-@if(auth()->user()->role === 'teacher')
-    <a href="{{ route('teacher.assignments.create', ['classroom_id' => $class->id]) }}"
-       class="btn-primary mb-3 inline-block">Create New Assignment</a>
-@endif
+        {{-- Teacher: Create new assignment --}}
+        @if(auth()->user()->role === 'teacher')
+            <a href="{{ route('teacher.assignments.create', ['classroom_id' => $class->id]) }}"
+               class="btn-primary mb-3 inline-block">Create New Assignment</a>
+        @endif
 
-{{-- List assignments --}}
-@if($assignments->count() > 0)
-    @foreach($assignments as $assignment)
-        <div class="app-card">
-            <h3 class="font-semibold text-lg">
-                {{ $assignment->title }}
-            </h3>
+        {{-- List assignments --}}
+        @if($assignments->count() > 0)
+            @foreach($assignments as $assignment)
+                <div class="app-card mb-4">
 
-            <p>{{ $assignment->description }}</p>
-
-            @if($assignment->file)
-                <p class="info-meta">
-                    File:
-                    @if(auth()->user()->role === 'teacher')
-                        <a href="{{ route('teacher.assignments.download', $assignment->id) }}" class="text-blue-600 hover:underline">
-                            {{ basename($assignment->file) }}
-                        </a>
-                    @else
-                        <a href="{{ route('student.assignments.download', $assignment->id) }}" class="text-blue-600 hover:underline">
-                            {{ basename($assignment->file) }}
-                        </a>
-                    @endif
-                </p>
-            @endif
-
-            <p class="info-meta">Uploaded: {{ $assignment->created_at->format('d M Y') }}</p>
-
-            {{-- Teacher: Edit/Delete buttons --}}
-            @if($role === 'teacher')
-                <a href="{{ route('teacher.assignments.edit', $assignment->id) }}" class="btn-secondary inline-block px-4 py-2 text-sm">Edit</a>
-
-                <form action="{{ route('teacher.assignments.destroy', $assignment->id) }}" method="POST" class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn-danger px-4 py-2 text-sm"
-                        onclick="return confirm('Are you sure you want to delete this assignment?');">
-                        Delete
-                    </button>
-                </form>
-            @endif
-
-            {{-- Student: Submission form --}}
-            @if($role === 'student')
-                @php
-                    $submission = $assignment->submissions()->where('student_id', auth()->id())->first();
-                @endphp
-
-                <form action="{{ route('student.assignments.submit', $assignment->id) }}" method="POST" enctype="multipart/form-data" class="mt-2">
-                    @csrf
-                    <input type="file" name="file" class="border rounded p-2 w-full mb-2" required>
-
-                    @if($submission)
-                        <p>Previous submission:
-                            <a href="{{ asset('storage/' . $submission->file) }}" class="text-blue-600 underline">
-                                {{ basename($submission->file) }}
+                      {{-- Assignment title --}}
+                    @if($role === 'teacher')
+                        <h3 class="font-semibold text-lg">
+                            <a href="{{ route('teacher.assignments.submissions', $assignment->id) }}" class="text-blue-600 hover:underline">
+                                {{ $assignment->title }}
                             </a>
+                        </h3>
+                    @else
+                        <h3 class="font-semibold text-lg">{{ $assignment->title }}</h3>
+                    @endif
+
+                    <p>{{ $assignment->description }}</p>
+
+                    {{-- Due date --}}
+                    @if($assignment->due_at)
+                        <p class="text-sm text-gray-600">
+                            Due: {{ \Carbon\Carbon::parse($assignment->due_at)->timezone('Asia/Kuala_Lumpur')->format('d M Y H:i') }}
                         </p>
                     @endif
 
-                    <button type="submit" class="btn-primary mt-1">Submit Assignment</button>
-                </form>
-            @endif
+                    {{-- Assignment file download --}}
+                    @if($assignment->file)
+                        <p class="mt-1">
+                            @if(auth()->user()->role === 'teacher')
+                                <a href="{{ route('teacher.assignments.download', $assignment->id) }}" class="text-blue-600 hover:underline">
+                                    {{ basename($assignment->file) }}
+                                </a>
+                            @else
+                                <a href="{{ route('student.assignments.download', $assignment->id) }}" class="text-blue-600 hover:underline">
+                                    {{ basename($assignment->file) }}
+                                </a>
+                            @endif
+                        </p>
+                    @endif
 
-        </div>
-    @endforeach
-@else
-    <p class="empty-message">No assignments uploaded yet.</p>
-@endif
+                    {{-- Teacher: Edit/Delete buttons --}}
+                    @if($role === 'teacher')
+                        <a href="{{ route('teacher.assignments.edit', $assignment->id) }}" class="btn-secondary inline-block px-4 py-2 text-sm">Edit</a>
+                        <form action="{{ route('teacher.assignments.destroy', $assignment->id) }}" method="POST" class="inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn-danger px-4 py-2 text-sm"
+                                onclick="return confirm('Are you sure you want to delete this assignment?');">
+                                Delete
+                            </button>
+                        </form>
+                    @endif
+
+                    {{-- Student submission --}}
+                    @if($role === 'student')
+                        @php
+                            $submission = $assignment->submissions()->where('student_id', auth()->id())->first();
+                        @endphp
+
+                        @if($submission)
+                            @php
+                                $submittedAt = \Carbon\Carbon::parse($submission->submitted_at)->timezone('Asia/Kuala_Lumpur');
+                                $dueAt = $assignment->due_at ? \Carbon\Carbon::parse($assignment->due_at)->timezone('Asia/Kuala_Lumpur') : null;
+                            @endphp
+
+                            <p>Submitted at: {{ $submittedAt->format('d M Y H:i') }}</p>
+
+                            @if($dueAt && $submittedAt->gt($dueAt))
+                                <p class="error-alert font-semibold">Turned in Late</p>
+                            @else
+                                <p class="success-alert font-semibold">Turned in On Time</p>
+                            @endif
+
+                            <p>
+                                Previous submission:
+                                <a href="{{ asset('storage/' . $submission->file) }}" class="text-blue-600 underline">
+                                    {{ basename($submission->file) }}
+                                </a>
+                            </p>
+
+                            {{-- Delete submission --}}
+                            <form action="{{ route('student.assignments.deleteSubmission', $assignment->id) }}" method="POST" class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn-danger px-3 py-1 text-sm"
+                                    onclick="return confirm('Are you sure you want to delete this submission?');">
+                                    Delete Submission
+                                </button>
+                            </form>
+                        @else
+                            <p class="text-gray-600">Not submitted yet</p>
+                        @endif
+
+                        {{-- Submission form --}}
+                        <form action="{{ route('student.assignments.submit', $assignment->id) }}" method="POST" enctype="multipart/form-data" class="mt-2">
+                            @csrf
+                            <input type="file" name="file" class="border rounded p-2 w-full mb-2" required>
+                            <button type="submit" class="btn-primary mt-1">Submit Assignment</button>
+                        </form>
+                    @endif
+
+                </div>
+            @endforeach
+        @else
+            <p class="empty-message">No assignments uploaded yet.</p>
+        @endif
+    </div>
 </div>
 @endsection

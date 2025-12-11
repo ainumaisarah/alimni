@@ -32,9 +32,9 @@
 
             <div class="auth-actions flex items-center mt-4 w-full">
     <div class="flex-1">
-        @if (Route::has('password.request'))
-            <a href="{{ route('password.request') }}" class="text-sm text-gray-200 hover:text-red-400">
-                {{ __('Forgot your password?') }}
+        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="text-sm text-gray-200 hover:text-red-400">
+                                Don't have account?  Register Now    </a>
             </a>
         @endif
     </div>

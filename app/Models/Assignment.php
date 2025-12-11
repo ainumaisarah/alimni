@@ -15,16 +15,20 @@ class Assignment extends Model
     'description',
     'file',
     'user_id',
+    'due_at',
     ];
 
-    public function classroom()
-    {
-        return $this->belongsTo(Classroom::class);
-    }
 
-    public function submissions()
-    {
-        return $this->hasMany(Submission::class);
-    }
+    // app/Models/Assignment.php
+public function classroom()
+{
+    return $this->belongsTo(Classroom::class);
+}
+
+public function submissions()
+{
+    return $this->hasMany(Submission::class);
+}
+
 }
 

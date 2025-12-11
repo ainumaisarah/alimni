@@ -12,11 +12,13 @@ class Question extends Model
     protected $fillable = [
         'quiz_id',
         'question_text',
+        'question_type',
         'option_a',
         'option_b',
         'option_c',
         'option_d',
         'correct_answer',
+        'short_answer',
     ];
 
     public function quiz()

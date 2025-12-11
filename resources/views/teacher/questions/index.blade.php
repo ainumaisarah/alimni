@@ -5,6 +5,11 @@
 
     <h2 class="mb-4">Questions for: {{ $quiz->title }}</h2>
 
+    <a href="{{ route('teacher.quizzes.results', $quiz->id) }}"
+       class="btn-primary px-4 py-2 text-sm">
+       View Result
+    </a>
+
     <a href="{{ route('teacher.questions.create', $quiz->id) }}"
        class="btn-primary px-4 py-2 rounded mb-4 inline-block">
        Add Question
@@ -15,6 +20,7 @@
             <thead class="bg-gray-100">
                 <tr>
                     <th class="px-4 py-2 border">Question</th>
+                    <th class="px-4 py-2 border">Type</th>
                     <th class="px-4 py-2 border">Correct Answer</th>
                     <th class="px-4 py-2 border">Action</th>
                 </tr>
@@ -23,16 +29,23 @@
                 @foreach($questions as $question)
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-2 border">{{ $question->question_text }}</td>
-                        <td class="px-4 py-2 border text-center">{{ $question->correct_answer }}</td>
                         <td class="px-4 py-2 border text-center">
+                            {{ $question->question_type }} {{-- shows mcq or short --}}
+                        </td>
+                        <td class="px-4 py-2 border text-center">
+                            {{ $question->question_type === 'mcq' ? $question->correct_answer : $question->short_answer }}
+                        </td>
+
+                        <td class="px-4 py-2 border text-center">
+                            <a href="{{ route('teacher.questions.edit', [$quiz->id, $question->id]) }}"
+                               class="btn-secondary px-4 py-2 text-sm">Edit</a>
+
                             <form action="{{ route('teacher.questions.destroy', [$quiz->id, $question->id]) }}"
-                                  method="POST" onsubmit="return confirm('Delete this question?')" class="inline-block">
+                                  method="POST" class="inline-block"
+                                  onsubmit="return confirm('Delete this question?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit"
-                                        class="btn-danger">
-                                    Delete
-                                </button>
+                                <button type="submit" class="btn-danger">Delete</button>
                             </form>
                         </td>
                     </tr>

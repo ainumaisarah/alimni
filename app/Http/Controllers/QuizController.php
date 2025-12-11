@@ -7,15 +7,30 @@ use App\Models\Classroom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\QuizResult;
+// --------------------------
+// Student-facing methods
+// --------------------------
+use App\Models\Attempt;
+use App\Models\Answer;
+
 
 class QuizController extends Controller
 {
     // Teacher: list own quizzes
-    public function index()
-    {
-        $quizzes = Quiz::where('teacher_id', auth()->id())->get(); // only teacher's quizzes
-        return view('teacher.quizzes.index', compact('quizzes'));
-    }
+    public function index($classroomId)
+{
+    $class = Classroom::findOrFail($classroomId);
+
+    $quizzes = Quiz::where('teacher_id', auth()->id())
+                   ->where('classroom_id', $classroomId)
+                   ->latest() // latest quiz first
+                   ->get();
+
+    return view('classes.quizzes', compact('class', 'quizzes'));
+}
+
+
+
 
     // Show create form
     public function create()
@@ -36,19 +51,24 @@ class QuizController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'classroom_id' => 'required|exists:classrooms,id',
+            'duration' => 'nullable|integer|min:1',
+            'open_at' => 'nullable|date',
+            'due_at' => 'nullable|date|after_or_equal:open_at',
         ]);
 
-        // Save quiz
         $quiz = new Quiz();
         $quiz->title = $request->title;
         $quiz->description = $request->description;
         $quiz->classroom_id = $request->classroom_id;
         $quiz->teacher_id = auth()->id();
+        $quiz->show_answers = $request->has('show_answers'); // checkbox
+        $quiz->duration = $request->duration;
+        $quiz->open_at = $request->open_at;
+        $quiz->due_at = $request->due_at;
         $quiz->save();
 
-        // Redirect back to classroom page
-        return redirect()->route('classes.show', $request->classroom_id)
-                        ->with('success', 'Quiz created successfully!');
+        return redirect()->route('classes.quizzes', $quiz->classroom_id)
+                 ->with('success', 'Quiz created successfully!');
     }
 
 
@@ -56,15 +76,9 @@ class QuizController extends Controller
     public function destroy(Quiz $quiz)
     {
         $quiz->delete();
-        return redirect()->route('teacher.quizzes.index')->with('success', 'Quiz deleted successfully.');
-    }
 
-    // List all quizzes for the student
-    public function studentIndex()
-    {
-        $student = auth()->user();
-        $quizzes = Quiz::where('classroom_id', $student->classroom_id)->get();
-        return view('student.quizzes.index', compact('quizzes'));
+        return redirect()->route('classes.quizzes', $quiz->classroom_id)
+                        ->with('success', 'Quiz deleted successfully.');
     }
 
     // Show the quiz questions
@@ -86,33 +100,6 @@ class QuizController extends Controller
         $canRetake = !$result || ($answeredCount < $totalCount);
 
         return view('student.quizzes.show', compact('quiz', 'questions', 'result', 'canRetake'));
-    }
-
-    // Handle quiz submission
-    public function submit(Request $request, Quiz $quiz)
-    {
-        $answers = $request->input('answers', []);
-        $student = auth()->user();
-
-        $score = 0;
-
-        foreach ($quiz->questions as $question) {
-            $studentAnswer = $answers[$question->id] ?? null;
-            if ($studentAnswer && strtoupper($studentAnswer) === strtoupper($question->correct_answer)) {
-                $score++;
-            }
-        }
-
-        // Save to quiz_results table
-        QuizResult::create([
-            'quiz_id' => $quiz->id,
-            'student_id' => $student->id,
-            'answers' => $answers,
-            'score' => $score,
-        ]);
-
-        return redirect()->route('student.quizzes.index')
-                         ->with('success', "You scored $score out of ".$quiz->questions->count()."!");
     }
 
         // Show edit form for a quiz
@@ -145,22 +132,33 @@ class QuizController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
             'classroom_id' => 'required|exists:classrooms,id',
+            'duration' => 'nullable|integer|min:1',
+            'open_at' => 'nullable|date',
+            'due_at' => 'nullable|date|after_or_equal:open_at',
         ]);
 
-        // Update quiz info
-        $quiz->update($validated);
+        $quiz->update([
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'classroom_id' => $validated['classroom_id'],
+            'show_answers' => $request->has('show_answers'),
+            'duration' => $validated['duration'] ?? null,
+            'open_at' => $validated['open_at'] ?? null,
+            'due_at' => $validated['due_at'] ?? null,
+        ]);
 
-        // OPTION 1: Reset all student attempts
+        // Reset all student attempts if needed
         if ($quiz->results()->exists()) {
             $quiz->results()->delete();
         }
 
-        return redirect()->route('teacher.quizzes.index')
-                        ->with('success', 'Quiz updated successfully! All student attempts have been reset.');
+        return redirect()->route('classes.quizzes', $quiz->classroom_id)
+                 ->with('success', 'Quiz updated successfully! All student attempts have been reset.');
     }
 
-    // Show quiz results for teacher
+// Show quiz results for teacher
     public function results(Quiz $quiz)
     {
         // Get latest attempt per student
@@ -177,6 +175,107 @@ class QuizController extends Controller
 
         return view('teacher.quizzes.results', compact('quiz', 'results', 'questions'));
     }
+
+////////////----- S T U D E N T   P A R T -----////////////////
+/*public function studentIndex()
+{
+    $student = auth()->user();
+
+    $classroomIds = $student->classrooms()->pluck('classrooms.id');
+
+    $quizzes = Quiz::whereIn('classroom_id', $classroomIds)
+                   ->with(['results' => function($q) use ($student){
+                        $q->where('student_id', $student->id);
+                   }])
+                   ->get();
+
+    return view('student.quizzes.index', compact('quizzes'));
+}*/
+
+// Single quiz dashboard (index for one quiz)
+// Show single quiz dashboard (attempts, retake button)
+public function studentQuiz(Quiz $quiz)
+{
+    $student = auth()->user();
+
+    // Load only this student's attempts
+    $quiz->load(['results' => function($q) use ($student) {
+        $q->where('student_id', $student->id);
+    }]);
+
+    $attempts = $quiz->results;
+    $attemptsCount = $attempts->count();
+    $maxAttempts = 3;
+
+    return view('student.quizzes.index', compact('quiz', 'attempts', 'attemptsCount', 'maxAttempts'));
+}
+
+// Show the quiz questions for student to attempt
+public function showStudent(Quiz $quiz)
+{
+    $student = auth()->user();
+    $attemptsCount = $quiz->results()->where('student_id', $student->id)->count();
+    $maxAttempts = 3;
+
+    if ($attemptsCount >= $maxAttempts) {
+        return redirect()->route('student.quizzes.single', $quiz->id)
+            ->with('error', 'You have reached the maximum attempts.');
+    }
+
+    $questions = $quiz->questions()->get();
+
+    return view('student.quizzes.show', compact('quiz', 'questions', 'attemptsCount', 'maxAttempts'));
+}
+
+// Submit quiz answers
+public function submit(Request $request, Quiz $quiz)
+{
+    $student = auth()->user();
+    $attemptsCount = $quiz->results()->where('student_id', $student->id)->count();
+
+    if($attemptsCount >= 3){
+        return redirect()->route('student.quizzes.single', $quiz->id)
+            ->with('error', 'You cannot attempt this quiz more than 3 times.');
+    }
+
+    $answersInput = $request->input('answers', []);
+    $score = 0;
+    $questions = $quiz->questions()->get();
+
+    foreach($questions as $question){
+        $studentAnswer = strtoupper(trim($answersInput[$question->id] ?? ''));
+        $correctAnswer = strtoupper(trim($question->correct_answer ?? ''));
+
+        if($studentAnswer === $correctAnswer){
+            $score++;
+        }
+    }
+
+    $attemptNumber = $attemptsCount + 1;
+
+    $quiz->results()->create([
+        'student_id' => $student->id,
+        'answers' => $answersInput,
+        'score' => round(($score / $questions->count()) * 100, 2),
+        'attempt_number' => $attemptNumber,
+    ]);
+
+    return redirect()->route('student.quizzes.single', $quiz->id)
+        ->with('success', 'Quiz submitted successfully!');
+}
+
+// Review a previous attempt
+public function review(Quiz $quiz, $resultId)
+{
+    $student = auth()->user();
+
+    $result = $quiz->results()->where('student_id', $student->id)->findOrFail($resultId);
+    $answers = $result->answers;
+    $questions = $quiz->questions()->get()->keyBy('id');
+
+    return view('student.quizzes.review', compact('quiz', 'result', 'answers', 'questions'));
+}
+
 
 
 }

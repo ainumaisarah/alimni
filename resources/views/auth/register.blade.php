@@ -54,6 +54,12 @@
 
             {{-- Submit Button --}}
             <div class="auth-actions flex justify-center items-center mt-4 w-full">
+                <div class="flex-1">
+             <a href="{{ route('login') }}" class="text-sm text-gray-200 hover:text-red-400">
+                               Already have account? Login Now</a>
+            </a>
+
+    </div>
     <x-button type="submit" class="login-button items-center">
         {{ __('Register') }}
     </x-button>

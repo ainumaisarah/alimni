@@ -1,63 +1,32 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="page-container">
-    <h2>{{ $quiz->title }}</h2>
-
-   @if($result && !$canRetake)
-        <div class="success-alert mb-4">
-            You already submitted this quiz. Score: {{ $result->score }}/{{ $quiz->questions->count() }}
-        </div>
-    @endif
+<div class="page-container p-6">
+<h2 class="mb-4">{{ $quiz->title }}</h2>
 
 <form action="{{ route('student.quizzes.submit', $quiz->id) }}" method="POST">
     @csrf
 
-    @foreach($questions as $question)
-    <div class="app-card">
-        <p>{{ $loop->iteration }}. {{ $question->question_text }}</p>
+    @foreach($questions as $q)
+        <div class="mb-4 p-3 border rounded">
+            <p class="font-semibold">{{ $loop->iteration }}. {{ $q->question_text }}</p>
 
-        @php
-            $prevAnswer = strtoupper($result->answers[$question->id] ?? '');
-            $correctAnswer = strtoupper($question->correct_answer);
-        @endphp
+             @if($q->question_type == 'mcq')
+                    @foreach(['a','b','c','d'] as $opt)
+                        @php $optionValue = $q->{'option_'.$opt}; @endphp
+                        @if($optionValue)
+                            <label class="block ml-4">
+                                <input type="radio" name="answers[{{ $q->id }}]" value="{{ strtoupper($opt) }}" required>
+                                {{ $optionValue }}
+                            </label>
+                        @endif
+                    @endforeach
+                @elseif($q->question_type == 'short')
+                    <input type="text" name="answers[{{ $q->id }}]" class="w-full border rounded p-2" required>
+                @endif
+            @endforeach
 
-        @foreach(['a','b','c','d'] as $option)
-            @php
-                $optionText = $question->{'option_'.$option};
-                $isSelected = $prevAnswer == strtoupper($option);
-                $isCorrect = $correctAnswer == strtoupper($option);
-                $icon = '';
-
-                if($result) {
-                    if($isCorrect) {
-                        $icon = '✅';
-                    } elseif($isSelected && !$isCorrect) {
-                        $icon = '❌';
-                    }
-                }
-
-                // Disable old answers only if they exist
-                $disabled = ($result && $prevAnswer && !$canRetake) ? 'disabled' : '';
-            @endphp
-
-            <div class="p-3 rounded mb-2 flex items-center gap-2">
-                <input type="radio" name="answers[{{ $question->id }}]" value="{{ $option }}"
-                    {{ $isSelected ? 'checked' : '' }}
-                    {{ $disabled }}
-                >
-                <span class="font-medium">{{ strtoupper($option) }}. {{ $optionText }} {{ $icon }}</span>
-            </div>
-        @endforeach
-    </div>
-    @endforeach
-
-    @if($canRetake)
-        <button type="submit" class="btn-primary">
-            Submit Quiz
-        </button>
-    @endif
+    <button type="submit" class="btn-primary">Submit Quiz</button>
 </form>
-
 </div>
 @endsection

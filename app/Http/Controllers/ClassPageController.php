@@ -128,7 +128,9 @@ public function show($id)
     {
         $class = Classroom::findOrFail($id);
         $role = auth()->user()->role;
-        $assignments = Assignment::where('classroom_id', $id)->get();
+        $assignments = Assignment::where('classroom_id', $id)
+         ->latest()        // latest first
+        ->get();
 
         return view('classes.assignment', compact('class', 'role', 'assignments'));
     }

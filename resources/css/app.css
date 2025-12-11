@@ -366,7 +366,7 @@ nav {
 /* Table container */
 .schedule-container {
     padding: 0rem;
-    background: rgba(134, 8, 8, 0);
+    background: rgba(255, 255, 255, 0);
     backdrop-filter: blur(16px);
     border-radius: 1rem;
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
@@ -815,7 +815,7 @@ nav {
 
 
 /* Generic Button Styles */
-.btn-primary, .btn-danger, .btn-secondary, .btn-chat {
+.btn-primary, .btn-danger, .btn-secondary, .btn-chat, .btn-nope {
     display: inline-block;
     padding: 0.35rem 0.75rem;
     border-radius: 8px;
@@ -838,6 +838,9 @@ nav {
 
 .btn-chat { background: #2b5948; color:rgb(224, 216, 191); }
 .btn-chat:hover { background: #204236; }
+
+.btn-nope { background: rgba(200, 195, 186, 0.838) ; color: #a3363f; }
+.btn-nope:hover { background: rgba(156, 148, 134, 0.922) 7; }
 
 /* Success alert */
 .success-alert {
@@ -1101,16 +1104,32 @@ nav {
     font-weight: 700;
     font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 }
-.class-menu {
-    display: flex;
-    gap: 22px;
+/* Container for the menu links */
+.class-nav .class-menu {
+    display: flex;       /* arrange links in a row */
+    gap: 20px;           /* space between links */
 }
 
-.class-menu a.active {
-    color: #ffffff;
-    background-color: #007bff00; /* example */
-    border-radius: 4px;
-    padding: 4px 8px;
+/* Individual links */
+.class-nav .class-menu a {
+    color: rgb(214, 209, 195); /* default text color */
+    text-decoration: none;
+    font-weight: 500;
+    padding-bottom: 2px;       /* space for underline */
+    display: inline-block;
+    transition: color 0.2s, transform 0.2s, border-bottom 0.2s;
+}
+
+/* Hover effect */
+.class-nav .class-menu a:hover {
+    color: rgb(194, 168, 124); /* slightly darker text on hover */
+    transform: scale(1.05);
+}
+
+/* Active link effect - underline */
+.class-nav .class-menu a.active {
+    border-bottom: 2px solid rgb(214, 209, 195); /* underline */
+    color: rgb(214, 209, 195);                   /* optional text color */
 }
 
 

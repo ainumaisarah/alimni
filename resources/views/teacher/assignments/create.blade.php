@@ -20,6 +20,16 @@
     </div>
 
     <div>
+    <label class="font-medium">Due</label>
+    <input type="datetime-local"
+           name="due_at"
+           value="{{ old('due_at') }}"
+           class="w-full border rounded p-2">
+    </div>
+
+
+
+    <div>
         <label class="font-medium">Upload File</label>
         <input type="file" name="file" class="w-full border rounded p-2">
     </div>

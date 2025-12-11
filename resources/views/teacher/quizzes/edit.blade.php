@@ -2,25 +2,71 @@
 
 @section('content')
 <div class="page-container p-6">
+    <h2 class="mb-4">{{ isset($quiz) ? 'Edit Quiz' : 'Create Quiz' }}</h2>
 
-    <h2 class="mb-4">Edit Quiz: {{ $quiz->title }}</h2>
+    @if ($errors->any())
+        <div class="error-alert mb-4">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-    {{-- Quiz Info Form --}}
-    <form action="{{ route('teacher.quizzes.update', $quiz->id) }}" method="POST" class="info-card mb-6">
+    <form action="{{ isset($quiz) ? route('teacher.quizzes.update', $quiz->id) : route('teacher.quizzes.store') }}" method="POST" class="info-card">
         @csrf
-        @method('PUT')
+        @if(isset($quiz))
+            @method('PUT')
+        @endif
 
+        {{-- Quiz Title --}}
         <div class="mb-4">
-            <label for="title" class="block font-semibold mb-1">Quiz Title:</label>
-            <input type="text" name="title" id="title" value="{{ old('title', $quiz->title) }}"
-                   class="w-full border p-2 rounded">
+            <label class="block font-semibold mb-1">Quiz Title</label>
+            <input type="text" name="title" class="w-full border rounded p-2" value="{{ old('title', $quiz->title ?? '') }}" required>
         </div>
 
+        {{-- Quiz Description --}}
         <div class="mb-4">
-            <label for="classroom_id" class="block font-semibold mb-1">Classroom:</label>
-            <select name="classroom_id" id="classroom_id" class="w-full border p-2 rounded">
+            <label class="block font-semibold mb-1">Description (optional)</label>
+            <textarea name="description" class="w-full border rounded p-2" rows="3">{{ old('description', $quiz->description ?? '') }}</textarea>
+        </div>
+
+        {{-- Show Answers --}}
+        <div class="mb-4">
+            <label class="inline-flex items-center">
+                <input type="checkbox" name="show_answers" value="1" {{ old('show_answers', $quiz->show_answers ?? false) ? 'checked' : '' }}>
+                <span class="ml-2">Reveal answers to students after submission</span>
+            </label>
+        </div>
+
+        {{-- Duration --}}
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Quiz Duration (minutes, optional)</label>
+            <input type="number" name="duration" class="w-full border rounded p-2" min="1" value="{{ old('duration', $quiz->duration ?? '') }}">
+        </div>
+
+        {{-- Open Date/Time --}}
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Open Date & Time (optional)</label>
+            <input type="datetime-local" name="open_at" class="w-full border rounded p-2"
+                value="{{ old('open_at', isset($quiz->open_at) ? \Carbon\Carbon::parse($quiz->open_at)->format('Y-m-d\TH:i') : '') }}">
+        </div>
+
+        {{-- Close Date/Time --}}
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Close Date & Time (optional)</label>
+            <input type="datetime-local" name="due_at" class="w-full border rounded p-2"
+                value="{{ old('due_at', isset($quiz->due_at) ? \Carbon\Carbon::parse($quiz->due_at)->format('Y-m-d\TH:i') : '') }}">
+        </div>
+
+
+        {{-- Classroom --}}
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">Classroom</label>
+            <select name="classroom_id" class="w-full border rounded p-2" required>
                 @foreach($classrooms as $classroom)
-                    <option value="{{ $classroom->id }}" {{ $quiz->classroom_id == $classroom->id ? 'selected' : '' }}>
+                    <option value="{{ $classroom->id }}" {{ old('classroom_id', $quiz->classroom_id ?? request('classroom_id')) == $classroom->id ? 'selected' : '' }}>
                         {{ $classroom->name }}
                     </option>
                 @endforeach
@@ -28,43 +74,8 @@
         </div>
 
         <button type="submit" class="btn-primary">
-            Update Quiz
+            {{ isset($quiz) ? 'Update Quiz' : 'Create Quiz' }}
         </button>
     </form>
-
-    {{-- Questions List --}}
-    <h3>Questions</h3>
-
-    @if($quiz->questions->count() > 0)
-        <ul class="mb-4">
-            @foreach($quiz->questions as $question)
-                <li class="app-card mb-2 flex justify-between items-center">
-                    <span>{{ $question->question_text }}</span>
-                    <div class="flex gap-2">
-                        <a href="{{ route('teacher.questions.edit', $question->id) }}"
-                           class="btn-secondary">
-                            Edit
-                        </a>
-                        <form action="{{ route('teacher.questions.destroy', $question->id) }}" method="POST" class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    class="btn-danger"
-                                    onclick="return confirm('Delete this question?')">
-                                Delete
-                            </button>
-                        </form>
-                    </div>
-                </li>
-            @endforeach
-        </ul>
-    @else
-        <p class="empty-message mb-4">No questions yet.</p>
-    @endif
-
-    <a href="{{ route('teacher.questions.create', ['quiz' => $quiz->id]) }}"
-       class="btn-primary">
-       Add New Question
-    </a>
 </div>
 @endsection

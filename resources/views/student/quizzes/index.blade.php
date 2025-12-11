@@ -1,75 +1,46 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="page-container">
-    <h2>My Quizzes</h2>
+<div class="page-container p-6">
 
-    @if(session('success'))
-        <div class="success-alert mb-4">
-            {{ session('success') }}
-        </div>
-    @endif
+    <h2 class="mb-6 font-semibold text-2xl">{{ $quiz->title }}</h2>
+    <p class="mb-4">{{ $quiz->description }}</p>
 
-    @if($quizzes->count() > 0)
-        <table>
+    @if($attemptsCount == 0)
+        <p>Please attempt the quiz.</p>
+        <a href="{{ route('student.quizzes.show', $quiz->id) }}" class="btn-primary">Attempt Quiz</a>
+    @else
+        <table class="w-full text-left border mb-4">
             <thead>
                 <tr class="bg-gray-100">
-                    <th class="px-4 py-2 border">Title</th>
-                    <th class="px-4 py-2 border">Classroom</th>
-                    <th class="px-4 py-2 border">Actions</th>
+                    <th class="p-2 border">Attempt</th>
+                    <th class="p-2 border">Score</th>
+                    <th class="p-2 border">Review</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($quizzes as $quiz)
-
-                @php
-                    // Student's latest result
-                    $result = $quiz->results()
-                        ->where('student_id', auth()->id())
-                        ->latest()
-                        ->first();
-
-                    // Determine total current questions
-                    $currentTotal = $quiz->questions->count();
-
-                    // Determine answered question count (only from latest attempt)
-                    $answeredTotal = $result ? count($result->answers ?? []) : 0;
-
-                    // Determine if teacher updated quiz (student has not answered all)
-                    $needsRetake = (!$result) || ($answeredTotal < $currentTotal);
-                @endphp
-
-                <tr>
-                    <td>{{ $quiz->title }}</td>
-                    <td>{{ $quiz->classroom->name ?? 'N/A' }}</td>
-                    <td>
-
-                        {{-- Student must retake because teacher added questions --}}
-                        @if($needsRetake)
-                            <a href="{{ route('student.quizzes.show', $quiz->id) }}"
-                               class="btn-primary">
-                                Take Quiz
-                            </a>
-
-                        {{-- Student already completed latest version — show review --}}
-                        @else
-                            <a href="{{ route('student.quizzes.show', $quiz->id) }}"
-                               class="btn-secondary">
-                                Review Quiz
-                            </a>
-                            <span class="success-alert mb-4">
-                                Score: {{ $result->score }}/{{ $quiz->questions->count() }}
-                            </span>
-                        @endif
-
-                    </td>
-                </tr>
-
+                @foreach($attempts as $attempt)
+                    <tr>
+                        <td class="p-2 border">{{ $attempt->attempt_number }}</td>
+                        <td class="p-2 border">{{ $attempt->score }}%</td>
+                        <td class="p-2 border">
+                            <a href="{{ route('student.quizzes.review', [$quiz->id, $attempt->id]) }}" class="text-blue-600 underline">View</a>
+                        </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
-    @else
-        <p class="empty-message">No quizzes available for your class yet.</p>
-    @endif
+
+        @if($attemptsCount < $maxAttempts)
+            <a href="{{ route('student.quizzes.show', $quiz->id) }}" class="btn-primary mt-2 inline-block">Attempt Again</a>
+            <p class="mt-1 text-sm text-gray-500">
+                You can attempt {{ $maxAttempts - $attemptsCount }} more time(s).
+            </p>
+        @else
+            <p class="mt-2 text-red-600 font-semibold">
+                You have reached the maximum attempts ({{ $maxAttempts }}).
+            </p>
+        @endif
+    @endif {{-- <-- Close the very first @if --}}
 </div>
 @endsection

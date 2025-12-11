@@ -11,9 +11,28 @@ class Quiz extends Model
 
     protected $fillable = [
         'title',
-        'teacher_id',
-        'classroom_id'
+        'description',
+        'duration',      // in minutes
+        'open_at',       // datetime when quiz opens
+        'due_at',      // datetime when quiz closes
+        'classroom_id',  // related classroom
+        'subject_id',    // optional subject
     ];
+
+    protected $dates = [
+        'open_at',
+        'due_at',
+        'created_at',
+        'updated_at',
+    ];
+
+    protected $casts = [
+    'open_at' => 'datetime',
+    'due_at'  => 'datetime',
+
+    'answers' => 'array', //quiz:store answers as jason
+    ];
+
 
 
     public function classroom()
