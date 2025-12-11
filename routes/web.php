@@ -214,7 +214,7 @@ Route::middleware(['auth', \App\Http\Middleware\IsTeacher::class])->prefix('teac
 Route::middleware(['auth', IsStudent::class])->group(function () {
     Route::get('/assignments/download/{assignment}', [AssignmentController::class, 'download'])->name('student.assignments.download');
     Route::post('/assignments/submit/{assignment}', [AssignmentController::class, 'submit'])->name('student.assignments.submit');
-});
+});*/
 
 Route::post('offline-quizzes/{quiz}', [QuizController::class, 'offlineSubmit'])
     ->name('offline.quizzes.submit');
