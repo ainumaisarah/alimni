@@ -45,5 +45,19 @@
             Learn anywhere, anytime — your education, your way.</p>
     </section>
 
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    if ("serviceWorker" in navigator) {
+        console.log("SW: Supported");
+
+        navigator.serviceWorker.register("/sw.js")
+            .then(reg => console.log("SW registered:", reg.scope))
+            .catch(err => console.error("SW registration failed:", err));
+    } else {
+        console.log("SW: NOT supported");
+    }
+});
+</script>
+
 </body>
 </html>

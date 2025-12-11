@@ -58,6 +58,10 @@
                         @method('DELETE')
                         <button type="submit" class="btn-danger">Delete</button>
                     </form>
+                    <a href="{{ route('teacher.materials.view', $material->id) }}"
+                    class="bg-green-500 text-black px-3 py-1 rounded hover:bg-green-600 transition">
+                    View
+                    </a>
                 @endif
             </div>
         @endforeach

@@ -97,6 +97,7 @@ Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->name('teacher.
     Route::delete('materials/{id}', [MaterialController::class, 'destroy'])->name('materials.destroy');
     Route::get('materials/{id}/view', [MaterialController::class, 'view'])->name('materials.view');
 
+
     // Quizzes
     Route::resource('quizzes', QuizController::class);
 
@@ -193,48 +194,27 @@ Route::get('/classes/{classroomId}/quizzes',
 )->name('classes.quizzes');
 
 
-Route::prefix('student')->name('student.')->middleware('auth')->group(function() {
-    Route::get('quizzes', [QuizController::class, 'index'])->name('quizzes.index');
-    Route::get('quizzes/{quiz}', [QuizController::class, 'showStudent'])->name('quizzes.show');
-    Route::post('quizzes/{quiz}/submit', [QuizController::class, 'submit'])->name('quizzes.submit');
-    Route::get('quizzes/{quiz}/attempts/{attempt}', [QuizController::class, 'review'])->name('quizzes.review');
-});*/
+//Assignment
+// Teacher routes
+Route::middleware(['auth', IsTeacher::class])->group(function () {
+    Route::get('/assignments/create/{classroom_id}', [AssignmentController::class, 'create'])->name('teacher.assignments.create');
+    Route::post('/assignments/store', [AssignmentController::class, 'store'])->name('teacher.assignments.store');
+    Route::get('/assignments/edit/{assignment}', [AssignmentController::class, 'edit'])->name('teacher.assignments.edit');
+    Route::put('/assignments/update/{assignment}', [AssignmentController::class, 'update'])->name('teacher.assignments.update');
+    Route::delete('/assignments/delete/{assignment}', [AssignmentController::class, 'destroy'])->name('teacher.assignments.destroy');
+});
+;
 
-// Teacher view all quizzes for a class
-Route::get('/classes/{classroomId}/quizzes',
-    [QuizController::class, 'index']
-)->name('classes.quizzes');
+Route::middleware(['auth', \App\Http\Middleware\IsTeacher::class])->prefix('teacher')->group(function () {
+    Route::get('/assignments/download/{assignment}', [AssignmentController::class, 'download'])
+        ->name('teacher.assignments.download');
+});
 
-// Student quiz routes
+// Student routes
+Route::middleware(['auth', IsStudent::class])->group(function () {
+    Route::get('/assignments/download/{assignment}', [AssignmentController::class, 'download'])->name('student.assignments.download');
+    Route::post('/assignments/submit/{assignment}', [AssignmentController::class, 'submit'])->name('student.assignments.submit');
+});
 
-Route::get('/student/quizzes/{quiz}',
-    [QuizController::class, 'showStudent']
-)->name('student.quizzes.show');
-
-Route::post('/student/quizzes/{quiz}/submit',
-    [QuizController::class, 'submit']
-)->name('student.quizzes.submit');
-
-Route::get('/student/quizzes/{quiz}/review/{resultId}',
-    [QuizController::class, 'review']
-)->name('student.quizzes.review');
-
-// Old route (calls deleted method)
-// Route::get('/student/quizzes', [QuizController::class, 'studentIndex'])->name('student.quizzes.index');
-// Show a single quiz dashboard (student sees the quiz info + attempts)
-Route::get('/student/quizzes/{quiz}', [QuizController::class, 'studentQuiz'])
-    ->name('student.quizzes.single');
-
-// Show quiz attempt page (student answers questions)
-Route::get('/student/quizzes/{quiz}/show', [QuizController::class, 'showStudent'])
-    ->name('student.quizzes.show');
-
-// Submit quiz answers
-Route::post('/student/quizzes/{quiz}/submit', [QuizController::class, 'submit'])
-    ->name('student.quizzes.submit');
-
-// Review a previous attempt
-Route::get('/student/quizzes/{quiz}/review/{result}', [QuizController::class, 'review'])
-    ->name('student.quizzes.review');
-
-
+Route::post('offline-quizzes/{quiz}', [QuizController::class, 'offlineSubmit'])
+    ->name('offline.quizzes.submit');
