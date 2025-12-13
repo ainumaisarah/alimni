@@ -249,8 +249,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('teacher/quizzes/{quiz}/review/{result}', [QuizController::class, 'teacherReview'])
         ->name('teacher.quizzes.review');
 });
-
-
+// Teacher submission routes
+Route::get('teacher/assignments/{assignment}/submissions', [AssignmentController::class, 'submissions'])
+    ->name('teacher.assignments.submissions')
+    ->middleware('auth'); // and your isTeacher middleware
 
 
 
