@@ -80,7 +80,7 @@
                             @endif
 
                             @if($isAvailable)
-                                <a href="{{ route('student.quizzes.show', $quiz->id) }}" class="btn-primary px-3 py-1 text-sm">
+                                <a href="{{ route('student.quizzes.show', $quiz->id) }}" class="btn-secondary px-3 py-1 text-sm">
                                     Attempt
                                 </a>
                             @else

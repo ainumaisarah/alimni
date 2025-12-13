@@ -102,7 +102,7 @@ body {
     display: block;
     padding: 0.5rem 1rem;
     font-weight: 500;
-    color: #fdfeff; /* text-gray-700 */
+    color: #315a57; /* text-gray-700 */
 }
 
 .profile [x-show] a {
@@ -172,8 +172,8 @@ body {
     padding: 1rem;
 
     /* Dark overlay + background image */
-    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5)),
-                url('/images/background.jpg') no-repeat center center;
+    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)),
+                url('/images/background.png') no-repeat center center;
     background-size: cover;
 }
 
@@ -264,12 +264,13 @@ nav {
     font-size: 2.8rem;
     font-weight: 700;
     margin-bottom: 1rem;
+    color:#284a38;
 }
 
 .hero p {
     max-width: 600px;
     font-size: 1rem;
-    color: #f0f0f0;
+    color: #765151;
     margin-bottom: 2rem;
 }
 

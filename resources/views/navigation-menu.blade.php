@@ -92,7 +92,7 @@
                     x-transition:leave-end="opacity-0 transform scale-95"
                     class="absolute right-0 top-full -translate-y-1 w-48 bg-white border rounded-md shadow-lg z-50">
 
-                    <span class="block px-4 py-2 text-left text-gray-700 font-medium">{{ Auth::user()->name }}</span>
+                    <span class="block px-4 py-2 text-left text-black font-medium">{{ Auth::user()->name }}</span>
 
                     <x-dropdown-link href="{{ route('profile.show') }}">Profile</x-dropdown-link>
 
