@@ -20,8 +20,10 @@
             </a>
         </div>
     </nav>
-
-    <h3 class="text-xl font-semibold mt-4 mb-2">Quizzes</h3>
+    <div class="classbox">
+    <h3 style="font-size: 22px; font-weight: 650; color: #2b5948;">
+        Quizzes
+    </h3>
 
     @if(auth()->user()->role === 'teacher')
         <a href="{{ route('teacher.quizzes.create', ['classroom_id' => $class->id]) }}"
@@ -29,7 +31,7 @@
     @endif
 
     @if($quizzes->count() > 0)
-        <div class="quiz-list max-h-[500px] overflow-y-auto space-y-3">
+
             @foreach($quizzes->sortByDesc('created_at') as $quiz)
                 <div class="app-card p-3 border rounded shadow-sm">
                     @php
@@ -48,7 +50,7 @@
                                 {{ $quiz->title }}
                             </a>
                         @else
-                            <a href="{{ route('student.quizzes.index', $quiz->id) }}" class="text-blue-600 hover:underline">
+                            <a href="{{ route('student.quizzes.single', $quiz->id) }}" class="text-blue-600 hover:underline">
                                 {{ $quiz->title }}
                             </a>
                         @endif

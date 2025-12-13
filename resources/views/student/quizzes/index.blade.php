@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="page-container p-6">
-
     <h2 class="mb-6 font-semibold text-2xl">{{ $quiz->title }}</h2>
     <p class="mb-4">{{ $quiz->description }}</p>
 

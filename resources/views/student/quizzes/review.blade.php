@@ -31,7 +31,7 @@
                 $isCorrect = ($studentAnswer == $question->correct_answer);
             @endphp
 
-            <div class="p-4 border rounded bg-white shadow-sm">
+            <div class="info-card">
                 <!-- Question -->
                 <p class="font-semibold mb-2">{{ $loop->iteration }}. {{ $question->question_text }}</p>
 

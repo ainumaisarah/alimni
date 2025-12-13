@@ -9,7 +9,8 @@ class QuizResult extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['quiz_id', 'student_id', 'answers', 'score'];
+    protected $fillable = ['quiz_id', 'student_id', 'answers', 'score', 'attempt_number'];
+
 
     protected $casts = [
         'answers' => 'array', // automatically converts JSON to array

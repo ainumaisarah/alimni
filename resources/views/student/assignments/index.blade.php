@@ -65,7 +65,10 @@
                 </form>
 
             @else
-                <p class="text-gray-600">Not submitted yet</p>
+                <p class="font-semibold text-yellow-600 text-sm bg-yellow-100 px-2 py-1 rounded">
+                    Not submitted yet
+                </p>
+
             @endif
 
             {{-- Submission Form --}}

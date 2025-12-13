@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="chat-wrapper mx-auto flex h-[80vh] border rounded shadow overflow-hidden">
+<div class="chat-wrapper mx-auto flex h-[100vh] border rounded shadow overflow-hidden">
 
     <!-- User List -->
     <div class="chat-sidebar">
@@ -36,7 +36,7 @@
     </div>
 
     <!-- Right Side Dynamic Section -->
-    <div class="flex-1 bg-gray-100 p-4 overflow-y-auto chat-right-panel">
+    <div class="flex-1 overflow-y-auto chat-right-panel">
         @yield('chatbox')
     </div>
 

@@ -133,7 +133,7 @@ Route::middleware(['auth', IsStudent::class])->prefix('student')->name('student.
     Route::get('materials/{id}/download', [MaterialController::class, 'download'])->name('materials.download');
 
     // Quizzes
-    Route::get('quizzes', [QuizController::class, 'studentIndex'])->name('quizzes.index');
+    //Route::get('quizzes', [QuizController::class, 'studentIndex'])->name('quizzes.index');
     Route::get('quizzes/{quiz}', [QuizController::class, 'show'])->name('quizzes.show');
     Route::post('quizzes/{quiz}/submit', [QuizController::class, 'submit'])->name('quizzes.submit');
 
@@ -218,3 +218,29 @@ Route::middleware(['auth', IsStudent::class])->group(function () {
 
 Route::post('offline-quizzes/{quiz}', [QuizController::class, 'offlineSubmit'])
     ->name('offline.quizzes.submit');
+
+    Route::get('/teacher/quizzes/{quiz}/questions', [QuestionController::class, 'index'])
+    ->name('teacher.questions.index');
+
+// Student quiz list (attempt list)
+Route::get('/student/quizzes/{quiz}', [QuizController::class, 'studentQuiz'])
+    ->name('student.quizzes.single');
+
+// Student: start quiz / show questions
+Route::get('/student/quizzes/{quiz}/attempt', [QuizController::class, 'showStudent'])
+    ->name('student.quizzes.show');
+
+// Submit quiz answers
+Route::post('/student/quizzes/{quiz}/submit', [QuizController::class, 'submit'])
+    ->name('student.quizzes.submit');
+
+// Review attempt
+Route::get('/student/quizzes/{quiz}/review/{resultId}', [QuizController::class, 'review'])
+    ->name('student.quizzes.review');
+
+// Review a previous attempt
+Route::get('/student/quizzes/{quiz}/{attempt}', [QuizController::class, 'review'])
+    ->name('student.quizzes.review');
+
+
+

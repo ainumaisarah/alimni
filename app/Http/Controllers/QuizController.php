@@ -254,11 +254,13 @@ public function submit(Request $request, Quiz $quiz)
     $attemptNumber = $attemptsCount + 1;
 
     $quiz->results()->create([
+        'quiz_id' => $quiz->id, // add this
         'student_id' => $student->id,
         'answers' => $answersInput,
         'score' => round(($score / $questions->count()) * 100, 2),
         'attempt_number' => $attemptNumber,
     ]);
+
 
     return redirect()->route('student.quizzes.single', $quiz->id)
         ->with('success', 'Quiz submitted successfully!');

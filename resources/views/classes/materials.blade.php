@@ -18,7 +18,7 @@
 
 <div class="classbox">
 {{-- MATERIALS SECTION (your original code continues below) --}}
-    <h3 style="font-size: 22px; font-weight: 650; color: #171818;">
+    <h3 style="font-size: 22px; font-weight: 650; color: #2b5948;">
         Materials
     </h3>
 

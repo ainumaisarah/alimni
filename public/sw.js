@@ -7,8 +7,6 @@ const filesToCache = [
     '/',
     '/offline.html',
     '/manifest.json',
-    '/build/assets/app-CDqcQyX_.css', // update with your build filename
-    '/build/assets/app-DuZCpTSs.js',  // update with your build filename
     '/logo.png'
 ];
 

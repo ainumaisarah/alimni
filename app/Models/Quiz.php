@@ -33,6 +33,8 @@ class Quiz extends Model
     'answers' => 'array', //quiz:store answers as jason
     ];
 
+    protected $primaryKey = 'id'; // should match the DB column
+
 
 
     public function classroom()

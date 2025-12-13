@@ -25,7 +25,9 @@
     @endif
 
     <div class="classbox">
-        <h3 style="font-size: 22px; font-weight: 650; color: #171818;">Assignments</h3>
+        <h3 style="font-size: 22px; font-weight: 650; color: #2b5948;">
+        Assignments
+        </h3>
 
         {{-- Teacher: Create new assignment --}}
         @if(auth()->user()->role === 'teacher')
@@ -41,13 +43,14 @@
                       {{-- Assignment title --}}
                     @if($role === 'teacher')
                         <h3 class="font-semibold text-lg">
-                            <a href="{{ route('teacher.assignments.submissions', $assignment->id) }}" class="text-blue-600 hover:underline">
+                            <a href="{{ route('teacher.assignments.submissions', ['assignment' => $assignment->id]) }}" class="text-blue-600 hover:underline">
                                 {{ $assignment->title }}
                             </a>
                         </h3>
                     @else
                         <h3 class="font-semibold text-lg">{{ $assignment->title }}</h3>
                     @endif
+
 
                     <p>{{ $assignment->description }}</p>
 

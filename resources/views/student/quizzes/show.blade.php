@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="page-container p-6">
-<h2 class="mb-4">{{ $quiz->title }}</h2>
+<div class = "info-card">
+<h2 style="font-size: 22px; font-weight: 650; color: #2b5948;">{{ $quiz->title }}</h2>
 
 <form action="{{ route('student.quizzes.submit', $quiz->id) }}" method="POST">
     @csrf
@@ -11,20 +11,33 @@
         <div class="mb-4 p-3 border rounded">
             <p class="font-semibold">{{ $loop->iteration }}. {{ $q->question_text }}</p>
 
-             @if($q->question_type == 'mcq')
-                    @foreach(['a','b','c','d'] as $opt)
-                        @php $optionValue = $q->{'option_'.$opt}; @endphp
-                        @if($optionValue)
-                            <label class="block ml-4">
-                                <input type="radio" name="answers[{{ $q->id }}]" value="{{ strtoupper($opt) }}" required>
-                                {{ $optionValue }}
-                            </label>
-                        @endif
-                    @endforeach
-                @elseif($q->question_type == 'short')
-                    <input type="text" name="answers[{{ $q->id }}]" class="w-full border rounded p-2" required>
-                @endif
-            @endforeach
+            @if($q->question_type == 'mcq')
+                @foreach(['a','b','c','d'] as $opt)
+                    @php
+                        $optionValue = $q->{'option_'.$opt};
+                    @endphp
+
+                    @if($optionValue)
+                        <label class="block ml-4">
+                            <input type="radio"
+                                   name="answers[{{ $q->id }}]"
+                                   value="{{ strtoupper($opt) }}"
+                                   required>
+
+                            {{ $optionValue }}
+                        </label>
+                    @endif
+                @endforeach
+
+            @elseif($q->question_type == 'short')
+                <input type="text"
+                       name="answers[{{ $q->id }}]"
+                       class="w-full border rounded p-2"
+                       required>
+            @endif
+
+        </div>
+    @endforeach  {{-- ✔ CORRECTLY CLOSED FOREACH --}}
 
     <button type="submit" class="btn-primary">Submit Quiz</button>
 </form>
@@ -44,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const form = document.querySelector('form');
 
-    // <-- REPLACE your old form submit handler with this one
     form.addEventListener('submit', async (e) => {
         if (!navigator.onLine) {
             e.preventDefault();
@@ -59,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if ('serviceWorker' in navigator && 'SyncManager' in window) {
                 const registration = await navigator.serviceWorker.ready;
                 await registration.sync.register('sync-submissions');
-                console.log('Background sync registered for offline quiz submission.');
             }
 
             alert('You are offline. Your answers are saved and will be submitted when back online.');

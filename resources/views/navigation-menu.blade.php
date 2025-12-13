@@ -69,7 +69,7 @@
 </nav>
 
     <!-- MAIN CONTENT + TOP NAV -->
-    <div class="flex-1 flex flex-col">
+    <div class="profile flex-1 flex flex-col">
 
         <!-- TOP NAV / PROFILE -->
         <header class="fixed top-0 right-0 left-64 h-16 bg-white flex justify-end items-center px-6 z-50">

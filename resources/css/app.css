@@ -9,7 +9,7 @@
 body {
     font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     color: rgba(34, 33, 33, 0.724);
-    background: rgb(244, 245, 244);
+    background: rgb(255, 255, 255);
     padding-top: 4rem; /* same as navbar height */
     padding-left: 16rem; /* same as sidebar width */
 }
@@ -33,6 +33,103 @@ body {
     font-size: 23px;
     color: rgba(43, 89, 72, 0.9);
     text-align:justify; /* ensures content inside is centered */
+}
+
+/* Profile container */
+.profile {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Fixed header for profile */
+.profile header {
+    height: 4rem; /* 16 */
+    background-color: rgba(255, 255, 255, 0);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 1.5rem; /* px-6 */
+    z-index: 50;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 16rem; /* leave space for sidebar if present */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0);
+}
+
+/* Profile button (avatar + chevron) */
+.profile button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.profile button img {
+    height: 2rem; /* h-8 */
+    width: 2rem;
+    border-radius: 9999px;
+    object-fit: cover;
+}
+
+.profile button svg {
+    height: 1rem; /* h-4 */
+    width: 1rem;
+    color: #6b7280; /* text-gray-500 */
+}
+
+/* Dropdown menu */
+.profile [x-show] {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    transform: translateY(-0.25rem); /* -translate-y-1 */
+    width: 12rem; /* w-48 */
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.375rem; /* rounded-md */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    z-index: 50;
+    overflow: hidden;
+}
+
+/* Dropdown content */
+.profile [x-show] span {
+    display: block;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    color: #374151; /* text-gray-700 */
+}
+
+.profile [x-show] a {
+    display: block;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    color: #373838;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+}
+
+.profile [x-show] a:hover {
+    background-color: #f3f4f6; /* gray-100 */
+    color: #111827; /* gray-900 */
+}
+
+/* Divider */
+.profile [x-show] .border-t {
+    border-top: 1px solid #e5e7eb;
+}
+
+/* Responsive dropdown for mobile */
+@media(max-width: 768px) {
+    .profile header {
+        left: 0; /* fill full width on small screens */
+        padding: 0 1rem;
+    }
 }
 
 .sidebar-nav {
@@ -366,10 +463,9 @@ nav {
 /* Table container */
 .schedule-container {
     padding: 0rem;
-    background: rgba(255, 255, 255, 0);
+    background: rgb(255, 255, 255);
     backdrop-filter: blur(16px);
     border-radius: 1rem;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
     max-width: 90%;
     overflow-x: auto;
     margin: 0.5rem auto; /* centers the container */
@@ -487,6 +583,7 @@ nav {
     max-width: 800px;
     margin: 0 auto;
     padding: 1rem;
+    background: rgb(255, 255, 255);
 }
 
 /* Page titles */
@@ -868,6 +965,7 @@ nav {
     display: flex;
     flex-direction: column;
     height: 100%;
+    background: #2b5948;
 }
 
 /* Chat container inside right panel */
@@ -875,8 +973,8 @@ nav {
     display: flex;
     flex-direction: column;
     height: 100%;
-    background: rgba(200, 195, 186, 0.632);
-    border-radius: 8px;
+    background: rgb(255, 255, 255);
+    border-radius: 0;
     overflow: hidden;
 }
 
@@ -928,7 +1026,7 @@ nav {
 .chat-input {
     position: sticky;
     bottom: 0;
-    background: #f3f3f3;
+    background: #ffffff;
     padding: 8px;
     border-top: 1px solid #ddd;
     z-index: 10;
@@ -957,7 +1055,7 @@ nav {
 
 .chat-wrapper {
     display: flex;
-    height: 80vh;
+    height: 87vh;
     border: 1px solid #ddd;
     border-radius: 8px;
     overflow: hidden;
@@ -1072,32 +1170,90 @@ nav {
 }
 
 /* class */
+/* Container fills screen height and width, responsive */
 .class-container {
     display: flex;
     flex-direction: column;
-    max-width: 950px;
+    width: 100%;         /* full width */
+    height: 85vh;       /* full viewport height */
     border-radius: 8px;
-    display: flex;
-    height: 80vh;
     overflow: hidden;
     background: white;
+    box-sizing: border-box;
 }
+
+/* Sticky nav at top, full width, responsive */
 .class-nav {
     position: sticky;
     top: 0;
+    width: 100%;         /* full width */
     background: #2b5948;
-    padding: 12px 20px; /* FIXED */
+    padding: 12px 20px;
     border-bottom: 1px solid #ddd;
     font-weight: 700;
     font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    max-width: 950px;
     z-index: 30;
     display: flex;
     flex-direction: row;
-    align-items: center; /* vertically center */
     justify-content: space-between;
-    align-items: center;        /* spacing between items */
+    align-items: center;
+    box-sizing: border-box;
 }
+
+.class-nav .class-menu {
+    display: flex;
+    gap: 20px;
+}
+/* Responsive adjustments */
+/* Laptop screens (1024px - 1280px) */
+@media (max-width: 1280px) {
+    .class-nav {
+        padding: 12px 20px;
+    }
+    .class-nav .class-menu {
+        gap: 16px;
+    }
+}
+
+/* Tablets / Small laptops (768px - 1024px) */
+@media (max-width: 1024px) {
+    .class-nav {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 10px 16px;
+        gap: 8px;
+    }
+    .class-nav .class-menu {
+        flex-wrap: wrap;
+        gap: 12px;
+        width: 100%;
+    }
+}
+
+/* Mobile devices (480px - 767px) */
+@media (max-width: 767px) {
+    .class-nav {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    .class-nav .class-menu {
+        gap: 8px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .class-nav {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+    .class-nav .class-menu {
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+    }
+}
+
 
 .class-nav h2{
     color: rgb(224, 216, 191);
