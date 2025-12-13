@@ -159,22 +159,52 @@ class QuizController extends Controller
     }
 
 // Show quiz results for teacher
-    public function results(Quiz $quiz)
-    {
-        // Get latest attempt per student
-        $results = $quiz->results()
-            ->with('student')
-            ->get()
-            ->groupBy('student_id')
-            ->map(function ($attempts) {
-                // Get the latest submission
-                return $attempts->sortByDesc('created_at')->first();
-            });
+    // Show all quiz results for a teacher
+// Show quiz results for teacher (all attempts)
+// Show quiz results summary for teacher
+public function results(Quiz $quiz)
+{
+    $class = $quiz->classroom;
 
-        $questions = $quiz->questions()->get();
+    // Get all students in the class
+    $students = $class->students()->orderBy('name')->get();
 
-        return view('teacher.quizzes.results', compact('quiz', 'results', 'questions'));
+    // Prepare summary: latest attempt & total attempts per student
+    $studentResults = $students->map(function ($student) use ($quiz) {
+        $attempts = $quiz->results()
+                         ->where('student_id', $student->id)
+                         ->orderBy('created_at', 'desc')
+                         ->get();
+
+        $latestScore = $attempts->first()?->score ?? null; // null if no attempt
+        $totalAttempts = $attempts->count();
+
+        return [
+            'student' => $student,
+            'latestScore' => $latestScore,
+            'totalAttempts' => $totalAttempts,
+            'attempts' => $attempts,
+        ];
+    });
+
+    return view('teacher.quizzes.results', compact('quiz', 'studentResults'));
+}
+
+
+
+// Review a single student attempt (teacher)
+public function teacherReview(Quiz $quiz, QuizResult $result)
+{
+    // Make sure the result belongs to this quiz
+    if ($result->quiz_id !== $quiz->id) {
+        abort(404, 'Result does not belong to this quiz.');
     }
+
+    $questions = $quiz->questions;
+
+    return view('teacher.quizzes.review', compact('quiz', 'result', 'questions'));
+}
+
 
 ////////////----- S T U D E N T   P A R T -----////////////////
 /*public function studentIndex()

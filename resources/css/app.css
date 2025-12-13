@@ -102,14 +102,14 @@ body {
     display: block;
     padding: 0.5rem 1rem;
     font-weight: 500;
-    color: #374151; /* text-gray-700 */
+    color: #fdfeff; /* text-gray-700 */
 }
 
 .profile [x-show] a {
     display: block;
     padding: 0.5rem 1rem;
     font-weight: 500;
-    color: #373838;
+    color: #263535;
     text-decoration: none;
     transition: background 0.2s, color 0.2s;
 }
@@ -1298,6 +1298,46 @@ nav {
     max-width:none;
     flex-direction: column;
 }
+.classbox table {
+    width: 90%; /* take full container width */
+    /*margin: 0 auto;  center table */
+    border-collapse: separate;
+    border-spacing: 0;
+    text-align: center;
+    font-size: 0.875rem;
+    border-radius: 0.5rem; /* more rounded corners */
+    border: 1px solid rgba(29, 63, 52, 0.587);
+    background: rgb(254, 254, 254);
+    overflow: hidden;
+}
+
+/* Table header */
+.classbox th {
+    border: 1px solid rgba(29, 63, 52, 0.587);
+    padding: 0.4rem 0.6rem;
+    background-color: rgba(38, 82, 67, 0.587);
+    color: #1f2937;
+    font-weight: 700;
+    text-align:center;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+/* Table cells */
+.classbox td {
+    border: 1px solid rgba(29, 63, 52, 0.587);
+    padding: 0.35rem 0.5rem;
+    vertical-align: top;
+    color: #374151;
+}
+
+/* Time column */
+.classbox td:first-child {
+    font-weight: 600;
+    color: #111827;
+    background: rgba(29, 61, 50, 0);
+}
+
 .classbox::-webkit-scrollbar {
     width: 4px;       /* Visible width */
 }

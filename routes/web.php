@@ -242,5 +242,15 @@ Route::get('/student/quizzes/{quiz}/review/{resultId}', [QuizController::class, 
 Route::get('/student/quizzes/{quiz}/{attempt}', [QuizController::class, 'review'])
     ->name('student.quizzes.review');
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('teacher/quizzes/{quiz}/results', [QuizController::class, 'results'])
+        ->name('teacher.quizzes.results');
+
+    Route::get('teacher/quizzes/{quiz}/review/{result}', [QuizController::class, 'teacherReview'])
+        ->name('teacher.quizzes.review');
+});
+
+
+
 
 

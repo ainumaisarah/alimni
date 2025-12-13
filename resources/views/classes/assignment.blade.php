@@ -26,21 +26,19 @@
 
     <div class="classbox">
         <h3 style="font-size: 22px; font-weight: 650; color: #2b5948;">
-        Assignments
+            Assignments
         </h3>
 
-        {{-- Teacher: Create new assignment --}}
         @if(auth()->user()->role === 'teacher')
             <a href="{{ route('teacher.assignments.create', ['classroom_id' => $class->id]) }}"
                class="btn-primary mb-3 inline-block">Create New Assignment</a>
         @endif
 
-        {{-- List assignments --}}
         @if($assignments->count() > 0)
             @foreach($assignments as $assignment)
                 <div class="app-card mb-4">
 
-                      {{-- Assignment title --}}
+                    {{-- Assignment title --}}
                     @if($role === 'teacher')
                         <h3 class="font-semibold text-lg">
                             <a href="{{ route('teacher.assignments.submissions', ['assignment' => $assignment->id]) }}" class="text-blue-600 hover:underline">
@@ -51,32 +49,27 @@
                         <h3 class="font-semibold text-lg">{{ $assignment->title }}</h3>
                     @endif
 
+                    <h5 class="font-semibold text-sm text-gray-900">{{ $assignment->description }}</h5>
 
-                    <p>{{ $assignment->description }}</p>
 
-                    {{-- Due date --}}
+
+                    @if($assignment->file)
+                        <p class="font-semibold text-sm !text-gray-900">
+                        <a href="{{ auth()->user()->role === 'teacher'
+                            ? route('teacher.assignments.download', $assignment->id)
+                            : route('student.assignments.download', $assignment->id) }}"
+                        class="text-blue-200 hover:underline">
+                            {{ basename($assignment->file) }}
+                        </a>
+                    </p>
+                    @endif
+
                     @if($assignment->due_at)
-                        <p class="text-sm text-gray-600">
+                        <p class="font-semibold text-sm text-gray-600">
                             Due: {{ \Carbon\Carbon::parse($assignment->due_at)->timezone('Asia/Kuala_Lumpur')->format('d M Y H:i') }}
                         </p>
                     @endif
 
-                    {{-- Assignment file download --}}
-                    @if($assignment->file)
-                        <p class="mt-1">
-                            @if(auth()->user()->role === 'teacher')
-                                <a href="{{ route('teacher.assignments.download', $assignment->id) }}" class="text-blue-600 hover:underline">
-                                    {{ basename($assignment->file) }}
-                                </a>
-                            @else
-                                <a href="{{ route('student.assignments.download', $assignment->id) }}" class="text-blue-600 hover:underline">
-                                    {{ basename($assignment->file) }}
-                                </a>
-                            @endif
-                        </p>
-                    @endif
-
-                    {{-- Teacher: Edit/Delete buttons --}}
                     @if($role === 'teacher')
                         <a href="{{ route('teacher.assignments.edit', $assignment->id) }}" class="btn-secondary inline-block px-4 py-2 text-sm">Edit</a>
                         <form action="{{ route('teacher.assignments.destroy', $assignment->id) }}" method="POST" class="inline">
@@ -89,59 +82,76 @@
                         </form>
                     @endif
 
-                    {{-- Student submission --}}
                     @if($role === 'student')
                         @php
                             $submission = $assignment->submissions()->where('student_id', auth()->id())->first();
+                            $dueAt = $assignment->due_at ? \Carbon\Carbon::parse($assignment->due_at)->timezone('Asia/Kuala_Lumpur') : null;
+                            $submittedAt = $submission ? \Carbon\Carbon::parse($submission->submitted_at)->timezone('Asia/Kuala_Lumpur') : null;
                         @endphp
 
-                        @if($submission)
-                            @php
-                                $submittedAt = \Carbon\Carbon::parse($submission->submitted_at)->timezone('Asia/Kuala_Lumpur');
-                                $dueAt = $assignment->due_at ? \Carbon\Carbon::parse($assignment->due_at)->timezone('Asia/Kuala_Lumpur') : null;
-                            @endphp
+                        <table class="mx-auto border border-gray-300 border-collapse">
+                            <thead>
+                                <tr>
+                                    <th class="px-4 py-2 text-left font-semibold">Submitted At</th>
+                                    <th class="px-4 py-2 text-left font-semibold w-48">Status</th> <!-- wider column -->
+                                    <th class="px-4 py-2 text-left font-semibold">Previous Submission</th>
+                                    <th class="px-4 py-2 text-left font-semibold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="px-4 py-2">
+                                        {{ $submission ? $submittedAt->format('d M Y H:i') : '-' }}
+                                    </td>
+                                    <td class="px-4 py-2 w-48">
+                                        @if($submission)
+                                            @if($dueAt && $submittedAt->gt($dueAt))
+                                                <span class="font-semibold text-red-600">Turned in Late</span>
+                                            @else
+                                                <span class="font-semibold text-green-600">Turned in On Time</span>
+                                            @endif
+                                        @else
+                                            <span class="font-semibold text-gray-600">Not submitted yet</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-2 space-y-1">
+                                        @if($submission)
+                                            <a href="{{ asset('storage/' . $submission->file) }}" class="text-blue-600 underline block">
+                                                {{ basename($submission->file) }}
+                                            </a>
 
-                            <p>Submitted at: {{ $submittedAt->format('d M Y H:i') }}</p>
-
-                            @if($dueAt && $submittedAt->gt($dueAt))
-                                <p class="error-alert font-semibold">Turned in Late</p>
-                            @else
-                                <p class="success-alert font-semibold">Turned in On Time</p>
-                            @endif
-
-                            <p>
-                                Previous submission:
-                                <a href="{{ asset('storage/' . $submission->file) }}" class="text-blue-600 underline">
-                                    {{ basename($submission->file) }}
-                                </a>
-                            </p>
-
-                            {{-- Delete submission --}}
-                            <form action="{{ route('student.assignments.deleteSubmission', $assignment->id) }}" method="POST" class="inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-danger px-3 py-1 text-sm"
-                                    onclick="return confirm('Are you sure you want to delete this submission?');">
-                                    Delete Submission
-                                </button>
-                            </form>
-                        @else
-                            <p class="text-gray-600">Not submitted yet</p>
-                        @endif
-
-                        {{-- Submission form --}}
-                        <form action="{{ route('student.assignments.submit', $assignment->id) }}" method="POST" enctype="multipart/form-data" class="mt-2">
-                            @csrf
-                            <input type="file" name="file" class="border rounded p-2 w-full mb-2" required>
-                            <button type="submit" class="btn-primary mt-1">Submit Assignment</button>
-                        </form>
+                                            {{-- Delete button now under previous submission --}}
+                                            <form action="{{ route('student.assignments.deleteSubmission', $assignment->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn-danger px-3 py-1 text-sm mt-1"
+                                                    onclick="return confirm('Are you sure you want to delete this submission?');">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td class="px-4 py-2">
+                                        {{-- Submission Form --}}
+                                        <form action="{{ route('student.assignments.submit', $assignment->id) }}" method="POST" enctype="multipart/form-data">
+                                            @csrf
+                                            <input type="file" name="file" class="border rounded p-2 w-full mb-1" required>
+                                            <button type="submit" class="btn-primary px-2 py-1 text-sm">Submit</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     @endif
 
-                </div>
+
+                </div> {{-- End app-card --}}
             @endforeach
         @else
             <p class="empty-message">No assignments uploaded yet.</p>
         @endif
-    </div>
-</div>
+    </div> {{-- End classbox --}}
+</div> {{-- End class-container --}}
 @endsection
