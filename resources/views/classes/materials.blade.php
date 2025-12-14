@@ -32,17 +32,15 @@
     @if($materials->count() > 0)
         @foreach($materials as $material)
             <div class="app-card">
-                {{-- button style
-                <h3>{{ $material->title }}</h3>
 
-
-                <a href="{{ route('student.materials.download', $material->id) }}">
-                    <p class="btn-secondary">Download</p>
-                </a> --}}
-                 <h3 class="font-semibold text-lg">
-                    <a href="{{ route('student.materials.download', $material->id) }}">
+                <h3 class="font-semibold text-lg">
+                    @if(auth()->user()->role === 'student')
+                        <a href="{{ route('student.materials.download', $material->id) }}">
+                            {{ $material->title }}
+                        </a>
+                    @else
                         {{ $material->title }}
-                    </a>
+                    @endif
                 </h3>
 
                     <p>{{ $material->description }}</p>
@@ -59,9 +57,10 @@
                         <button type="submit" class="btn-danger">Delete</button>
                     </form>
                     <a href="{{ route('teacher.materials.view', $material->id) }}"
-                    class="btn-secondary">
+                    class="btn-secondary" target="_blank" rel="noopener">
                     View
                     </a>
+
                 @endif
             </div>
         @endforeach
