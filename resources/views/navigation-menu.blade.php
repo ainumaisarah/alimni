@@ -22,44 +22,77 @@
         {{-- Admin Links --}}
         @if($user->hasRole('admin'))
             <x-nav-link href="{{ route('admin.dashboard') }}" :active="request()->routeIs('admin.dashboard')">
+                <img src="{{ asset('images/dashboard.png') }}"
+                class="w-4 h-4 mr-2 inline-block"
+                alt="Dashboard">
                 {{ __('Dashboard') }}
             </x-nav-link>
             <x-nav-link href="{{ route('admin.classrooms.index') }}" :active="request()->routeIs('classes.index')">
+                <img src="{{ asset('images/class.png') }}"
+                class="w-4 h-4 mr-2 inline-block"
+                alt="Classes">
                 {{ __('Classes') }}
             </x-nav-link>
             <x-nav-link href="{{ route('admin.schedules.index') }}" :active="request()->routeIs('admin.home')">
+                <img src="{{ asset('images/schedule.png') }}"
+                class="w-4 h-4 mr-2 inline-block"
+                alt="Schedule">
                 {{ __('Schedule') }}
             </x-nav-link>
 
         {{-- Teacher Links --}}
         @elseif($user->hasRole('teacher'))
             <x-nav-link href="{{ route('teacher.home') }}" :active="request()->routeIs('teacher.home')">
+                <img src="{{ asset('images/home.png') }}"
+                class="w-4 h-4 mr-2 inline-block"
+                alt="Home">
                 {{ __('Home') }}
             </x-nav-link>
             <x-nav-link href="{{ route('teacher.dashboard') }}" :active="request()->routeIs('teacher.dashboard')">
+                <img src="{{ asset('images/dashboard.png') }}"
+                class="w-4 h-4 mr-2 inline-block"
+                alt="Dashboard">
                 {{ __('Dashboard') }}
             </x-nav-link>
             <!-- Classes -->
-                <x-nav-link href="{{ route('classes.index') }}" :active="request()->routeIs('classes.index')">
-                    {{ __('Classes') }}
-                </x-nav-link>
+            <x-nav-link href="{{ route('classes.index') }}" :active="request()->routeIs('classes.index')">
+                <img src="{{ asset('images/class.png') }}"
+                class="w-4 h-4 mr-2 inline-block"
+                alt="Classes">
+                {{ __('Classes') }}
+            </x-nav-link>
             <x-nav-link href="{{ route('chat.list') }}" :active="request()->routeIs('chat.*')">
+                <img src="{{ asset('images/chat.png') }}"
+                class="w-4 h-4 mr-2 inline-block"
+                alt="Chat">
                 {{ __('Chat') }}
             </x-nav-link>
 
         {{-- Student Links --}}
         @elseif($user->hasRole('student'))
             <x-nav-link href="{{ route('student.home') }}" :active="request()->routeIs('student.home')">
+                <img src="{{ asset('images/home.png') }}"
+                class="w-4 h-4 mr-2 inline-block"
+                alt="Home">
                 {{ __('Home') }}
             </x-nav-link>
             <x-nav-link href="{{ route('student.dashboard') }}" :active="request()->routeIs('student.dashboard')">
+                <img src="{{ asset('images/dashboard.png') }}"
+                class="w-4 h-4 mr-2 inline-block"
+                alt="Dashboard">
                 {{ __('Dashboard') }}
             </x-nav-link>
             <!-- Classes -->
                 <x-nav-link href="{{ route('classes.index') }}" :active="request()->routeIs('classes.index')">
+                    <img src="{{ asset('images/class.png') }}"
+                    class="w-4 h-4 mr-2 inline-block"
+                    alt="Classes">
                     {{ __('Classes') }}
                 </x-nav-link>
             <x-nav-link href="{{ route('chat.list') }}" :active="request()->routeIs('chat.*')">
+                <img src="{{ asset('images/chat.png') }}"
+                class="w-4 h-4 mr-2 inline-block"
+                alt="Chat">
                 {{ __('Chat') }}
             </x-nav-link>
         @endif
