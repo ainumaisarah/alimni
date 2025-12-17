@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('quizzes', function (Blueprint $table) {
-            $table->integer('duration')->nullable()->after('show_answers');
+            $table->integer('duration')->nullable();
             $table->timestamp('open_at')->nullable()->after('duration');
             $table->timestamp('due_at')->nullable()->after('open_at');
         });

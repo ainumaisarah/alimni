@@ -1,32 +1,37 @@
 console.log("SW FILE LOADED");
 
-const CACHE_NAME = 'alimni-cache-v1';
+const CACHE_NAME = 'alimni-static-v1';
 
-// Pre-cache core assets
-const filesToCache = [
-    '/',
+// ✅ ONLY static assets (SAFE)
+const STATIC_FILES = [
     '/offline.html',
     '/manifest.json',
     '/logo.png'
 ];
 
-// Install event — cache core assets
+// --------------------
+// INSTALL
+// --------------------
 self.addEventListener('install', event => {
-    console.log('SW installing and caching core files');
+    console.log('[SW] Installing');
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(filesToCache))
+        caches.open(CACHE_NAME).then(cache => {
+            return cache.addAll(STATIC_FILES);
+        })
     );
     self.skipWaiting();
 });
 
-// Activate event — clean old caches
+// --------------------
+// ACTIVATE
+// --------------------
 self.addEventListener('activate', event => {
-    console.log('SW activating');
+    console.log('[SW] Activating');
     event.waitUntil(
         caches.keys().then(keys =>
             Promise.all(
-                keys.filter(key => key !== CACHE_NAME)
+                keys
+                    .filter(key => key !== CACHE_NAME)
                     .map(key => caches.delete(key))
             )
         )
@@ -34,65 +39,65 @@ self.addEventListener('activate', event => {
     self.clients.claim();
 });
 
-// Fetch event — dynamic caching for GET requests only
+// --------------------
+// FETCH
+// --------------------
 self.addEventListener('fetch', event => {
-    const requestUrl = new URL(event.request.url);
+    const req = event.request;
 
-    // Skip SW itself, manifest, login/register POSTs, and non-GET requests
+    // ❌ NEVER touch non-GET (POST, PUT, DELETE)
+    if (req.method !== 'GET') return;
+
+    const url = new URL(req.url);
+
+    // ❌ NEVER cache auth / role / session pages
     if (
-        requestUrl.pathname === '/sw.js' ||
-        requestUrl.pathname === '/manifest.json' ||
-        event.request.method !== 'GET' ||
-        requestUrl.pathname.startsWith('/login') ||
-        requestUrl.pathname.startsWith('/register')
-    ) return;
+        url.pathname.startsWith('/login') ||
+        url.pathname.startsWith('/register') ||
+        url.pathname.startsWith('/logout') ||
+        url.pathname.startsWith('/dashboard') ||
+        url.pathname.startsWith('/student') ||
+        url.pathname.startsWith('/teacher') ||
+        url.pathname.startsWith('/admin')
+    ) {
+        return; // let Laravel handle it normally
+    }
 
-    // Dynamic caching for student quiz pages
-    if (requestUrl.pathname.startsWith('/student/quizzes/')) {
+    // ✅ Cache ONLY static assets
+    if (
+        req.destination === 'style' ||
+        req.destination === 'script' ||
+        req.destination === 'image'
+    ) {
         event.respondWith(
-            caches.match(event.request).then(cachedResponse => {
-                if (cachedResponse) return cachedResponse;
-
-                return fetch(event.request).then(response => {
-                    return caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, response.clone());
-                        return response;
-                    });
-                }).catch(() => caches.match('/offline.html'));
+            caches.match(req).then(cached => {
+                return (
+                    cached ||
+                    fetch(req).then(response => {
+                        return caches.open(CACHE_NAME).then(cache => {
+                            cache.put(req, response.clone());
+                            return response;
+                        });
+                    })
+                );
             })
         );
-        return;
     }
-
-    // Default GET fetch handler for other pages
-    event.respondWith(
-        caches.match(event.request).then(cachedResponse => {
-            return cachedResponse || fetch(event.request)
-                .then(response => {
-                    return caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, response.clone());
-                        return response;
-                    });
-                })
-                .catch(() => caches.match('/offline.html'));
-        })
-    );
 });
 
-// Background sync for offline submissions
+// --------------------
+// BACKGROUND SYNC
+// --------------------
 self.addEventListener('sync', event => {
     if (event.tag === 'sync-submissions') {
-        console.log('[SW] Syncing offline submissions...');
-        event.waitUntil(syncSubmissions());
+        console.log('[SW] Syncing offline submissions');
+        event.waitUntil(notifyClientsToSync());
     }
 });
 
-// Function to ask clients to send offline submissions
-async function syncSubmissions() {
-    const allClients = await self.clients.matchAll({ includeUncontrolled: true });
-    if (!allClients.length) return;
-
-    allClients.forEach(client => {
+async function notifyClientsToSync() {
+    const clients = await self.clients.matchAll({ includeUncontrolled: true });
+    clients.forEach(client => {
         client.postMessage({ action: 'sync-submissions' });
     });
 }
