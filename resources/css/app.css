@@ -891,6 +891,19 @@ nav {
     gap: 1rem;
     text-align: center;
 }
+
+.admin-card {
+    text-align: center;
+    background: rgba(200, 195, 186, 0.445) ;
+    border: 1.5px solid rgba(219, 211, 195, 0.459) ;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+
 .file {
     width: 72px;
     height: 50px;

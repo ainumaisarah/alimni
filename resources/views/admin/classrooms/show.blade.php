@@ -2,7 +2,24 @@
 
 @section('content')
 <div class="page-container">
-    <h2>{{ $classroom->name }}</h2>
+    <div class="flex items-center gap-2 mb-6">
+        <a href="{{ route('admin.classrooms.index') }}"
+            class="h-8 w-8 inline-flex items-center justify-center p-2
+                    bg-gray-100 hover:bg-gray-200 rounded-lg
+                    text-[#2b5948] hover:text-[#1f4033]">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-8 w-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 19l-7-7 7-7" />
+            </svg>
+        </a>
+        <h2>{{ $classroom->name }}</h2>
+    </div>
 
     <p><strong>Teacher:</strong> {{ $classroom->teacher->name ?? 'N/A' }}</p>
     <div class = "mt-4 app-card">
