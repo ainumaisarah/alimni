@@ -244,6 +244,20 @@ public function studentQuiz(Quiz $quiz)
 public function showStudent(Quiz $quiz)
 {
     $student = auth()->user();
+
+    // Check if quiz is open
+    $now = now();
+
+    if ($quiz->open_at && $quiz->open_at->isFuture()) {
+        return redirect()->route('student.quizzes.single', $quiz->id)
+            ->with('error', 'This quiz is not open yet.');
+    }
+
+    if ($quiz->due_at && $quiz->due_at->isPast()) {
+        return redirect()->route('student.quizzes.single', $quiz->id)
+            ->with('error', 'This quiz is already closed.');
+    }
+
     $attemptsCount = $quiz->results()->where('student_id', $student->id)->count();
     $maxAttempts = 3;
 
@@ -256,6 +270,7 @@ public function showStudent(Quiz $quiz)
 
     return view('student.quizzes.show', compact('quiz', 'questions', 'attemptsCount', 'maxAttempts'));
 }
+
 
 // Submit quiz answers
 public function submit(Request $request, Quiz $quiz)

@@ -22,8 +22,6 @@
         Materials
     </h3>
 
-
-
     @if(auth()->user()->role === 'teacher')
         <a href="{{ route('teacher.materials.create', ['classroom_id' => $class->id]) }}"
            class="btn-primary mb-3 inline-block">Upload New Material</a>

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<div class = "class-container">
     <div class="flex items-center gap-2 mb-6">
         <a href="{{ route('classes.quizzes', $quiz->classroom_id) }}"
             class="h-8 w-8 inline-flex items-center justify-center p-2
@@ -19,12 +20,20 @@
         </a>
         <h2 style="font-size: 22px; font-weight: 650; color: #2b5948;">{{ $quiz->title }}</h2>
     </div>
-<div class = "info-card">
+
+@if($quiz->duration)
+    <div class="sticky top-4 z-50 mb-4 p-2 bg-yellow-100 border rounded text-yellow-800 font-semibold shadow" id="countdown">
+        Time remaining: <span id="timeRemaining">{{ $quiz->duration }}:00</span>
+    </div>
+@endif
+
+
+<div class = "classbox">
 <form action="{{ route('student.quizzes.submit', $quiz->id) }}" method="POST">
     @csrf
 
     @foreach($questions as $q)
-        <div class="mb-4 p-3 border rounded">
+        <div class="info-card">
             <p class="font-semibold">{{ $loop->iteration }}. {{ $q->question_text }}</p>
 
             @if($q->question_type == 'mcq')
@@ -53,10 +62,11 @@
             @endif
 
         </div>
-    @endforeach  {{-- ✔ CORRECTLY CLOSED FOREACH --}}
+    @endforeach
 
     <button type="submit" class="btn-primary">Submit Quiz</button>
 </form>
+</div>
 
 <script src="{{ asset('/offlineQuizzes.js') }}"></script>
 <script>
@@ -94,6 +104,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+@if($quiz->duration)
+const durationMinutes = {{ $quiz->duration }};
+let timeLeft = durationMinutes * 60; // in seconds
+
+const countdownEl = document.getElementById('timeRemaining');
+
+const timerInterval = setInterval(() => {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    countdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+    if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        alert('Time is up! Your quiz will be submitted automatically.');
+
+        // Submit the form automatically
+        document.querySelector('form').submit();
+    }
+
+    timeLeft--;
+}, 1000);
+@endif
+
 </script>
 
 </div>
