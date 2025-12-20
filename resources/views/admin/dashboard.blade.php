@@ -16,7 +16,7 @@
         <div class="app-card">
             <h3 class="text-lg font-semibold">Teachers</h3>
             <p class = "text-lg font-bold">{{ $teacherCount }}</p>
-            <a href="#" class="btn-secondary">Manage</a>
+            <!--<a href="#" class="btn-secondary">Manage</a>-->
         </div>
         <div class="app-card">
             <h3 class="text-lg font-semibold">Students</h3>
