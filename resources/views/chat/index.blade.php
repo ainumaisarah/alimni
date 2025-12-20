@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="chat-wrapper mx-auto flex h-[100vh] border rounded shadow overflow-hidden">
+<div class="chat-wrapper mx-auto flex border rounded shadow overflow-hidden">
 
     <!-- User List -->
     <div class="chat-sidebar">

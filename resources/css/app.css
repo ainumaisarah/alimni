@@ -950,7 +950,7 @@ nav {
 
 
 /* Right panel container */
-.chat-right {
+.chat-right-panel {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -1045,6 +1045,7 @@ nav {
 .chat-wrapper {
     display: flex;
     height: 87vh;
+    width:85%;
     border: 1px solid #ddd;
     border-radius: 8px;
     overflow: hidden;
@@ -1106,6 +1107,7 @@ nav {
 .chat-sidebar-body {
     overflow-y: auto;
     height: 100%;
+    width:100%;
     padding: 8px;
 }
 
@@ -1163,7 +1165,7 @@ nav {
 .class-container {
     display: flex;
     flex-direction: column;
-    width: 100%;         /* full width */
+    width: 95%;         /* full width */
     height: 85vh;       /* full viewport height */
     border-radius: 8px;
     overflow: hidden;
