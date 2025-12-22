@@ -20,7 +20,7 @@
                       d="M15 19l-7-7 7-7" />
             </svg>
         </a>
-        <h2 class="text-2xl font-semibold">Import Students</h2>
+        <h2 class="text-2xl font-semibold">Import Teachers</h2>
     </div>
 
     {{-- Flash messages --}}
@@ -32,7 +32,7 @@
     @endif
 
     {{-- Import form --}}
-        <form action="{{ route('admin.students.import.post') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.teachers.import') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="mb-4">
                 <label for="file" class="block text-gray-700 font-bold mb-2 text-lg">
@@ -42,7 +42,7 @@
                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                        accept=".xlsx,.xls,.csv" required>
             </div>
-                    <button type="submit" class="btn btn-primary">Upload & Import</button>
+            <button type="submit" class="btn btn-primary">Upload & Import</button>
         </form>
 <br>
     {{-- Excel format table --}}
@@ -55,17 +55,13 @@
                         <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">Name</th>
                         <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">Username</th>
                         <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">Password</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">Class Name</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">Teacher Username</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-2 border">John Doe</td>
-                        <td class="px-4 py-2 border">john123</td>
+                        <td class="px-4 py-2 border">Jane Smith</td>
+                        <td class="px-4 py-2 border">jane123</td>
                         <td class="px-4 py-2 border">secret</td>
-                        <td class="px-4 py-2 border">1A Science</td>
-                        <td class="px-4 py-2 border">ainumai</td>
                     </tr>
                 </tbody>
             </table>

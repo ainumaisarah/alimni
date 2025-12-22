@@ -22,6 +22,8 @@ use App\Http\Controllers\ClassPageController;
 use App\Http\Controllers\Admin\StudentImportController;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\AssignmentController;
+use App\Http\Controllers\Admin\TeacherController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -35,8 +37,8 @@ Route::get('/', function () {
 });
 
 // Authentication
-Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [RegisterController::class, 'register']);
+//Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+//Route::post('/register', [RegisterController::class, 'register']);
 
 // Authenticated routes
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
@@ -77,6 +79,9 @@ Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(func
 
     Route::get('students/import', [StudentImportController::class, 'showForm'])->name('students.import');
     Route::post('students/import', [StudentImportController::class, 'import'])->name('students.import.post');
+
+    Route::get('teachers/import', [TeacherController::class, 'showForm'])->name('teachers.import.form');
+    Route::post('teachers/import', [TeacherController::class, 'import'])->name('teachers.import');
 });
 
 // Chat routes

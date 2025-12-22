@@ -6,7 +6,9 @@
         <div class="admin-card">
             <h3 class="text-lg font-semibold">Teachers</h3>
             <p class = "text-lg font-bold">{{ $teacherCount }}</p>
-            <!--<a href="#" class="btn-secondary">Manage</a>-->
+            <a style="font-size: 14px; font-weight: 500; color: #f9fafa;" href="{{ route('admin.teachers.import') }}" class="btn-primary mt-2 inline-block">
+                Import Teachers via Excel
+            </a>
         </div>
         <div class="admin-card">
             <h3 class="text-lg font-semibold">Students</h3>

@@ -11,10 +11,20 @@ use Illuminate\Http\Request;
 class ScheduleController extends Controller
 {
     public function index()
-    {
+{
         // Load schedules with classrooms and teachers
         $schedules = Schedule::with(['classroom', 'teacher'])->get();
-        return view('admin.schedules.index', compact('schedules'));
+
+        // Get classroom IDs that already have schedules
+        $scheduledClassroomIds = $schedules->pluck('classroom_id');
+
+        // Get classrooms without any schedule
+        $unscheduledClassrooms = Classroom::whereNotIn('id', $scheduledClassroomIds)->get();
+
+        return view('admin.schedules.index', compact(
+            'schedules',
+            'unscheduledClassrooms'
+        ));
     }
 
     public function create()

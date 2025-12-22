@@ -1,16 +1,43 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="schedule-container">
-    <h2>Manage Schedules</h2>
+<div class="page-container">
 
+    {{-- Page header --}}
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-semibold">Manage Schedules</h2>
+    </div>
+
+    {{-- Success message --}}
     @if(session('success'))
-        <div class = "success-alert mb-4">{{ session('success') }}</div>
+        <div class="success-alert mb-6">
+            {{ session('success') }}
+        </div>
     @endif
 
-    <a href="{{ route('admin.schedules.create') }}" class="btn-primary mb-3 mt-4">
-        + Create Schedule
-    </a>
+    {{-- 🔴 Unscheduled classrooms --}}
+    @if($unscheduledClassrooms->count())
+            <div class="app-card border-l-4 border-red-500 mb-8 w-full max-w-none">
+            <h3 class="text-lg font-semibold text-red-600 mb-2">
+                ⚠ {{ $unscheduledClassrooms->count() }} classes have not been scheduled yet
+            </h3>
+
+                <ul class="divide-y text-gray-700">
+                @foreach($unscheduledClassrooms as $classroom)
+                    <li class="flex items-center justify-between py-1">
+                        <span>{{ $classroom->name }}</span>
+
+                        <a href="{{ route('admin.schedules.create') }}"
+                           class="text-sm text-blue-600 hover:underline">
+                            Assign schedule →
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <h3 class="mb-2 font-semibold">Scheduled Classes</h3>
 
     <table>
         <thead>
