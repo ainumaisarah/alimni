@@ -12,20 +12,30 @@ class Material extends Model
     protected $fillable = [
         'title',
         'description',
-        'file_path',
         'classroom_id',
         'teacher_id',
     ];
 
+    /* ===========================
+       RELATIONSHIPS
+    ============================ */
+
+    // Material belongs to a classroom
     public function classroom()
     {
         return $this->belongsTo(Classroom::class);
     }
 
+    // Material belongs to a teacher (user)
     public function teacher()
     {
         return $this->belongsTo(User::class, 'teacher_id');
     }
 
+    // Material has MANY files (PDF, DOC, VIDEO, etc.)
+    public function files()
+    {
+        return $this->hasMany(MaterialFile::class)->orderBy('folder')->orderBy('created_at');
+    }
 
 }
