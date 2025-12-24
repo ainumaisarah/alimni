@@ -283,6 +283,7 @@ Route::put('materials/{id}', [MaterialController::class, 'update'])->name('mater
 Route::delete('materials/file/{id}', [MaterialController::class, 'destroyFile'])->name('teacher.materials.file.destroy');
 
 Route::get('materials/{id}/redirect', [MaterialController::class, 'redirectLink'])->name('materials.redirect');
+Route::get('materials/{id}/edit', [MaterialController::class, 'edit'])->name('teacher.materials.edit');
 
 Route::middleware(['auth', IsTeacher::class])
     ->prefix('teacher')
@@ -299,5 +300,22 @@ Route::middleware(['auth', IsTeacher::class])
 
         Route::delete('{id}', [MaterialController::class, 'destroy'])->name('destroy');
 });
+
+//student & teacher route
+// View class materials
+Route::get('/classes/{class}/materials', [MaterialController::class, 'classMaterials'])
+    ->name('classes.materials');
+
+// Download single file (students & teachers)
+Route::get('/materials/download/{id}', [MaterialController::class, 'download'])
+    ->name('materials.download');
+
+// Download all files for a material (students & teachers)
+Route::get('/materials/downloadAll/{material}/{folder?}', [MaterialController::class, 'downloadAll'])
+    ->name('materials.downloadAll');
+
+// Optional: Redirect YouTube or link
+Route::get('/materials/link/{id}', [MaterialController::class, 'redirectLink'])
+    ->name('materials.redirectLink');
 
 
