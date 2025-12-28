@@ -52,6 +52,6 @@ class User extends Authenticatable
     // Student → belongs to many classrooms
     public function classrooms()
     {
-        return $this->belongsToMany(Classroom::class, 'classroom_user');
+        return $this->belongsToMany(Classroom::class, 'classroom_user', 'user_id', 'classroom_id');
     }
 }

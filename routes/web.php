@@ -171,8 +171,6 @@ Route::middleware(['auth'])->prefix('classes')->group(function () {
     Route::put('/channel/comment/{comment}', [ClassPageController::class, 'updateComment'])->name('channel.comment.update');
     Route::delete('/channel/comment/{comment}', [ClassPageController::class, 'destroyComment'])->name('channel.comment.delete');
 
-    // Generic class page (catch-all)
-    Route::get('/{class}', [ClassPageController::class, 'showClass'])->name('classes.show');
 });
 
 // Offline quiz submit
@@ -326,4 +324,7 @@ Route::get('/materials/downloadAll/{material}/{folder?}', [MaterialController::c
 Route::get('/materials/link/{id}', [MaterialController::class, 'redirectLink'])
     ->name('materials.redirectLink');
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/classes/{id}', [ClassPageController::class, 'show'])->name('classes.show');
+});
 
