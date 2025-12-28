@@ -40,23 +40,20 @@
             <select name="classroom_id" id="classroom_id" class="w-full border rounded px-3 py-2" required>
                 <option value="" disabled selected>Select a classroom</option>
                 @foreach($classrooms as $classroom)
-                    <option value="{{ $classroom->id }}" data-teacher="{{ $classroom->teacher_id }}">
+                    <option value="{{ $classroom->id }}"
+                            data-teacher="{{ $classroom->teacher_id }}"
+                            {{ (isset($selectedClassroomId) && $selectedClassroomId == $classroom->id) ? 'selected' : '' }}>
                         {{ $classroom->name }}
                     </option>
                 @endforeach
             </select>
         </div>
 
-        <div class="mb-4">
-            <label for="teacher_id">Teacher</label>
-            <select name="teacher_id" id="teacher_id" class="w-full border rounded px-3 py-2" required>
-                <option value="{{ $classroom->id }}"
-                        data-teacher="{{ $classroom->teacher_id }}"
-                        {{ (isset($selectedClassroomId) && $selectedClassroomId == $classroom->id) ? 'selected' : '' }}>
-                    {{ $classroom->name }}
-                </option>
-                @endforeach
-            </select>
+        <div class="mb-4"> <label for="teacher_id">Teacher</label> <select name="teacher_id" id="teacher_id" class="w-full border rounded px-3 py-2" required>
+        <option value="" disabled selected>Select a teacher</option>
+        @foreach($teachers as $teacher) <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+        @endforeach
+             </select>
         </div>
 
         <div class="mb-4">
@@ -86,20 +83,25 @@
 
 {{-- Auto-select teacher JS --}}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const classroomSelect = document.getElementById('classroom_id');
-        const teacherSelect = document.getElementById('teacher_id');
+document.addEventListener('DOMContentLoaded', function () {
+    const classroomSelect = document.getElementById('classroom_id');
+    const teacherSelect = document.getElementById('teacher_id');
 
-        classroomSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            const teacherId = selectedOption.getAttribute('data-teacher');
+    function autoSelectTeacher() {
+        const selectedOption = classroomSelect.options[classroomSelect.selectedIndex];
+        if (!selectedOption) return;
 
-            if (teacherId) {
-                teacherSelect.value = teacherId;
-            } else {
-                teacherSelect.value = ""; // reset if no teacher
-            }
-        });
-    });
+        const teacherId = selectedOption.getAttribute('data-teacher');
+        if (teacherId) {
+            teacherSelect.value = teacherId;
+        }
+    }
+
+    // ✅ run once on page load
+    autoSelectTeacher();
+
+    // ✅ run again when classroom changes
+    classroomSelect.addEventListener('change', autoSelectTeacher);
+});
 </script>
 @endsection
