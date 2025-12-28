@@ -5,11 +5,26 @@
 
     <!-- Navigation -->
     <nav class="class-nav">
-        <h2>
-            <a href="{{ route('classes.show', $class->id) }}" class="font-semibold text-lg">
-                {{ $class->name }}
+            <div class="flex items-center gap-2">
+            <a href="{{ route('classes.index') }}" :active="request()->routeIs('classes.index')"
+                class="h-8 w-8 inline-flex items-center justify-center p-2" style="color: rgb(224, 216, 191);
+                hover:text-[#1f4033]">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="h-8 w-8"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15 19l-7-7 7-7" />
+                </svg>
             </a>
-        </h2>
+            <h2><a href="{{ route('classes.show', $class->id) }}" class="font-semibold text-lg">
+            {{ $class->name }}
+        </a></h2>
+        </div>
+
         <div class="class-menu">
             <a href="{{ route('classes.materials', $class->id) }}" class="{{ request()->routeIs('classes.materials') ? 'active' : '' }}"> Materials </a>
             <a href="{{ route('classes.assignment', $class->id) }}" class="{{ request()->routeIs('classes.assignment') ? 'active' : '' }}"> Assignment </a>
