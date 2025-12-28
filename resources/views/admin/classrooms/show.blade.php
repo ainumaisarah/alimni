@@ -33,17 +33,18 @@
     @else
         <p>No students enrolled in this class.</p>
     @endif
-
-    {{--<h3 class="mt-4 font-semibold">Enroll Students</h3>  --}}
+<br>
     <form action="{{ route('admin.classroom.enroll.submit', $classroom->id) }}" method="POST">
         @csrf
 
         <label for="students" class="block mb-1">Select Students:</label>
         <select name="students[]" id="students" multiple class="border border-gray-300 rounded p-2 w-full">
-            @foreach(\App\Models\User::where('role', 'student')->get() as $student)
-                <option value="{{ $student->id }}"
-                    @if($classroom->students && $classroom->students->contains('id', $student->id)) selected @endif
-                >
+            @foreach(\App\Models\User::where('role', 'student')
+                ->whereDoesntHave('classrooms', function($q) use ($classroom) {
+                    $q->where('classrooms.id', $classroom->id);
+                })
+                ->get() as $student)
+                <option value="{{ $student->id }}">
                     {{ $student->name }} ({{ $student->username }})
                 </option>
             @endforeach

@@ -60,13 +60,12 @@ class UserController extends Controller
             'students.*' => 'exists:users,id',
         ]);
 
-        // Sync selected students to classroom
-        $classroom->students()->sync($request->students);
+        // Add students without removing existing ones
+        $classroom->students()->syncWithoutDetaching($request->students);
 
         return redirect()->route('admin.classrooms.show', $classroom->id)
                         ->with('success', 'Students enrolled successfully.');
     }
-
 
     public function destroy($id)
     {

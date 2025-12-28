@@ -8,20 +8,34 @@ use App\Models\Classroom;
 
 class StudentDashboardController extends Controller
 {
-    public function index()
-    {
-        $student = auth()->user();
+   public function index()
+{
+    $student = auth()->user();
 
-        // Get the IDs of classrooms this student belongs to
-        $classroomIds = $student->classrooms()->pluck('classroom_id');
+    // Get classroom IDs of the student
+    $classroomIds = $student->classrooms()->pluck('classrooms.id');
 
-        // Get schedules for these classrooms
-        $schedules = Schedule::with(['teacher', 'classroom'])
-                            ->whereIn('classroom_id', $classroomIds)
-                            ->get();
+    // Get schedules for these classrooms
+    $schedules = Schedule::with(['teacher', 'classroom'])
+                        ->whereIn('classroom_id', $classroomIds)
+                        ->get();
 
-        return view('student.dashboard', compact('schedules'));
+    // Retrieve recently accessed classrooms from session
+    $recentClassroomsIds = session()->get('recent_classrooms', []);
+
+    // If empty, fallback to first 3 enrolled classrooms
+    if (empty($recentClassroomsIds)) {
+        $recentClassroomsIds = $classroomIds->take(3)->toArray();
     }
 
+    $recentClassrooms = Classroom::whereIn('id', $recentClassroomsIds)
+                                 ->orderByRaw("FIELD(id," . implode(',', $recentClassroomsIds) . ")")
+                                 ->get();
+
+    return view('student.dashboard', compact('schedules', 'recentClassrooms'));
 }
+
+
+}
+
 

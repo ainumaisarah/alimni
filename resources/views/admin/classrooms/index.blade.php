@@ -25,14 +25,16 @@
                         </a>
                     </td>
                     <td>{{ $classroom->teacher->name ?? 'N/A' }}</td>
-                    <td class="border border-gray-300 px-4 py-2 flex gap-2">
-                        <a href="{{ route('admin.classrooms.edit', $classroom->id) }}" class="btn-secondary">Edit</a>
+                    <td class="border border-gray-300 px-4 py-2">
+                        <div class="flex justify-center gap-2">
+                            <a href="{{ route('admin.classrooms.edit', $classroom->id) }}" class="btn-secondary">Edit</a>
 
-                        <form action="{{ route('admin.classrooms.destroy', $classroom->id) }}" method="POST" onsubmit="return confirm('Delete this classroom?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn-danger">Delete</button>
-                        </form>
+                            <form action="{{ route('admin.classrooms.destroy', $classroom->id) }}" method="POST" onsubmit="return confirm('Delete this classroom?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn-danger">Delete</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @empty

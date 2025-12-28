@@ -49,7 +49,30 @@ public function show($id)
     $class = Classroom::findOrFail($id);
     $role = auth()->user()->role;
 
+    // ------------------------------
+    // Track recently accessed classrooms
+    // ------------------------------
+    $recent = session()->get('recent_classrooms', []);
+\Log::info('Recent classes before update:', $recent);
+
+    // Remove if already exists to avoid duplicates
+    if (($key = array_search($class->id, $recent)) !== false) {
+        unset($recent[$key]);
+    }
+
+    // Add this classroom to the beginning of the array
+    array_unshift($recent, $class->id);
+
+    // Keep only the last 3
+    $recent = array_slice($recent, 0, 3);
+
+    // Save back to session
+    session(['recent_classrooms' => $recent]);
+\Log::info('Recent classes after update:', $recent);
+
+    // ------------------------------
     // Fetch posts for this class
+    // ------------------------------
     $posts = Post::where('classroom_id', $class->id)->get();
 
     return view('classes.show', compact('class', 'role', 'posts'));
