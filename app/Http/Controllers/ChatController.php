@@ -12,15 +12,9 @@ class ChatController extends Controller
     // List users to chat with (opposite role)
     public function list()
     {
-        $user = Auth::user();
-
-        if ($user->hasRole('teacher')) {
-            $users = User::where('role', 'student')->get();
-        } elseif ($user->hasRole('student')) {
-            $users = User::where('role', 'teacher')->get();
-        } else {
-            $users = collect(); // For admin or other roles
-        }
+        $users = User::where('id', '!=', Auth::id())
+                    ->where('role', '!=', 'admin')
+                    ->get();
 
         return view('chat.list', compact('users'));
     }
