@@ -27,12 +27,15 @@ class ScheduleController extends Controller
         ));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $classrooms = Classroom::all();
         $teachers = User::where('role', 'teacher')->get();
 
-        return view('admin.schedules.create', compact('classrooms', 'teachers'));
+        // 👇 get classroom_id from query string
+    $selectedClassroomId = $request->query('classroom_id');
+
+        return view('admin.schedules.create', compact('classrooms', 'teachers','selectedClassroomId'));
     }
 
     public function store(Request $request)

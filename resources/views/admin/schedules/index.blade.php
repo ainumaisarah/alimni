@@ -27,8 +27,8 @@
                     <li class="flex items-center justify-between py-1">
                         <span>{{ $classroom->name }}</span>
 
-                        <a href="{{ route('admin.schedules.create') }}"
-                           class="text-sm text-blue-600 hover:underline">
+                        <a href="{{ route('admin.schedules.create', ['classroom_id' => $classroom->id]) }}"
+                        class="text-sm text-blue-600 hover:underline">
                             Assign schedule →
                         </a>
                     </li>

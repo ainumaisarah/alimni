@@ -50,9 +50,11 @@
         <div class="mb-4">
             <label for="teacher_id">Teacher</label>
             <select name="teacher_id" id="teacher_id" class="w-full border rounded px-3 py-2" required>
-                <option value="" disabled selected>Select a teacher</option>
-                @foreach($teachers as $teacher)
-                    <option value="{{ $teacher->id }}">{{ $teacher->name }}</option>
+                <option value="{{ $classroom->id }}"
+                        data-teacher="{{ $classroom->teacher_id }}"
+                        {{ (isset($selectedClassroomId) && $selectedClassroomId == $classroom->id) ? 'selected' : '' }}>
+                    {{ $classroom->name }}
+                </option>
                 @endforeach
             </select>
         </div>
