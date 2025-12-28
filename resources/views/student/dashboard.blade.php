@@ -12,7 +12,7 @@
         <div>
             <img src="{{ asset('images/gazelle.png') }}"
                  alt="Mountain Gazelle"
-                 style="width:64px; height:64px; object-fit:contain; border-radius:8px;">
+                 style="width:100px; height:100px; object-fit:contain; border-radius:8px;">
         </div>
     </div>
 </div>

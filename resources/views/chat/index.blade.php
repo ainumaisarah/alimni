@@ -23,10 +23,21 @@
         <div class="chat-sidebar-body">
             <ul id="userList">
                 @foreach($users as $user)
+                    @php
+                        // Count unread messages from this user to the logged-in user
+                        $unreadCount = \App\Models\Message::where('sender_id', $user->id)
+                                        ->where('receiver_id', auth()->id())
+                                        ->where('is_read', 0)
+                                        ->count();
+                    @endphp
                     <li class="border-b chat-user-row">
-                        <a href="{{ route('chat.show', $user->id) }}"
-                           class="chat-user-item">
+                        <a href="{{ route('chat.show', $user->id) }}" class="chat-user-item">
                             <span class="chat-user-name">{{ $user->name }}</span>
+                            @if($unreadCount > 0)
+                                <span style="display:inline-block; background:red; color:white; font-size:10px; width:16px; height:16px; text-align:center; line-height:16px; border-radius:50%; margin-left:5px;">
+                                    {{ $unreadCount }}
+                                </span>
+                            @endif
                         </a>
                     </li>
                 @endforeach
@@ -58,3 +69,4 @@
 </script>
 
 @endsection
+

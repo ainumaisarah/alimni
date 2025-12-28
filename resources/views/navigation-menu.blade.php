@@ -61,11 +61,15 @@
                 alt="Classes">
                 {{ __('Classes') }}
             </x-nav-link>
-            <x-nav-link href="{{ route('chat.list') }}" :active="request()->routeIs('chat.*')">
-                <img src="{{ asset('images/chat.png') }}"
-                class="w-4 h-4 mr-2 inline-block"
-                alt="Chat">
+            <x-nav-link href="{{ route('chat.list') }}" :active="request()->routeIs('chat.*')" class="relative">
+                <img src="{{ asset('images/chat.png') }}" class="w-4 h-4 mr-2 inline-block" alt="Chat">
                 {{ __('Chat') }}
+
+                @if(isset($unreadChatCount) && $unreadChatCount > 0)
+                    <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                        {{ $unreadChatCount }}
+                    </span>
+                @endif
             </x-nav-link>
 
         {{-- Student Links --}}
@@ -89,11 +93,15 @@
                     alt="Classes">
                     {{ __('Classes') }}
                 </x-nav-link>
-            <x-nav-link href="{{ route('chat.list') }}" :active="request()->routeIs('chat.*')">
-                <img src="{{ asset('images/chat.png') }}"
-                class="w-4 h-4 mr-2 inline-block"
-                alt="Chat">
+            <x-nav-link href="{{ route('chat.list') }}" :active="request()->routeIs('chat.*')" class="relative">
+                <img src="{{ asset('images/chat.png') }}" class="w-4 h-4 mr-2 inline-block" alt="Chat">
                 {{ __('Chat') }}
+
+                @if(isset($unreadChatCount) && $unreadChatCount > 0)
+                    <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                        {{ $unreadChatCount }}
+                    </span>
+                @endif
             </x-nav-link>
         @endif
     @endauth
