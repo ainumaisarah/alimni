@@ -14,7 +14,12 @@
         @foreach($messages as $msg)
             <div class="chat-message {{ $msg->sender_id === auth()->id() ? 'sent' : 'received' }}">
                 <p>{{ $msg->message }}</p>
-                <small>{{ $msg->created_at->format('H:i') }}</small>
+                <small>
+                    {{ $msg->created_at->timezone('Asia/Kuala_Lumpur')->isToday()
+                        ? $msg->created_at->timezone('Asia/Kuala_Lumpur')->format('H:i')
+                        : $msg->created_at->timezone('Asia/Kuala_Lumpur')->format('d M, H:i') }}
+                </small>
+
             </div>
         @endforeach
     </div>
