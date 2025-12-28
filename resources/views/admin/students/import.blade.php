@@ -52,11 +52,11 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-100">
                     <tr>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">Name</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">Username</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">Password</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">Class Name</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border">Teacher Username</th>
+                        <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700 border">Name</th>
+                        <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700 border">Username</th>
+                        <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700 border">Password</th>
+                        <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700 border">Class Name</th>
+                        <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700 border">Teacher Username</th>
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -64,8 +64,8 @@
                         <td class="px-4 py-2 border">John Doe</td>
                         <td class="px-4 py-2 border">john123</td>
                         <td class="px-4 py-2 border">secret</td>
-                        <td class="px-4 py-2 border">1A Science</td>
-                        <td class="px-4 py-2 border">ainumai</td>
+                        <td class="px-4 py-2 border">11A Science</td>
+                        <td class="px-4 py-2 border">ali67</td>
                     </tr>
                 </tbody>
             </table>
