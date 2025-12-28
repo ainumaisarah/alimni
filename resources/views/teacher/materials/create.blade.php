@@ -74,13 +74,13 @@
             </div>
             <button type="button" onclick="addVideoRow()" class="mb-3 btn-secondary">+ Add another video</button>
 
-            {{-- Folder Upload --}}
+            <!--{{-- Folder Upload --}}
             <div class="mb-3">
                 <label class="font-semibold block mb-1">Upload Folder</label>
                 <input type="file" name="folders[]" webkitdirectory directory multiple class="border p-2 rounded w-full">
                 <p class="text-sm text-gray-500 mt-1">Select a folder. All files inside will be uploaded.</p>
-            </div>
-
+            </div>-->
+            <br>
             <button type="submit" class="btn-primary mt-4">Upload Material</button>
         </form>
     </div>
