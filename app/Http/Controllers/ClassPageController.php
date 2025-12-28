@@ -111,15 +111,21 @@ public function show($id)
     /** -----------------------------------------------
      *  CLASS NAVIGATION: MATERIALS
      * -----------------------------------------------*/
-    public function materials($id)
-{
-    $class = Classroom::findOrFail($id);
-    $role = auth()->user()->role;
 
-    $materials = Material::where('classroom_id', $id)->get();
+    public function materials($classId)
+    {
+        // Get the class object
+        $class = Classroom::findOrFail($classId);
 
-    return view('classes.materials', compact('class', 'role', 'materials'));
-}
+        // Get the materials for this class
+        $materials = Material::where('classroom_id', $class->id)
+            ->with('files')
+            ->get();
+
+        // Pass both $class and $materials to the view
+        return view('classes.materials', compact('class', 'materials'));
+    }
+
 
     /** -----------------------------------------------
      *  CLASS NAVIGATION: ASSIGNMENTS

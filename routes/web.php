@@ -101,16 +101,6 @@ Route::middleware(['auth'])->group(function () {
 
 // Teacher routes
 Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->name('teacher.')->group(function () {
-
-    // Materials
-    Route::get('materials', [MaterialController::class, 'teacherIndex'])->name('materials.index');
-    Route::get('materials/create', [MaterialController::class, 'create'])->name('materials.create');
-    Route::post('materials', [MaterialController::class, 'store'])->name('materials.store');
-    Route::get('materials/{id}/download', [MaterialController::class, 'download'])->name('materials.download');
-    Route::delete('materials/{id}', [MaterialController::class, 'destroy'])->name('materials.destroy');
-    Route::get('materials/{id}/view', [MaterialController::class, 'view'])->name('materials.view');
-
-
     // Quizzes
     Route::resource('quizzes', QuizController::class);
 
@@ -142,8 +132,8 @@ Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->name('teacher.
 // Student routes
 Route::middleware(['auth', IsStudent::class])->prefix('student')->name('student.')->group(function () {
     // Materials
-    Route::get('materials', [MaterialController::class, 'studentIndex'])->name('materials.index');
-    Route::get('materials/{id}/download', [MaterialController::class, 'download'])->name('materials.download');
+    //Route::get('materials', [MaterialController::class, 'studentIndex'])->name('materials.index');
+    //Route::get('materials/{id}/download', [MaterialController::class, 'download'])->name('materials.download');
 
     // Quizzes
     //Route::get('quizzes', [QuizController::class, 'studentIndex'])->name('quizzes.index');
@@ -267,5 +257,73 @@ Route::get('teacher/assignments/{assignment}/submissions', [AssignmentController
     ->name('teacher.assignments.submissions')
     ->middleware('auth'); // and your isTeacher middleware
 
+Route::middleware(['auth'])
+    ->prefix('classes')
+    ->group(function () {
+
+        Route::get('/{class}/materials', [MaterialController::class, 'classMaterials'])
+            ->name('classes.materials');
+
+});
+Route::middleware(['auth'])->group(function () {
+
+    // Download ONE file
+    Route::get('/materials/file/{id}/download',
+        [MaterialController::class, 'downloadFile'])
+        ->name('materials.download.file');
+
+    // Download ALL files (ZIP)
+    Route::get('/materials/{id}/download-all',
+        [MaterialController::class, 'downloadAll'])
+        ->name('materials.download.all');
+});
+
+Route::get('/classes/{class}/materials', [ClassPageController::class, 'materials'])
+     ->name('classes.materials');
+Route::get('materials/file/{fileId}/view', [MaterialController::class, 'viewFile'])->name('teacher.materials.view');
+// Edit material
+Route::get('teacher/materials/{material}/edit', [MaterialController::class, 'edit'])->name('teacher.materials.edit');
+Route::get('teacher/materials/{material}/edit', [MaterialController::class, 'edit'])->name('teacher.materials.edit');
+Route::put('teacher/materials/{material}', [MaterialController::class, 'update'])->name('teacher.materials.update');
+
+//Route::get('materials/{id}/edit', [MaterialController::class, 'edit'])->name('materials.edit');
+Route::put('materials/{id}', [MaterialController::class, 'update'])->name('materials.update');
+Route::delete('materials/file/{id}', [MaterialController::class, 'destroyFile'])->name('teacher.materials.file.destroy');
+
+Route::get('materials/{id}/redirect', [MaterialController::class, 'redirectLink'])->name('materials.redirect');
+Route::get('materials/{id}/edit', [MaterialController::class, 'edit'])->name('teacher.materials.edit');
+
+Route::middleware(['auth', IsTeacher::class])
+    ->prefix('teacher')
+    ->name('teacher.materials.') // ← This sets the prefix for all routes inside
+    ->group(function () {
+
+        Route::get('/', [MaterialController::class, 'teacherIndex'])->name('index');
+        Route::get('create', [MaterialController::class, 'create'])->name('create');
+        Route::post('/', [MaterialController::class, 'store'])->name('store');
+
+        Route::get('{id}/download', [MaterialController::class, 'download'])->name('download');
+        Route::get('{id}/view', [MaterialController::class, 'view'])->name('view');
+        Route::get('{id}/download-all/{folder?}', [MaterialController::class, 'downloadAll'])->name('downloadAll');
+
+        Route::delete('{id}', [MaterialController::class, 'destroy'])->name('destroy');
+});
+
+//student & teacher route
+// View class materials
+Route::get('/classes/{class}/materials', [MaterialController::class, 'classMaterials'])
+    ->name('classes.materials');
+
+// Download single file (students & teachers)
+Route::get('/materials/download/{id}', [MaterialController::class, 'download'])
+    ->name('materials.download');
+
+// Download all files for a material (students & teachers)
+Route::get('/materials/downloadAll/{material}/{folder?}', [MaterialController::class, 'downloadAll'])
+    ->name('materials.downloadAll');
+
+// Optional: Redirect YouTube or link
+Route::get('/materials/link/{id}', [MaterialController::class, 'redirectLink'])
+    ->name('materials.redirectLink');
 
 
