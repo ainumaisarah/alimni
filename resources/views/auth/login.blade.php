@@ -31,18 +31,18 @@
             </div>
 
             <div class="auth-actions flex items-center mt-4 w-full">
-   <!-- <div class="flex-1">
-        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="text-sm text-gray-200 hover:text-red-400">
-                                Don't have account?  Register Now    </a>
-            </a>
-        @endif
-    </div>-->
+            <!-- <div class="flex-1">
+                    @if (Route::has('register'))
+                                        <a href="{{ route('register') }}" class="text-sm text-gray-200 hover:text-red-400">
+                                            Don't have account?  Register Now    </a>
+                        </a>
+                    @endif
+                </div>-->
 
-    <x-button type="submit" class="login-button items-center">
-        {{ __('Log in') }}
-    </x-button>
-</div>
+                <x-button type="submit" class="login-button items-center">
+                    {{ __('Log in') }}
+                </x-button>
+            </div>
 
         </form>
     </div>
