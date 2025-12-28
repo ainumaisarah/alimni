@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\StudentImportController;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\Admin\TeacherController;
+use App\Http\Controllers\ProfileController;
 
 
 /*
@@ -40,6 +41,13 @@ Route::get('/', function () {
 //Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 //Route::post('/register', [RegisterController::class, 'register']);
 
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/photo', [ProfileController::class, 'updateProfilePhoto'])->name('profile.updatePhoto');
+    Route::put('/profile/photo/remove', [ProfileController::class, 'removeProfilePhoto'])->name('profile.removePhoto');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
+});
 // Authenticated routes
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
 
