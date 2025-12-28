@@ -13,7 +13,7 @@ class StudentDashboardController extends Controller
     $student = auth()->user();
 
     // Get classroom IDs of the student
-    $classroomIds = $student->classrooms()->pluck('classrooms.id');
+    $classroomIds = $student->classrooms()->pluck('classrooms.id')->toArray();
 
     // Get schedules for these classrooms
     $schedules = Schedule::with(['teacher', 'classroom'])
@@ -23,14 +23,17 @@ class StudentDashboardController extends Controller
     // Retrieve recently accessed classrooms from session
     $recentClassroomsIds = session()->get('recent_classrooms', []);
 
-    // If empty, fallback to first 3 enrolled classrooms
     if (empty($recentClassroomsIds)) {
-        $recentClassroomsIds = $classroomIds->take(3)->toArray();
+        $recentClassroomsIds = array_slice($classroomIds, 0, 3);
     }
 
-    $recentClassrooms = Classroom::whereIn('id', $recentClassroomsIds)
-                                 ->orderByRaw("FIELD(id," . implode(',', $recentClassroomsIds) . ")")
-                                 ->get();
+    $recentClassrooms = collect();
+
+    if (!empty($recentClassroomsIds)) {
+        $recentClassrooms = Classroom::whereIn('id', $recentClassroomsIds)
+            ->orderByRaw("FIELD(id," . implode(',', $recentClassroomsIds) . ")")
+            ->get();
+    }
 
     return view('student.dashboard', compact('schedules', 'recentClassrooms'));
 }

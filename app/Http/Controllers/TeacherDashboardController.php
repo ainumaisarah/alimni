@@ -39,9 +39,15 @@ class TeacherDashboardController extends Controller
             $recentClassroomsIds = $classroomIds->take(3)->toArray();
         }
 
-        $recentClassrooms = Classroom::whereIn('id', $recentClassroomsIds)
-                                     ->orderByRaw("FIELD(id," . implode(',', $recentClassroomsIds) . ")")
-                                     ->get();
+        $recentClassroomsQuery = Classroom::whereIn('id', $recentClassroomsIds);
+
+        if (!empty($recentClassroomsIds)) {
+            $recentClassroomsQuery->orderByRaw(
+                "FIELD(id," . implode(',', $recentClassroomsIds) . ")"
+            );
+        }
+
+        $recentClassrooms = $recentClassroomsQuery->get();
 
         return view('teacher.dashboard', compact('schedules', 'recentClassrooms'));
     }

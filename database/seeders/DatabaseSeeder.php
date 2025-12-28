@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
     'name' => 'Test User',
     'username' => 'testuser',
     'role' => 'student',
+    'password' => Hash::make('password'),
+
 ]);
 
         User::create([
