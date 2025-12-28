@@ -37,47 +37,57 @@
 
                     @foreach($grouped as $folder => $files)
                         <h4 class="font-semibold mb-2">{{ $folder ?? 'No Folder' }}</h4>
-                        <ul class="pl-5">
+
+                        <ul class="pl-0">
                             @foreach($files as $file)
-                                <li class="mb-2 flex-col gap-2">
+                                <li class="flex flex-col gap-2 mb-6">
+                                    {{-- File / Link with View button on the same line --}}
+                                    <div class="flex items-center gap-3">
+                                        @if($file->file_type !== 'link')
+                                            <a href="{{ route('materials.download', $file->id) }}" class="text-blue-600 hover:underline">
+                                                {{ $file->original_name }}
+                                            </a>
+                                            @if(in_array($file->file_type, ['pdf', 'image']) && $file->file_path)
+                                                <a href="{{ asset('storage/'.$file->file_path) }}" target="_blank" class="btn-secondary px-2 py-1 inline-block">
+                                                    View
+                                                </a>
+                                            @endif
+                                        @else
+                                            <a href="{{ $file->link_url }}" target="_blank" class="text-blue-600 hover:underline">
+                                                {{ $file->original_name }} (Link)
+                                            </a>
+                                        @endif
+                                    </div>
 
-                                    {{-- File / Video Download --}}
-                                    @if($file->file_type !== 'link')
-                                        <a href="{{ route('materials.download', $file->id) }}" class="text-blue-600 hover:underline">
-                                            {{ $file->original_name }}
-                                        </a>
-                                    @else
-                                        <span class="text-gray-600">{{ $file->original_name }} (Link)</span>
-                                    @endif
-
-                                    {{-- View / Watch --}}
+                                    {{-- Video / YouTube iframe --}}
                                     @if($file->file_type === 'video' && $file->file_path)
-                                        <video width="480" controls class="rounded border mt-1">
+                                        <video width="100%" controls class="rounded border mt-1">
                                             <source src="{{ asset('storage/'.$file->file_path) }}" type="video/mp4">
                                             Your browser does not support the video tag.
                                         </video>
                                     @elseif($file->file_type === 'link' && $file->link_url)
                                         @php
                                             $youtubeId = null;
-                                            if (Str::contains($file->link_url, 'youtube.com/watch?v=')) {
+                                            if (Str::contains($file->link_url, 'youtube.com/watch')) {
                                                 parse_str(parse_url($file->link_url, PHP_URL_QUERY), $query);
                                                 $youtubeId = $query['v'] ?? null;
                                             } elseif (Str::contains($file->link_url, 'youtu.be/')) {
-                                                $youtubeId = last(explode('/', $file->link_url));
+                                                $parts = explode('/', rtrim($file->link_url, '/'));
+                                                $youtubeId = end($parts);
+                                            }
+                                            if ($youtubeId && Str::contains($youtubeId, '?')) {
+                                                $youtubeId = explode('?', $youtubeId)[0];
                                             }
                                         @endphp
+
                                         @if($youtubeId)
-                                            <iframe width="480" height="270" class="rounded border mt-1"
+                                            <iframe width="100%" height="400" class="rounded border mt-1"
                                                 src="https://www.youtube.com/embed/{{ $youtubeId }}"
                                                 title="{{ $file->original_name }}"
                                                 frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                                 allowfullscreen>
                                             </iframe>
-                                        @else
-                                            <a href="{{ $file->link_url }}" target="_blank" class="btn-secondary">Watch</a>
                                         @endif
-                                    @elseif(in_array($file->file_type, ['pdf', 'image']) && $file->file_path)
-                                        <a href="{{ asset('storage/'.$file->file_path) }}" target="_blank" class="btn-secondary inline-block px-2 py-2 mt-1">View</a>
                                     @endif
                                 </li>
                             @endforeach
