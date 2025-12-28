@@ -61,12 +61,13 @@ public function store(Request $request)
     $request->validate([
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
-        'files.*' => 'nullable|file|max:10240', // 10MB max
-        'videos.*' => 'nullable|mimes:mp4,mov,avi|max:51200', // 50MB max
+        'files.*' => 'nullable|file|max:10240', // 10 MB max for regular files
+        'videos.*' => 'nullable|mimes:mp4,mov,avi|max:614400', // 600 MB max (~40 min 720p)
         'video_links.*' => 'nullable|url',
         'classroom_id' => 'required|exists:classrooms,id',
         'folders.*' => 'nullable|string|max:255',
     ]);
+
 
     $material = Material::create([
         'title' => $request->title,
@@ -217,11 +218,12 @@ public function update(Request $request, $id)
     $request->validate([
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
-        'files.*' => 'nullable|file|max:10240', // 10MB
-        'videos.*' => 'nullable|mimes:mp4,mov,avi|max:51200', // 50MB
+        'files.*' => 'nullable|file|max:10240', // 10 MB
+        'videos.*' => 'nullable|mimes:mp4,mov,avi|max:614400', // 600 MB max (~40 min)
         'video_links.*' => 'nullable|url',
         'classroom_id' => 'required|exists:classrooms,id',
     ]);
+
 
     $material = Material::with('files')->findOrFail($id);
 
