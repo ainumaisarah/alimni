@@ -20,9 +20,9 @@
                 @if($class->schedules->isNotEmpty())
                     <ul class="mt-2">
                         @foreach($class->schedules as $schedule)
-                            <li class="info-meta">
+                            <!--<li class="info-meta">
                                 {{ $schedule->start_time ?? 'N/A' }} - {{ $schedule->end_time ?? 'N/A' }}
-                            </li>
+                            </li>-->
                         @endforeach
                     </ul>
                 @endif
