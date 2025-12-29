@@ -1390,6 +1390,41 @@ nav {
     background: rgba(82, 81, 81, 0.075);
 }
 
+.warning-alert {
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.warning-alert.yellow {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
+}
+
+.warning-alert.orange {
+    background: #ffe5d0;
+    color: #8a3b00;
+    border: 1px solid #ffccaa;
+}
+
+.warning-alert.red {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.flash {
+    animation: flash 1s infinite;
+}
+
+@keyframes flash {
+    0% { opacity: 1; }
+    50% { opacity: .5; }
+    100% { opacity: 1; }
+}
+
 
 
 

@@ -52,6 +52,13 @@
         <input type="file" name="file" class="w-full border rounded p-2">
     </div>
 
+    <div>
+        <label class="inline-flex items-center gap-2">
+            <input type="checkbox" name="allow_late_submission" value="1">
+            <span class="font-medium">Allow late submission</span>
+        </label>
+    </div>
+
     <button type="submit" class="btn-primary">Create Assignment</button>
 </form>
 </div>
