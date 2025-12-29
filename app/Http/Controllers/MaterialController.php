@@ -152,32 +152,40 @@ public function downloadAll($id)
 {
     $material = Material::with('files')->findOrFail($id);
 
-    if ($material->files->isEmpty()) {
+    $files = $material->files->filter(fn ($f) => $f->file_type !== 'link');
+
+    if ($files->isEmpty()) {
         return back()->with('error', 'No files to download.');
     }
 
-    $zipFileName = $material->title . '.zip';
-    $zipPath = storage_path('app/public/temp/' . $zipFileName);
-
-    // Ensure temp folder exists
-    if (!file_exists(storage_path('app/public/temp'))) {
-        mkdir(storage_path('app/public/temp'), 0777, true);
+    $zipDir = storage_path('app/public/temp');
+    if (!file_exists($zipDir)) {
+        mkdir($zipDir, 0755, true);
     }
 
-    $zip = new \ZipArchive();
-    if ($zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
-        foreach ($material->files as $file) {
+    $zipFileName = Str::slug($material->title) . '.zip';
+    $zipPath = $zipDir . '/' . $zipFileName;
+
+    $zip = new ZipArchive();
+
+    if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+
+        foreach ($files as $file) {
             $filePath = storage_path('app/public/' . $file->file_path);
+
             if (file_exists($filePath)) {
-                // Add to ZIP with original filename
                 $zip->addFile($filePath, $file->original_name);
             }
         }
+
         $zip->close();
+    } else {
+        return back()->with('error', 'Failed to create ZIP file.');
     }
 
     return response()->download($zipPath)->deleteFileAfterSend(true);
 }
+
 
 // MaterialController.php
 public function redirectLink($id)
