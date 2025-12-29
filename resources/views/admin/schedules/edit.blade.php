@@ -74,17 +74,17 @@
         </div>
 
         <div class="mb-4">
-            <label for="start_time">Start Time</label>
+            <label for="start_time">Start Time</label><br>
             <input type="time" name="start_time" id="start_time"
             value="{{ old('start_time', \Carbon\Carbon::parse($schedule->start_time)->format('H:i')) }}"
-            class="w-full border rounded px-3 py-2" required>
+            class="border rounded px-3 py-2" required>
         </div>
 
         <div class="mb-4">
-            <label for="end_time">End Time</label>
+            <label for="end_time">End Time</label><br>
             <input type="time" name="end_time" id="end_time"
             value="{{ old('end_time', \Carbon\Carbon::parse($schedule->end_time)->format('H:i')) }}"
-            class="w-full border rounded px-3 py-2" required>
+            class="border rounded px-3 py-2" required>
         </div>
 
         <button type="submit" class="btn-primary">Update Schedule</button>

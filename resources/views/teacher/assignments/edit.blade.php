@@ -37,11 +37,11 @@
     </div>
 
     <div>
-    <label class="font-medium">Due</label>
+    <label class="font-medium">Due</label><br>
     <input type="datetime-local"
        name="due_at"
        value="{{ old('due_at', optional($assignment)->due_at ? \Carbon\Carbon::parse($assignment->due_at)->format('Y-m-d\TH:i') : '') }}"
-       class="w-full border rounded p-2">
+       class="border rounded p-2">
     </div>
 
 
@@ -57,12 +57,11 @@
         <label class="inline-flex items-center gap-2">
             <input type="checkbox" name="allow_late_submission" value="1"
                 {{ $assignment->allow_late_submission ? 'checked' : '' }}>
-            <span class="font-medium">Allow late submission</span>
+            <span class="font-semibold">Allow late submission</span>
         </label>
     </div>
 
-
-    <button type="submit" class="btn-primary">Update Assignment</button>
+    <button type="submit" class="btn-primary mt-2">Update Assignment</button>
 </form>
 
 <form action="{{ route('teacher.assignments.destroy', $assignment->id) }}" method="POST" class="mt-4">

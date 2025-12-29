@@ -60,19 +60,19 @@
         {{-- Duration --}}
         <div class="mb-4">
             <label class="block font-semibold mb-1">Quiz Duration (minutes, optional)</label>
-            <input type="number" name="duration" class="w-full border rounded p-2" min="1" value="{{ old('duration', $quiz->duration ?? '') }}">
+            <input type="number" name="duration" class="border rounded p-2 w-60" min="1" value="{{ old('duration', $quiz->duration ?? '') }}">
         </div>
 
         {{-- Open Date/Time --}}
         <div class="mb-4">
             <label class="block font-semibold mb-1">Open Date & Time (optional)</label>
-            <input type="datetime-local" name="open_at" class="w-full border rounded p-2" value="{{ old('open_at', isset($quiz->open_at) ? $quiz->open_at->format('Y-m-d\TH:i') : '') }}">
+            <input type="datetime-local" name="open_at" class="border rounded p-2 w-60" value="{{ old('open_at', isset($quiz->open_at) ? $quiz->open_at->format('Y-m-d\TH:i') : '') }}">
         </div>
 
         {{-- Due Date/Time --}}
         <div class="mb-4">
             <label class="block font-semibold mb-1">Due Date & Time (optional)</label>
-            <input type="datetime-local" name="due_at" class="w-full border rounded p-2" value="{{ old('due_at', isset($quiz->due_at) ? $quiz->due_at->format('Y-m-d\TH:i') : '') }}">
+            <input type="datetime-local" name="due_at" class="border rounded p-2 w-60" value="{{ old('due_at', isset($quiz->due_at) ? $quiz->due_at->format('Y-m-d\TH:i') : '') }}">
         </div>
 
         {{-- Classroom --}}
