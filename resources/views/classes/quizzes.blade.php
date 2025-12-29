@@ -129,14 +129,14 @@
 
                             @if($questionsCount == 0)
                                 {{-- No questions yet --}}
-                                <a href="{{ route('teacher.questions.create', $quiz->id) }}"
+                                <a style="font-size: 14px; font-weight: 500; color: #f9fafa;"  href="{{ route('teacher.questions.create', $quiz->id) }}"
                                 class="btn-primary px-3 py-1 text-sm">
                                 + Add Question
                                 </a>
                             @else
                                 {{-- Questions already exist --}}
-                                <a href="{{ route('teacher.questions.index', $quiz->id) }}"
-                                class="btn-secondary px-3 py-1 text-sm">
+                                <a style="font-size: 14px; font-weight: 500; color: #f9fafa;" href="{{ route('teacher.questions.index', $quiz->id) }}"
+                                class="btn-primary px-3 py-1 text-sm">
                                 Manage Questions
                                 </a>
                             @endif
