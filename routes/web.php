@@ -82,6 +82,7 @@ Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(func
     Route::put('users/{user}/enroll', [UserController::class, 'update'])->name('users.enroll.update');
     Route::get('classroom-enroll', [UserController::class, 'showClassroomEnrollForm'])->name('classroom.enroll');
     Route::post('classroom-enroll/{classroom}', [UserController::class, 'enrollStudentsToClassroom'])->name('classroom.enroll.submit');
+    Route::delete('classrooms/{classroom}/students/{student}', [UserController::class, 'unenrollStudent'])->name('classroom.unenroll');
 
     Route::get('classroom-overview', [ClassroomController::class, 'overview'])->name('classrooms.overview');
 
@@ -90,6 +91,9 @@ Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(func
 
     Route::get('teachers/import', [TeacherController::class, 'showForm'])->name('teachers.import.form');
     Route::post('teachers/import', [TeacherController::class, 'import'])->name('teachers.import');
+    Route::get('/teachers', [TeacherController::class, 'index']) ->name('teachers.index');
+    Route::delete('/teachers/{id}', [TeacherController::class, 'destroy']) ->name('teachers.destroy');
+
 });
 
 // Chat routes
