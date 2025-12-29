@@ -21,7 +21,6 @@
         <h2 class="mb-4">Quiz Results Summary: {{ $quiz->title }}</h2>
     </div>
 
-
     @if($studentResults->isEmpty())
         <p class="empty-message">No students in this class.</p>
     @else
@@ -51,8 +50,21 @@
                                 <select onchange="if(this.value) window.location.href=this.value">
                                     <option value="">Select Attempt</option>
                                     @foreach($res['attempts'] as $attempt)
+                                        @php
+                                            $hasUngraded = false;
+                                            foreach($attempt->answers as $questionId => $answerValue) {
+                                                $question = $quiz->questions->firstWhere('id', $questionId);
+                                                if($question && $question->question_type === 'short') {
+                                                    $hasUngraded = true;
+                                                    break;
+                                                }
+                                            }
+                                        @endphp
                                         <option value="{{ route('teacher.quizzes.review', [$quiz->id, $attempt->id]) }}">
                                             Attempt #{{ $attempt->attempt_number }} ({{ $attempt->score }}%)
+                                            @if($hasUngraded)
+                                                - Pending Short Answer Grading
+                                            @endif
                                         </option>
                                     @endforeach
                                 </select>

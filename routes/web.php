@@ -332,3 +332,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/classes/{id}', [ClassPageController::class, 'show'])->name('classes.show');
 });
 
+Route::get('/teacher/quizzes/{quiz}/results/{result}/grade', [QuizController::class, 'gradeShortAnswers'])
+    ->name('teacher.quizzes.grade');
+
+Route::post('/teacher/quizzes/{quiz}/results/{result}/grade', [QuizController::class, 'submitShortGrades'])
+    ->name('teacher.quizzes.submit_grades');
+
+Route::post('/teacher/quizzes/{quiz}/results/{result}/grade', [QuizController::class, 'submitShortGrades'])
+    ->name('teacher.quizzes.submit_grades');
+
+Route::post(
+    '/teacher/quizzes/{quiz}/results/{result}/grade',
+    [QuizController::class, 'submitGrades']
+)->name('teacher.quizzes.submit_grades');
+

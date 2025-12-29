@@ -8,60 +8,68 @@ use Illuminate\Http\Request;
 
 class QuestionController extends Controller
 {
-    // Show all questions for a quiz
+    // SHOW ALL QUESTIONS
     public function index(Quiz $quiz)
     {
         $questions = $quiz->questions()->get();
         return view('teacher.questions.index', compact('quiz', 'questions'));
     }
 
-    // Show create form for a quiz
+    // CREATE FORM
     public function create(Quiz $quiz)
     {
         return view('teacher.questions.create', compact('quiz'));
     }
 
-    // Store new question
+    // STORE QUESTION
     public function store(Request $request, Quiz $quiz)
     {
-        // Validation
         $request->validate([
-            'question_text'  => 'required|string|max:1000',
-            'question_type'  => 'required|in:mcq,short',
-
-            'option_a'       => 'required_if:question_type,mcq|max:255',
-            'option_b'       => 'required_if:question_type,mcq|max:255',
-            'option_c'       => 'nullable|max:255',
-            'option_d'       => 'nullable|max:255',
-            'correct_answer' => 'required_if:question_type,mcq|in:A,B,C,D',
-
-            'short_answer'   => 'required_if:question_type,short|max:255',
+            'question_text'   => 'required|string|max:1000',
+            'question_type'   => 'required|in:mcq,short',
+            // MCQ fields
+            'option_a'        => 'required_if:question_type,mcq|max:255',
+            'option_b'        => 'required_if:question_type,mcq|max:255',
+            'option_c'        => 'nullable|max:255',
+            'option_d'        => 'nullable|max:255',
+            'correct_answer'  => 'required_if:question_type,mcq|in:A,B,C,D',
+            // Short answer marks
+            'marks_short'     => 'required_if:question_type,short|integer|min:1',
         ]);
+
+        $questionType = $request->input('question_type');
 
         $data = [
             'question_text' => $request->question_text,
-            'question_type' => $request->question_type,
+            'question_type' => $questionType,
+            'quiz_id'       => $quiz->id,
         ];
 
-        if ($request->question_type === 'mcq') {
-            $data['option_a'] = $request->option_a;
-            $data['option_b'] = $request->option_b;
-            $data['option_c'] = $request->option_c;
-            $data['option_d'] = $request->option_d;
-            $data['correct_answer'] = $request->correct_answer;
-            $data['short_answer'] = null;
+        if ($questionType === 'mcq') {
+            $data += [
+                'option_a'      => $request->option_a,
+                'option_b'      => $request->option_b,
+                'option_c'      => $request->option_c,
+                'option_d'      => $request->option_d,
+                'correct_answer'=> $request->correct_answer,
+                'marks_mcq'     => 1,                   // default for MCQ
+                'marks_short'   => 2,                   // default for short answer
+            ];
         } else { // short answer
-            $data['option_a'] = null;
-            $data['option_b'] = null;
-            $data['option_c'] = null;
-            $data['option_d'] = null;
-            $data['correct_answer'] = null;
-            $data['short_answer'] = $request->short_answer;
+            $data += [
+                'option_a'      => null,
+                'option_b'      => null,
+                'option_c'      => null,
+                'option_d'      => null,
+                'correct_answer'=> null,
+                'marks_mcq'     => 1,                   // default for MCQ
+                'marks_short'   => $request->marks_short ?? 2,  // allocated marks
+            ];
         }
 
         $quiz->questions()->create($data);
 
-        // Reset attempts
+        // Reset student attempts
         $quiz->results()->delete();
 
         return redirect()
@@ -69,52 +77,74 @@ class QuestionController extends Controller
             ->with('success', 'Question added successfully!');
     }
 
-
-    // Show edit form
+    // EDIT FORM
     public function edit(Quiz $quiz, Question $question)
     {
         return view('teacher.questions.edit', compact('quiz', 'question'));
     }
 
-
-    // Update question
+    // UPDATE QUESTION
     public function update(Request $request, Quiz $quiz, Question $question)
     {
         $request->validate([
-            'question_text' => 'required|string|max:1000',
-            'question_type' => 'required|in:mcq,short',
-            'option_a' => 'required_if:question_type,mcq|max:255',
-            'option_b' => 'required_if:question_type,mcq|max:255',
-            'option_c' => 'nullable|max:255',
-            'option_d' => 'nullable|max:255',
-            'correct_answer' => 'required_if:question_type,mcq|in:A,B,C,D',
-            'short_answer' => 'required_if:question_type,short|max:255',
+            'question_text'   => 'required|string|max:1000',
+            'question_type'   => 'required|in:mcq,short',
+            // MCQ fields
+            'option_a'        => 'required_if:question_type,mcq|max:255',
+            'option_b'        => 'required_if:question_type,mcq|max:255',
+            'option_c'        => 'nullable|max:255',
+            'option_d'        => 'nullable|max:255',
+            'correct_answer'  => 'required_if:question_type,mcq|in:A,B,C,D',
+            // Short answer marks
+            'marks_short'     => 'required_if:question_type,short|integer|min:1',
         ]);
 
-        $question->update([
-            'question_text'  => $request->question_text,
-            'question_type'  => $request->question_type,
-            'option_a'       => $request->option_a,
-            'option_b'       => $request->option_b,
-            'option_c'       => $request->option_c,
-            'option_d'       => $request->option_d,
-            'correct_answer' => $request->correct_answer,
-            'short_answer'   => $request->short_answer,
-        ]);
+        $questionType = $request->input('question_type');
 
-        // Reset attempts
-        $question->quiz->results()->delete();
+        if ($questionType === 'mcq') {
+            $question->update([
+                'question_text'   => $request->question_text,
+                'question_type'   => 'mcq',
+                'option_a'        => $request->option_a,
+                'option_b'        => $request->option_b,
+                'option_c'        => $request->option_c,
+                'option_d'        => $request->option_d,
+                'correct_answer'  => $request->correct_answer,
+                'marks_mcq'       => 1,                 // default for MCQ
+                'marks_short'     => 2,                 // default for short answer
+            ]);
+        } else { // short answer
+            $question->update([
+                'question_text'   => $request->question_text,
+                'question_type'   => 'short',
+                'option_a'        => null,
+                'option_b'        => null,
+                'option_c'        => null,
+                'option_d'        => null,
+                'correct_answer'  => null,
+                'marks_mcq'       => 1,                 // default for MCQ
+                'marks_short'     => $request->marks_short ?? 2,
+            ]);
+        }
 
-        return redirect()->route('teacher.questions.index', $question->quiz->id)
-                        ->with('success', 'Question updated successfully!');
+        // Reset student attempts
+        $quiz->results()->delete();
+
+        return redirect()
+            ->route('teacher.questions.index', $quiz->id)
+            ->with('success', 'Question updated successfully!');
     }
 
-
-    // Delete question
+    // DELETE QUESTION
     public function destroy(Quiz $quiz, Question $question)
     {
         $question->delete();
-        return redirect()->route('teacher.questions.index', $quiz->id)
-                        ->with('success', 'Question deleted successfully!');
+
+        // Reset student attempts
+        $quiz->results()->delete();
+
+        return redirect()
+            ->route('teacher.questions.index', $quiz->id)
+            ->with('success', 'Question deleted successfully!');
     }
 }

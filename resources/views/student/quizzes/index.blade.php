@@ -19,9 +19,7 @@
                     d="M15 19l-7-7 7-7" />
             </svg>
         </a>
-        <h2 class="font-semibold text-2xl">
-            {{ $quiz->title }}
-        </h2>
+        <h2 class="font-semibold text-2xl">{{ $quiz->title }}</h2>
     </div>
 
     <p class="mb-4">{{ $quiz->description }}</p>
@@ -40,9 +38,28 @@
             </thead>
             <tbody>
                 @foreach($attempts as $attempt)
+                    @php
+                        $attemptHasUngraded = false;
+
+                        foreach($attempt->answers as $questionId => $answerValue) {
+                            $question = $questions->firstWhere('id', $questionId);
+                            if($question && $question->question_type === 'short') {
+                                // If marks not yet given for this short answer
+                                if(!isset($attempt->answers[$questionId.'_marks'])) {
+                                    $attemptHasUngraded = true;
+                                    break;
+                                }
+                            }
+                        }
+                    @endphp
                     <tr>
                         <td class="p-2 border">{{ $attempt->attempt_number }}</td>
-                        <td class="p-2 border">{{ $attempt->score }}%</td>
+                        <td class="p-2 border">
+                            {{ $attempt->score }}%
+                            @if($attemptHasUngraded)
+                                <span class="text-orange-600 font-semibold">(not final)</span>
+                            @endif
+                        </td>
                         <td class="p-2 border">
                             <a href="{{ route('student.quizzes.review', [$quiz->id, $attempt->id]) }}" class="text-blue-600 underline">View</a>
                         </td>
@@ -61,6 +78,6 @@
                 You have reached the maximum attempts ({{ $maxAttempts }}).
             </p>
         @endif
-    @endif {{-- <-- Close the very first @if --}}
+    @endif
 </div>
 @endsection
