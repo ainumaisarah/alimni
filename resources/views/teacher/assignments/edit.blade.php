@@ -53,6 +53,15 @@
         @endif
     </div>
 
+    <div>
+        <label class="inline-flex items-center gap-2">
+            <input type="checkbox" name="allow_late_submission" value="1"
+                {{ $assignment->allow_late_submission ? 'checked' : '' }}>
+            <span class="font-medium">Allow late submission</span>
+        </label>
+    </div>
+
+
     <button type="submit" class="btn-primary">Update Assignment</button>
 </form>
 
