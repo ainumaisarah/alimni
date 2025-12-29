@@ -17,12 +17,12 @@
 
             <div>
                 <x-label for="username" value="{{ __('Username') }}" />
-                <x-input id="username" class="block mt-1 w-full px-4 py-2 rounded-lg border border-white/30 bg-white/5 text-white focus:outline-none focus:border-red-700 focus:ring-1 focus:ring-red-700 transition" type="text" name="username" :value="old('username')" required autofocus autocomplete="username" />
+                <x-input id="username" class="block mt-1 w-full px-4 py-2 rounded-lg border border-white/30 bg-white/5 text-black focus:outline-none focus:border-red-700 focus:ring-1 focus:ring-red-700 transition" type="text" name="username" :value="old('username')" required autofocus autocomplete="username" />
             </div>
 
             <div>
                 <x-label for="password" value="{{ __('Password') }}" />
-                <x-input id="password" class="block mt-1 w-full px-4 py-2 rounded-lg border border-white/30 bg-white/5 text-white focus:outline-none focus:border-red-700 focus:ring-1 focus:ring-red-700 transition" type="password" name="password" required autocomplete="current-password" />
+                <x-input id="password" class="block mt-1 w-full px-4 py-2 rounded-lg border border-white/30 bg-white/5 text-black focus:outline-none focus:border-red-700 focus:ring-1 focus:ring-red-700 transition" type="password" name="password" required autocomplete="current-password" />
             </div>
 
             <div class="flex items-center mt-4 gap-2">
