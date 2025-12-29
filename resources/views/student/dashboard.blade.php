@@ -7,7 +7,7 @@
     <div style="background-color:#7c3636; color:white; padding:20px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
         <div>
             <h1 style="font-size:1.5rem; font-weight:bold;">Welcome, {{ auth()->user()->name }}!</h1>
-            <p>Here’s your latest class schedule and recently accessed classes.</p>
+            <p style="color:white;">Here’s your latest class schedule and recently accessed classes.</p>
         </div>
         <div>
             <img src="{{ asset('images/gazelle.png') }}"
@@ -35,45 +35,104 @@
 <div class="schedule-container">
     <h2>Your Class Schedule</h2>
 
-    @if (count($schedules) === 0)
+    @if ($schedules->isEmpty())
         <p>You are not assigned to a class or there are no schedules yet.</p>
     @else
         @php
             $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-            $timeSlots = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
-            $scheduleMatrix = [];
+
+            // Generate 30-minute slots (08:00 – 14:00)
+            $timeSlots = [];
+            $current = \Carbon\Carbon::parse('08:00');
+            $endTime = \Carbon\Carbon::parse('14:00');
+
+            while ($current < $endTime) {
+                $timeSlots[] = $current->format('H:i');
+                $current->addMinutes(30);
+            }
+
+            // Prepare schedule map + skipped cells
+            $scheduleMap = [];
+            $skipSlots = [];
+
             foreach ($schedules as $schedule) {
-                $start = \Carbon\Carbon::parse($schedule->start_time)->format('H:i');
-                $scheduleMatrix[$schedule->day][$start][] = $schedule;
+                $start = \Carbon\Carbon::parse($schedule->start_time);
+                $end   = \Carbon\Carbon::parse($schedule->end_time);
+
+                $rowspan = $start->diffInMinutes($end) / 30;
+                $day = $schedule->day;
+                $startKey = $start->format('H:i');
+
+                $scheduleMap[$day][$startKey] = [
+                    'rowspan'   => $rowspan,
+                    'classroom' => $schedule->classroom->name ?? 'N/A',
+                    'teacher'   => $schedule->teacher->name ?? 'N/A',
+                ];
+
+                for ($i = 1; $i < $rowspan; $i++) {
+                    $skipSlots[$day][
+                        $start->copy()->addMinutes(30 * $i)->format('H:i')
+                    ] = true;
+                }
             }
         @endphp
 
-        <table>
+        <table class="border-collapse border w-full text-sm">
             <thead>
                 <tr>
-                    <th>Time</th>
+                    <th class="border px-2 py-1">Time</th>
                     @foreach ($days as $day)
-                        <th>{{ $day }}</th>
+                        <th class="border px-2 py-1">{{ $day }}</th>
                     @endforeach
                 </tr>
             </thead>
+
             <tbody>
                 @foreach ($timeSlots as $time)
                     <tr>
-                        <td>{{ $time }}</td>
+                        {{-- Time column --}}
+                        <td class="border px-2 py-1 font-bold">{{ $time }}</td>
+
+                        {{-- Day columns --}}
                         @foreach ($days as $day)
-                            <td>
-                                @if (isset($scheduleMatrix[$day][$time]))
-                                    @foreach ($scheduleMatrix[$day][$time] as $sched)
-                                        <div class="schedule-item">
-                                            <div class="classroom">{{ $sched->classroom->name ?? 'N/A' }}</div>
-                                            <div class="teacher">{{ $sched->teacher->name ?? 'N/A' }}</div>
+
+                            {{-- Skip slots covered by rowspan --}}
+                            @if (!empty($skipSlots[$day][$time]))
+                                @continue
+                            @endif
+
+                            {{-- Scheduled class --}}
+                            @if (!empty($scheduleMap[$day][$time]))
+                                <td
+                                    class="border px-2 py-1 bg-blue-200 text-center"
+                                    rowspan="{{ $scheduleMap[$day][$time]['rowspan'] }}"
+                                    style="position: relative;"
+                                >
+                                    <div style="
+                                        position: absolute;
+                                        inset: 0;
+                                        display: flex;
+                                        flex-direction: column;
+                                        justify-content: center;
+                                        align-items: center;
+                                        font-weight: 600;
+                                        text-align: center;
+                                    ">
+                                        <div>
+                                            {{ $scheduleMap[$day][$time]['classroom'] }}
                                         </div>
-                                    @endforeach
-                                @else
-                                    &nbsp;
-                                @endif
-                            </td>
+
+                                        <div class="text-xs text-gray-700">
+                                            {{ $scheduleMap[$day][$time]['teacher'] }}
+                                        </div>
+                                    </div>
+                                </td>
+
+                            {{-- Empty slot --}}
+                            @else
+                                <td class="border px-2 py-1">&nbsp;</td>
+                            @endif
+
                         @endforeach
                     </tr>
                 @endforeach
@@ -81,5 +140,6 @@
         </table>
     @endif
 </div>
+
 
 @endsection
