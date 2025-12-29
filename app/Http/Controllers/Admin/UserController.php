@@ -75,5 +75,13 @@ class UserController extends Controller
         return redirect()->route('admin.users.index')->with('success', 'Student deleted successfully.');
     }
 
+    public function unenrollStudent(Classroom $classroom, User $student)
+    {
+        // Detach student from this classroom only
+        $classroom->students()->detach($student->id);
+
+        return redirect()->back()->with('success', 'Student unenrolled successfully.');
+    }
+
 
 }

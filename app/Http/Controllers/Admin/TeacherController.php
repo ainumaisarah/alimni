@@ -10,6 +10,24 @@ use Illuminate\Support\Facades\Hash;
 
 class TeacherController extends Controller
 {
+    // List all teachers
+    public function index()
+    {
+        $teachers = User::where('role', 'teacher')->get();
+
+        return view('admin.teachers.index', compact('teachers'));
+    }
+
+    // Delete teacher
+    public function destroy($id)
+    {
+        $teacher = User::where('role', 'teacher')->findOrFail($id);
+        $teacher->delete();
+
+        return redirect()->route('admin.teachers.index')
+                         ->with('success', 'Teacher deleted successfully.');
+    }
+
     public function showForm()
     {
         return view('admin.teachers.import'); // create this blade like student import
