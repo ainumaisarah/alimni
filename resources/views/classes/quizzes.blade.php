@@ -59,18 +59,23 @@
                         $questionsCount = $quiz->questions->count();
                     @endphp
 
-                    <h3 class="text-lg font-semibold">
+                    <h3 class="text-lg font-semibold
+                        @if(auth()->user()->role === 'teacher' && $questionsCount == 0)
+                            error-alert
+                        @endif
+                    ">
                         @if(auth()->user()->role === 'teacher')
-                            <a href="{{ route('teacher.questions.index', $quiz->id) }}" class="text-inherit hover:underline">
+                            <a href="{{ route('teacher.questions.index', $quiz->id) }}"
+                            class="hover:underline">
                                 {{ $quiz->title }}
                             </a>
                         @else
-                            <a href="{{ route('student.quizzes.single', $quiz->id) }}" class="text-blue-600 hover:underline">
+                            <a href="{{ route('student.quizzes.single', $quiz->id) }}"
+                            class="text-blue-600 hover:underline">
                                 {{ $quiz->title }}
                             </a>
                         @endif
                     </h3>
-
 
                     @if($quiz->description)
                         <p class="info-meta">Description: {{ $quiz->description }}</p>
@@ -88,35 +93,73 @@
                         <p class="info-meta">Duration: {{ $quiz->duration }} minutes</p>
                     @endif
 
+                    <p class="info-meta">
+                        Questions: <strong>{{ $questionsCount }}</strong>
+                    </p>
+
                     @if(auth()->user()->role === 'student')
                         <div class="mt-2">
-                            @if(!$result)
-                                <p class="text-red-600 font-semibold mb-1">Please attempt the quiz</p>
-                            @endif
 
-                            @if($isAvailable)
-                                <a href="{{ route('student.quizzes.show', $quiz->id) }}" class="btn-secondary px-3 py-1 text-sm">
+                            @php
+                                $canAttempt = $questionsCount > 0 && $isAvailable;
+                            @endphp
+
+                            @if(!$canAttempt)
+                                <span class="text-gray-500 font-semibold">
+                                    The quiz is not available
+                                </span>
+                            @else
+                                @if(!$result)
+                                    <p class="text-red-600 font-semibold mb-1">
+                                        Please attempt the quiz
+                                    </p>
+                                @endif
+
+                                <a href="{{ route('student.quizzes.show', $quiz->id) }}"
+                                class="btn-secondary px-3 py-1 text-sm">
                                     Attempt
                                 </a>
-                            @else
-                                <span class="text-gray-500 font-semibold">Quiz not available</span>
                             @endif
+
                         </div>
                     @endif
 
                     @if(auth()->user()->role === 'teacher')
                         <div class="mt-2 flex space-x-2">
-                            <a href="{{ route('teacher.quizzes.edit', $quiz->id) }}" class="btn-secondary px-3 py-1 text-sm">Edit</a>
-                            <form action="{{ route('teacher.quizzes.destroy', $quiz->id) }}" method="POST">
+
+                            @if($questionsCount == 0)
+                                {{-- No questions yet --}}
+                                <a href="{{ route('teacher.questions.create', $quiz->id) }}"
+                                class="btn-primary px-3 py-1 text-sm">
+                                + Add Question
+                                </a>
+                            @else
+                                {{-- Questions already exist --}}
+                                <a href="{{ route('teacher.questions.index', $quiz->id) }}"
+                                class="btn-secondary px-3 py-1 text-sm">
+                                Manage Questions
+                                </a>
+                            @endif
+
+                            {{-- Optional edit & delete --}}
+                            <a href="{{ route('teacher.quizzes.edit', $quiz->id) }}"
+                            class="btn-secondary px-3 py-1 text-sm">
+                            Edit Quiz
+                            </a>
+
+                            <form action="{{ route('teacher.quizzes.destroy', $quiz->id) }}"
+                                method="POST">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn-danger px-3 py-1 text-sm"
+                                <button type="submit"
+                                        class="btn-danger px-3 py-1 text-sm"
                                         onclick="return confirm('Are you sure you want to delete this quiz?');">
                                     Delete
                                 </button>
                             </form>
                         </div>
                     @endif
+
                 </div>
             @endforeach
         </div>
