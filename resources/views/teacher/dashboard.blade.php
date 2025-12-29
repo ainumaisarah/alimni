@@ -4,7 +4,7 @@
 
 <!-- ================= Welcome Banner ================= -->
 <div class="schedule-container" style="margin-bottom:20px;">
-    <div style="background-color:#800000; color:white; padding:20px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+    <div style="background-color:#7c3636; color:white; padding:20px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
         <div>
             <h1 style="font-size:1.5rem; font-weight:bold;">Welcome, {{ auth()->user()->name }}!</h1>
             <p>Here’s your latest class schedule and recently accessed classes.</p>
