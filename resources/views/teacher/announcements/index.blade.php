@@ -10,7 +10,7 @@
                 <h3>{{ $announcement->title }}</h3>
                 <p>{{ $announcement->message }}</p>
                 <small class="info-meta">
-                    Posted by {{ $announcement->teacher->name }} on {{ $announcement->created_at->format('d M Y, H:i') }}
+                    Posted by {{ $announcement->teacher->name }} on {{ $announcement->created_at->timezone('Asia/Kuala_Lumpur')->format('d M Y, H:i') }}
                 </small>
             </div>
         @endforeach

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Schedule;
 use App\Models\Classroom;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class TeacherDashboardController extends Controller
 {
@@ -13,42 +14,49 @@ class TeacherDashboardController extends Controller
     {
         $teacher = Auth::user();
 
-        // Get classroom IDs the teacher is assigned to
-        // 1️⃣ Directly assigned as teacher
         $directClassIds = $teacher->teachingClasses()->pluck('classrooms.id');
-
-        // 2️⃣ Assigned via schedules
         $scheduledClassIds = Schedule::where('teacher_id', $teacher->id)
                                      ->pluck('classroom_id');
 
-        // Merge and remove duplicates
         $classroomIds = $directClassIds->merge($scheduledClassIds)->unique();
 
-        // Get schedules for these classrooms
         $schedules = Schedule::with(['teacher', 'classroom'])
                              ->whereIn('classroom_id', $classroomIds)
                              ->get();
 
-        // ------------------------------
-        // Recently accessed classrooms from session
-        // ------------------------------
-        $recentClassroomsIds = session()->get('recent_classrooms', []);
+        // Time slots (30 min)
+        $timeSlots = [];
+        $start = Carbon::parse('08:00');
+        $end = Carbon::parse('16:00');
+        while ($start->lte($end)) {
+            $timeSlots[] = $start->format('H:i');
+            $start->addMinutes(30);
+        }
 
-        // Fallback: show first 3 classes they teach if none in session
+        // Schedule matrix
+        $scheduleMatrix = [];
+        foreach ($schedules as $schedule) {
+            $scheduleMatrix[$schedule->day][] = [
+                'start' => Carbon::parse($schedule->start_time),
+                'end' => Carbon::parse($schedule->end_time),
+                'classroom' => $schedule->classroom->name ?? 'N/A',
+                'teacher' => $schedule->teacher->name ?? 'N/A',
+            ];
+        }
+
+        // Recently accessed classes
+        $recentClassroomsIds = session()->get('recent_classrooms', []);
         if (empty($recentClassroomsIds)) {
             $recentClassroomsIds = $classroomIds->take(3)->toArray();
         }
 
-        $recentClassroomsQuery = Classroom::whereIn('id', $recentClassroomsIds);
+        $recentClassrooms = Classroom::whereIn('id', $recentClassroomsIds)->get();
 
-        if (!empty($recentClassroomsIds)) {
-            $recentClassroomsQuery->orderByRaw(
-                "FIELD(id," . implode(',', $recentClassroomsIds) . ")"
-            );
-        }
-
-        $recentClassrooms = $recentClassroomsQuery->get();
-
-        return view('teacher.dashboard', compact('schedules', 'recentClassrooms'));
+        return view('teacher.dashboard', compact(
+            'schedules',
+            'timeSlots',
+            'scheduleMatrix',
+            'recentClassrooms'
+        ));
     }
 }
