@@ -38,11 +38,11 @@
     </div>
 
     <div>
-    <label class="font-medium">Due</label>
+    <label class="font-medium">Due</label><br>
     <input type="datetime-local"
            name="due_at"
            value="{{ old('due_at') }}"
-           class="w-full border rounded p-2">
+           class="border rounded p-2">
     </div>
 
 
@@ -55,7 +55,7 @@
     <div>
         <label class="inline-flex items-center gap-2">
             <input type="checkbox" name="allow_late_submission" value="1">
-            <span class="font-medium">Allow late submission</span>
+            <span class="font-semibold">Allow late submission</span>
         </label>
     </div>
 
