@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Classroom;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -29,6 +30,7 @@ class UserController extends Controller
         return view('admin.users.edit', compact('student', 'classrooms'));
     }
 
+    // Update student's classroom enrollment
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -41,18 +43,29 @@ class UserController extends Controller
         // Sync multiple classrooms
         $student->classrooms()->sync($request->classrooms ?? []);
 
-        return redirect()->route('admin.users.index')->with('success', 'Student enrollment updated successfully.');
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'user_id' => $student->id,
+                'role' => $student->role,
+                'classrooms' => $request->classrooms ?? [],
+            ])
+            ->log('Updated student enrollment');
+
+        return redirect()->route('admin.users.index')
+                         ->with('success', 'Student enrollment updated successfully.');
     }
 
-
+    // Show classroom enrollment form
     public function showClassroomEnrollForm()
     {
-        $classrooms = \App\Models\Classroom::all();
-        $students = \App\Models\User::where('role', 'student')->get();
+        $classrooms = Classroom::all();
+        $students = User::where('role', 'student')->get();
 
         return view('admin.users.classroom-enroll', compact('classrooms', 'students'));
     }
 
+    // Enroll multiple students to a classroom
     public function enrollStudentsToClassroom(Request $request, Classroom $classroom)
     {
         $request->validate([
@@ -63,25 +76,49 @@ class UserController extends Controller
         // Add students without removing existing ones
         $classroom->students()->syncWithoutDetaching($request->students);
 
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'classroom_id' => $classroom->id,
+                'students' => $request->students,
+            ])
+            ->log('Enrolled students to classroom');
+
         return redirect()->route('admin.classrooms.show', $classroom->id)
-                        ->with('success', 'Students enrolled successfully.');
+                         ->with('success', 'Students enrolled successfully.');
     }
 
+    // Delete a student
     public function destroy($id)
     {
         $student = User::findOrFail($id);
         $student->delete();
 
-        return redirect()->route('admin.users.index')->with('success', 'Student deleted successfully.');
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'user_id' => $student->id,
+                'role' => $student->role,
+            ])
+            ->log('Deleted student account');
+
+        return redirect()->route('admin.users.index')
+                         ->with('success', 'Student deleted successfully.');
     }
 
+    // Unenroll a student from a specific classroom
     public function unenrollStudent(Classroom $classroom, User $student)
     {
-        // Detach student from this classroom only
         $classroom->students()->detach($student->id);
+
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'classroom_id' => $classroom->id,
+                'student_id' => $student->id,
+            ])
+            ->log('Unenrolled student from classroom');
 
         return redirect()->back()->with('success', 'Student unenrolled successfully.');
     }
-
-
 }

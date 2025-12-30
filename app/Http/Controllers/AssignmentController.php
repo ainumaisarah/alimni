@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Assignment;
 use App\Models\Submission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
@@ -27,7 +28,7 @@ class AssignmentController extends Controller
             'classroom_id' => 'required|exists:classrooms,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,txt',
+            'file' => 'nullable|file|mimes:pdf,doc,docx,txt|max:20480',
             'due_at' => 'nullable|date',
             'allow_late_submission' => 'nullable|boolean',
         ]);
@@ -40,12 +41,11 @@ class AssignmentController extends Controller
             $filePath = $file->storeAs('assignments', $filename, 'public');
         }
 
-        // Convert due_at from KL to UTC
         $dueAtUtc = $request->due_at
             ? Carbon::parse($request->due_at, 'Asia/Kuala_Lumpur')->setTimezone('UTC')
             : null;
 
-        Assignment::create([
+        $assignment = Assignment::create([
             'classroom_id' => $request->classroom_id,
             'title' => $request->title,
             'description' => $request->description,
@@ -54,6 +54,15 @@ class AssignmentController extends Controller
             'due_at' => $dueAtUtc,
             'allow_late_submission' => $request->has('allow_late_submission'),
         ]);
+
+        // Log creation
+        activity()
+            ->causedBy(auth()->user())
+            ->withProperties([
+                'assignment_id' => $assignment->id,
+                'class_id' => $assignment->classroom_id,
+            ])
+            ->log('Created assignment');
 
         return redirect()
             ->route('classes.assignment', $request->classroom_id)
@@ -96,15 +105,21 @@ class AssignmentController extends Controller
 
         $assignment->title = $request->title;
         $assignment->description = $request->description;
-
-        // Convert due_at from KL to UTC
         $assignment->due_at = $request->due_at
             ? Carbon::parse($request->due_at, 'Asia/Kuala_Lumpur')->setTimezone('UTC')
             : null;
-
         $assignment->allow_late_submission = $request->has('allow_late_submission');
 
         $assignment->save();
+
+        // Log update
+        activity()
+            ->causedBy(auth()->user())
+            ->withProperties([
+                'assignment_id' => $assignment->id,
+                'class_id' => $assignment->classroom_id,
+            ])
+            ->log('Updated assignment');
 
         return redirect()
             ->route('classes.assignment', $assignment->classroom_id)
@@ -121,6 +136,15 @@ class AssignmentController extends Controller
         }
 
         $assignment->delete();
+
+        // Log deletion
+        activity()
+            ->causedBy(auth()->user())
+            ->withProperties([
+                'assignment_id' => $assignment->id,
+                'class_id' => $assignment->classroom_id,
+            ])
+            ->log('Deleted assignment');
 
         return back()->with('success', 'Assignment deleted.');
     }
@@ -156,43 +180,33 @@ class AssignmentController extends Controller
     ================================ */
     public function submit(Request $request, Assignment $assignment)
     {
-        // 🔒 Block late submission if not allowed
         if ($assignment->due_at) {
             $dueAt = Carbon::parse($assignment->due_at)->timezone('Asia/Kuala_Lumpur');
-
-            if (
-                now('Asia/Kuala_Lumpur')->gt($dueAt) &&
-                !$assignment->allow_late_submission
-            ) {
-                return back()->withErrors([
-                    'file' => 'Submission is closed for this assignment.'
-                ]);
+            if (now('Asia/Kuala_Lumpur')->gt($dueAt) && !$assignment->allow_late_submission) {
+                return back()->withErrors(['file' => 'Submission is closed for this assignment.']);
             }
         }
 
-        $request->validate([
-            'file' => 'required|file|max:10240', // 10MB
-        ]);
+        $request->validate(['file' => 'required|file|max:10240']); // 10MB
 
         $file = $request->file('file');
         $originalName = $file->getClientOriginalName();
-
-        $storedPath = $file->storeAs(
-            'submissions/' . auth()->id(),
-            $originalName,
-            'public'
-        );
+        $storedPath = $file->storeAs('submissions/' . auth()->id(), $originalName, 'public');
 
         Submission::updateOrCreate(
-            [
-                'assignment_id' => $assignment->id,
-                'student_id' => auth()->id(),
-            ],
-            [
-                'file' => $storedPath,
-                'submitted_at' => now(),
-            ]
+            ['assignment_id' => $assignment->id, 'student_id' => auth()->id()],
+            ['file' => $storedPath, 'submitted_at' => now()]
         );
+
+        // Log submission
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'assignment_id' => $assignment->id,
+                'file_name' => $file->getClientOriginalName(),
+                'class_id' => $assignment->classroom_id,
+            ])
+            ->log('Submitted assignment');
 
         return back()->with('success', 'Assignment submitted successfully.');
     }
@@ -202,16 +216,23 @@ class AssignmentController extends Controller
     ================================ */
     public function deleteSubmission(Assignment $assignment)
     {
-        $submission = $assignment
-            ->submissions()
-            ->where('student_id', auth()->id())
-            ->first();
+        $submission = $assignment->submissions()->where('student_id', auth()->id())->first();
 
         if ($submission) {
             if ($submission->file && Storage::disk('public')->exists($submission->file)) {
                 Storage::disk('public')->delete($submission->file);
             }
             $submission->delete();
+
+            // Log deletion
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'assignment_id' => $assignment->id,
+                    'student_id' => auth()->id(),
+                    'class_id' => $assignment->classroom_id,
+                ])
+                ->log('Deleted assignment submission');
         }
 
         return back()->with('success', 'Submission deleted successfully.');

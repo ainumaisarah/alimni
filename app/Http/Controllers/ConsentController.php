@@ -7,10 +7,12 @@ use Illuminate\Support\Facades\Auth;
 
 class ConsentController extends Controller
 {
-// app/Http/Controllers/ConsentController.php
-
     public function store(Request $request)
     {
+        $request->validate([
+            'parentConsent' => 'nullable|boolean',
+        ]);
+
         $user = Auth::user();
 
         $user->update([
@@ -18,11 +20,14 @@ class ConsentController extends Controller
             'parent_consented' => $request->input('parentConsent') ?? null,
         ]);
 
-        Auth::setUser($user->fresh());
+        // Log the consent action
+        activity()
+            ->causedBy($user)
+            ->withProperties([
+                'parent_consented' => $request->input('parentConsent') ?? null,
+            ])
+            ->log('Student gave PDPA consent');
 
         return response()->json(['success' => true]);
     }
-
-
-
 }

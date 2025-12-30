@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasProfilePhoto, Notifiable, TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, HasProfilePhoto, Notifiable, TwoFactorAuthenticatable, LogsActivity;
 
     protected $fillable = [
         'name',
@@ -34,17 +35,21 @@ class User extends Authenticatable
         'consent_given_at' => 'datetime',
         'last_login_at' => 'datetime',
         'parent_consented' => 'boolean',
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
-
 
     protected $appends = ['profile_photo_url'];
 
-    protected function casts(): array
+    /**
+     * Spatie Activitylog options
+     */
+    public function getActivitylogOptions(): LogOptions
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return LogOptions::defaults()
+            ->logOnly(['name', 'role', 'username', 'consent_given_at', 'parent_consented'])
+            ->useLogName('user')
+            ->logOnlyDirty();
     }
 
     public function hasRole($role)
@@ -52,13 +57,11 @@ class User extends Authenticatable
         return $this->role === $role;
     }
 
-    // Teacher → has many classrooms
     public function teachingClasses()
     {
         return $this->hasMany(Classroom::class, 'teacher_id');
     }
 
-    // Student → belongs to many classrooms
     public function classrooms()
     {
         return $this->belongsToMany(Classroom::class, 'classroom_user', 'user_id', 'classroom_id');

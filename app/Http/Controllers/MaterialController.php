@@ -36,11 +36,10 @@ class MaterialController extends Controller
             ->latest()
             ->get();
 
-        $class = Classroom::findOrFail($classId); // <-- add this
+        $class = Classroom::findOrFail($classId);
 
         return view('classes.materials', compact('materials', 'class'));
     }
-
 
     /* ===========================
        SHOW CREATE FORM
@@ -54,274 +53,290 @@ class MaterialController extends Controller
     }
 
     /* ===========================
-       STORE MATERIAL (MULTI FILE)
+       STORE MATERIAL
     ============================ */
-public function store(Request $request)
-{
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'files.*' => 'nullable|file|max:10240', // 10 MB max for regular files
-        'videos.*' => 'nullable|mimes:mp4,mov,avi|max:614400', // 600 MB max (~40 min 720p)
-        'video_links.*' => 'nullable|url',
-        'classroom_id' => 'required|exists:classrooms,id',
-        'folders.*' => 'nullable|string|max:255',
-    ]);
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'files.*' => 'nullable|file|max:10240',
+            'videos.*' => 'nullable|mimes:mp4,mov,avi|max:614400',
+            'video_links.*' => 'nullable|url',
+            'classroom_id' => 'required|exists:classrooms,id',
+            'folders.*' => 'nullable|string|max:255',
+        ]);
 
+        $material = Material::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'classroom_id' => $request->classroom_id,
+            'teacher_id' => auth()->id(),
+        ]);
 
-    $material = Material::create([
-        'title' => $request->title,
-        'description' => $request->description,
-        'classroom_id' => $request->classroom_id,
-        'teacher_id' => auth()->id(),
-    ]);
-
-    // Upload regular files
-    if ($request->hasFile('files')) {
-        foreach ($request->file('files') as $index => $file) {
-            $folder = $request->folders[$index] ?? null;
-            $ext = $file->getClientOriginalExtension();
-            $material->files()->create([
-                'file_path' => $file->store('materials', 'public'),
-                'original_name' => $file->getClientOriginalName(),
-                'file_type' => $ext,
-                'folder' => $folder,
-            ]);
+        // Upload regular files
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $index => $file) {
+                $folder = $request->folders[$index] ?? null;
+                $material->files()->create([
+                    'file_path' => $file->store('materials', 'public'),
+                    'original_name' => $file->getClientOriginalName(),
+                    'file_type' => $file->getClientOriginalExtension(),
+                    'folder' => $folder,
+                ]);
+            }
         }
-    }
 
-    // Upload videos
-    if ($request->hasFile('videos')) {
-        foreach ($request->file('videos') as $index => $video) {
-            $folder = $request->folders[$index] ?? null;
-            $material->files()->create([
-                'file_path' => $video->store('videos', 'public'),
-                'original_name' => $video->getClientOriginalName(),
-                'file_type' => 'video',
-                'folder' => $folder,
-            ]);
+        // Upload videos
+        if ($request->hasFile('videos')) {
+            foreach ($request->file('videos') as $index => $video) {
+                $folder = $request->folders[$index] ?? null;
+                $material->files()->create([
+                    'file_path' => $video->store('videos', 'public'),
+                    'original_name' => $video->getClientOriginalName(),
+                    'file_type' => 'video',
+                    'folder' => $folder,
+                ]);
+            }
         }
-    }
 
-    // Save video links
-if ($request->filled('video_links')) {
-    foreach ($request->video_links as $link) {
-        if ($link) {
-            $material->files()->create([
-                'file_path' => null,            // No file uploaded
-                'original_name' => $link,       // Show the link as the name
-                'file_type' => 'link',
-                'folder' => null,
-                'link_url' => $link,            // Save the URL here
-            ]);
+        // Save video links
+        if ($request->filled('video_links')) {
+            foreach ($request->video_links as $link) {
+                if ($link) {
+                    $material->files()->create([
+                        'file_path' => null,
+                        'original_name' => $link,
+                        'file_type' => 'link',
+                        'folder' => null,
+                        'link_url' => $link,
+                    ]);
+                }
+            }
         }
+
+        // ✅ Activity log
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'material_id' => $material->id,
+                'class_id' => $material->classroom_id,
+                'title' => $material->title,
+            ])
+            ->log('Uploaded material/lesson');
+
+        return redirect()->route('classes.materials', $request->classroom_id)
+                         ->with('success', 'Material uploaded successfully!');
     }
-}
-    return redirect()->route('classes.materials', $request->classroom_id)
-                     ->with('success', 'Material uploaded successfully!');
-}
 
     /* ===========================
        DOWNLOAD SINGLE FILE
     ============================ */
-public function download($id)
-{
-    $file = MaterialFile::findOrFail($id);
+    public function download($id)
+    {
+        $file = MaterialFile::findOrFail($id);
 
-    if($file->file_type === 'link') {
-        return redirect($file->link_url); // For links, just redirect
+        if ($file->file_type === 'link') {
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties([
+                    'file_id' => $file->id,
+                    'link_url' => $file->link_url,
+                ])
+                ->log('Accessed material link');
+
+            return redirect($file->link_url);
+        }
+
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'file_id' => $file->id,
+                'file_name' => $file->original_name,
+            ])
+            ->log('Downloaded material/file');
+
+        return response()->download(storage_path('app/public/' . $file->file_path), $file->original_name);
     }
 
-    return response()->download(storage_path('app/public/' . $file->file_path), $file->original_name);
-}
+    /* ===========================
+       DOWNLOAD ALL FILES
+    ============================ */
+    public function downloadAll($id)
+    {
+        $material = Material::with('files')->findOrFail($id);
 
-public function view($id)
-{
-    $file = MaterialFile::findOrFail($id);
+        $files = $material->files->filter(fn ($f) => $f->file_type !== 'link');
 
-    if($file->file_type === 'link') {
-        return redirect($file->link_url);
+        if ($files->isEmpty()) {
+            return back()->with('error', 'No files to download.');
+        }
+
+        $zipDir = storage_path('app/public/temp');
+        if (!file_exists($zipDir)) mkdir($zipDir, 0755, true);
+
+        $zipFileName = Str::slug($material->title) . '.zip';
+        $zipPath = $zipDir . '/' . $zipFileName;
+
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+            foreach ($files as $file) {
+                $filePath = storage_path('app/public/' . $file->file_path);
+                if (file_exists($filePath)) $zip->addFile($filePath, $file->original_name);
+            }
+            $zip->close();
+        } else {
+            return back()->with('error', 'Failed to create ZIP file.');
+        }
+
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'material_id' => $material->id,
+                'file_count' => $files->count(),
+            ])
+            ->log('Downloaded all files as ZIP');
+
+        return response()->download($zipPath)->deleteFileAfterSend(true);
     }
 
-    $path = storage_path('app/public/' . $file->file_path);
+    /* ===========================
+       REDIRECT LINK (e.g., YouTube)
+    ============================ */
+    public function redirectLink($id)
+    {
+        $file = MaterialFile::findOrFail($id);
+        if ($file->file_type !== 'link' || !$file->link_url) abort(404);
 
-    return response()->file($path); // Opens in browser
-}
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'file_id' => $file->id,
+                'link_url' => $file->link_url,
+            ])
+            ->log('Accessed material link');
 
-public function downloadAll($id)
-{
-    $material = Material::with('files')->findOrFail($id);
+        $youtubeId = null;
+        if (Str::contains($file->link_url, 'youtube.com/watch?v=')) {
+            parse_str(parse_url($file->link_url, PHP_URL_QUERY), $query);
+            $youtubeId = $query['v'] ?? null;
+        } elseif (Str::contains($file->link_url, 'youtu.be/')) {
+            $youtubeId = last(explode('/', $file->link_url));
+        }
 
-    $files = $material->files->filter(fn ($f) => $f->file_type !== 'link');
-
-    if ($files->isEmpty()) {
-        return back()->with('error', 'No files to download.');
+        return view('materials.redirectLink', compact('file', 'youtubeId'));
     }
 
-    $zipDir = storage_path('app/public/temp');
-    if (!file_exists($zipDir)) {
-        mkdir($zipDir, 0755, true);
+    /* ===========================
+       EDIT MATERIAL
+    ============================ */
+    public function edit($id)
+    {
+        $material = Material::with('files')->findOrFail($id);
+        if ($material->teacher_id !== auth()->id()) abort(403);
+
+        $classroomId = $material->classroom_id;
+        return view('teacher.materials.edit', compact('material', 'classroomId'));
     }
 
-    $zipFileName = Str::slug($material->title) . '.zip';
-    $zipPath = $zipDir . '/' . $zipFileName;
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'files.*' => 'nullable|file|max:10240',
+            'videos.*' => 'nullable|mimes:mp4,mov,avi|max:614400',
+            'video_links.*' => 'nullable|url',
+            'classroom_id' => 'required|exists:classrooms,id',
+        ]);
 
-    $zip = new ZipArchive();
+        $material = Material::with('files')->findOrFail($id);
+        if ($material->teacher_id !== auth()->id()) abort(403);
 
-    if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+        $material->update([
+            'title' => $request->title,
+            'description' => $request->description,
+        ]);
 
-        foreach ($files as $file) {
-            $filePath = storage_path('app/public/' . $file->file_path);
-
-            if (file_exists($filePath)) {
-                $zip->addFile($filePath, $file->original_name);
+        $keepIds = $request->input('keep_existing_files', []);
+        foreach ($material->files as $file) {
+            if (!in_array($file->id, $keepIds)) {
+                if ($file->file_type !== 'link' && $file->file_path) {
+                    Storage::disk('public')->delete($file->file_path);
+                }
+                $file->delete();
             }
         }
 
-        $zip->close();
-    } else {
-        return back()->with('error', 'Failed to create ZIP file.');
-    }
-
-    return response()->download($zipPath)->deleteFileAfterSend(true);
-}
-
-
-// MaterialController.php
-public function redirectLink($id)
-{
-    $file = MaterialFile::findOrFail($id);
-
-    if ($file->file_type !== 'link' || !$file->link_url) {
-        abort(404);
-    }
-
-    $youtubeId = null;
-    if (Str::contains($file->link_url, 'youtube.com/watch?v=')) {
-        parse_str(parse_url($file->link_url, PHP_URL_QUERY), $query);
-        $youtubeId = $query['v'] ?? null;
-    } elseif (Str::contains($file->link_url, 'youtu.be/')) {
-        $youtubeId = last(explode('/', $file->link_url));
-    }
-
-    return view('materials.redirectLink', compact('file', 'youtubeId'));
-}
-
-public function edit($id)
-{
-    $material = Material::with('files')->findOrFail($id);
-
-    // Only the teacher who uploaded can edit
-    if ($material->teacher_id !== auth()->id()) {
-        abort(403);
-    }
-
-    $classroomId = $material->classroom_id;
-
-    return view('teacher.materials.edit', compact('material', 'classroomId'));
-}
-
-public function update(Request $request, $id)
-{
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'files.*' => 'nullable|file|max:10240', // 10 MB
-        'videos.*' => 'nullable|mimes:mp4,mov,avi|max:614400', // 600 MB max (~40 min)
-        'video_links.*' => 'nullable|url',
-        'classroom_id' => 'required|exists:classrooms,id',
-    ]);
-
-
-    $material = Material::with('files')->findOrFail($id);
-
-    // Only teacher who created can edit
-    if ($material->teacher_id !== auth()->id()) {
-        abort(403);
-    }
-
-    // Update title & description
-    $material->update([
-        'title' => $request->title,
-        'description' => $request->description,
-    ]);
-
-    $keepIds = $request->input('keep_existing_files', []);
-
-    // Delete removed files
-    foreach ($material->files as $file) {
-        if (!in_array($file->id, $keepIds)) {
-            if ($file->file_type !== 'link' && $file->file_path) {
-                Storage::disk('public')->delete($file->file_path);
-            }
-            $file->delete();
-        }
-    }
-
-    // Upload new files
-    if ($request->hasFile('files')) {
-        foreach ($request->file('files') as $file) {
-            $material->files()->create([
-                'file_path' => $file->store('materials', 'public'),
-                'original_name' => $file->getClientOriginalName(),
-                'file_type' => $file->getClientOriginalExtension(),
-            ]);
-        }
-    }
-
-    // Upload new videos
-    if ($request->hasFile('videos')) {
-        foreach ($request->file('videos') as $video) {
-            $material->files()->create([
-                'file_path' => $video->store('videos', 'public'),
-                'original_name' => $video->getClientOriginalName(),
-                'file_type' => 'video',
-            ]);
-        }
-    }
-
-    // Add video links
-    if ($request->video_links) {
-        foreach ($request->video_links as $link) {
-            if ($link) {
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
                 $material->files()->create([
-                    'file_type' => 'link',
-                    'original_name' => $link,
-                    'link_url' => $link,
+                    'file_path' => $file->store('materials', 'public'),
+                    'original_name' => $file->getClientOriginalName(),
+                    'file_type' => $file->getClientOriginalExtension(),
                 ]);
             }
         }
+
+        if ($request->hasFile('videos')) {
+            foreach ($request->file('videos') as $video) {
+                $material->files()->create([
+                    'file_path' => $video->store('videos', 'public'),
+                    'original_name' => $video->getClientOriginalName(),
+                    'file_type' => 'video',
+                ]);
+            }
+        }
+
+        if ($request->video_links) {
+            foreach ($request->video_links as $link) {
+                if ($link) {
+                    $material->files()->create([
+                        'file_type' => 'link',
+                        'original_name' => $link,
+                        'link_url' => $link,
+                    ]);
+                }
+            }
+        }
+
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'material_id' => $material->id,
+                'class_id' => $material->classroom_id,
+                'title' => $material->title,
+            ])
+            ->log('Updated material/lesson');
+
+        return redirect()->route('classes.materials', $request->classroom_id)
+                         ->with('success', 'Material updated successfully!');
     }
 
-    return redirect()->route('classes.materials', $request->classroom_id)
-                     ->with('success', 'Material updated successfully!');
-}
-
-
     /* ===========================
-       DELETE MATERIAL (TEACHER)
+       DELETE MATERIAL
     ============================ */
     public function destroy($id)
     {
         $material = Material::with('files')->findOrFail($id);
-
-        if ($material->teacher_id !== Auth::id()) {
-            abort(403);
-        }
+        if ($material->teacher_id !== Auth::id()) abort(403);
 
         foreach ($material->files as $file) {
-            // Only delete physical files if file_path exists
-            if ($file->file_path) {
-                Storage::disk('public')->delete($file->file_path);
-            }
-
-            // Delete DB record
+            if ($file->file_path) Storage::disk('public')->delete($file->file_path);
             $file->delete();
         }
+
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties([
+                'material_id' => $material->id,
+                'class_id' => $material->classroom_id,
+                'title' => $material->title,
+            ])
+            ->log('Deleted material/lesson');
 
         $material->delete();
 
         return back()->with('success', 'Material deleted successfully.');
     }
-
 }

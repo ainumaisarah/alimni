@@ -15,7 +15,7 @@ class ActivitiesExport implements FromCollection
 
     public function collection()
     {
-        return $this->activities->map(function($a){
+        return $this->activities->map(function ($a) {
             return [
                 'User' => $a->causer?->name ?? 'System',
                 'Action' => $a->description,
