@@ -22,6 +22,12 @@
         <h2 class="text-xl font-bold mb-4">Audit Report</h2>
     </div>
 
+    <form method="GET" action="{{ route('admin.audit-report') }}" class="mb-4">
+    <input type="text" name="user" placeholder="User Name" class="input">
+    <input type="text" name="action" placeholder="Action" class="input">
+    <button type="submit" class="btn-primary">Filter</button>
+    </form>
+
     <table class="border-collapse border w-full text-sm">
         <thead class="bg-gray-200">
             <tr>

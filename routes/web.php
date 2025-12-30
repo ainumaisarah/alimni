@@ -358,6 +358,7 @@ Route::middleware(['auth', '\App\Http\Middleware\IsAdmin'])->group(function () {
     Route::get('/audit-report', [AuditReportController::class, 'index'])->name('admin.audit-report');
 });
 
+Route::get('/admin/audit-report/export', [AuditReportController::class, 'export'])->name('admin.audit-report.export');
 
 
 
