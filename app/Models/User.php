@@ -28,6 +28,12 @@ class User extends Authenticatable
         'two_factor_secret',
     ];
 
+    protected $casts = [
+        'consent_given_at' => 'datetime',
+
+    ];
+
+
     protected $appends = ['profile_photo_url'];
 
     protected function casts(): array

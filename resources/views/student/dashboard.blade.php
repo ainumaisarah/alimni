@@ -141,5 +141,51 @@
     @endif
 </div>
 
+@if(!Auth::user()->consent_given_at)
+<!-- Consent Modal -->
+<div id="consentModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300">
+    <div class="consent-container shadow-lg transform scale-95 transition-transform duration-300">
+        <h2 class="text-xl font-bold mb-4">Consent Notice</h2>
+        <p class="mt-4 mb-6 font-semibold">
+            Your account was created by your school. Your personal data will be used for educational purposes only.
+            Please read our <a href="{{ route('privacy.policy') }}" class="text-blue-600 underline" target="_blank">Privacy Policy</a>.
+        </p>
+        <form id="consentForm">
+            @csrf
+            <button type="submit" class="btn-primary center">
+                I Acknowledge
+            </button>
+        </form>
+    </div>
+</div>
 
+<script>
+document.getElementById('consentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    fetch("{{ route('consent.store') }}", {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok');
+        return res.json();
+    })
+    .then(data => {
+        if(data.success){
+            const modal = document.getElementById('consentModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+    })
+    .catch(err => console.error('Consent AJAX error:', err));
+});
+
+</script>
+@endif
 @endsection

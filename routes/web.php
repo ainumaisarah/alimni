@@ -93,7 +93,6 @@ Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(func
     Route::post('teachers/import', [TeacherController::class, 'import'])->name('teachers.import');
     Route::get('/teachers', [TeacherController::class, 'index']) ->name('teachers.index');
     Route::delete('/teachers/{id}', [TeacherController::class, 'destroy']) ->name('teachers.destroy');
-
 });
 
 // Chat routes
@@ -119,7 +118,7 @@ Route::middleware(['auth', IsTeacher::class])->prefix('teacher')->name('teacher.
 
         // Quiz results
         Route::get('results', [QuizController::class, 'results'])->name('quizzes.results');
-    });
+   });
 
     // Announcements
     Route::resource('announcements', AnnouncementController::class)->except(['show']);
@@ -345,4 +344,19 @@ Route::post(
     '/teacher/quizzes/{quiz}/results/{result}/grade',
     [QuizController::class, 'submitGrades']
 )->name('teacher.quizzes.submit_grades');
+
+//PDPA
+Route::get('/privacy-policy', [App\Http\Controllers\PageController::class, 'privacyPolicy'])->name('privacy.policy');
+
+Route::post('/consent', [\App\Http\Controllers\ConsentController::class, 'store'])
+    ->name('consent.store')
+    ->middleware('auth');
+
+Route::middleware(['auth', '\App\Http\Middleware\IsAdmin'])->group(function () {
+    Route::get('/admin/consent-report', [\App\Http\Controllers\AdminController::class, 'consentReport'])->name('admin.consent.report');
+});
+
+
+
+
 

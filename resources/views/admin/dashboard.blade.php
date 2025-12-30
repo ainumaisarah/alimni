@@ -3,21 +3,32 @@
 @section('content')
 <div class="page-container">
     <h2>Admin Dashboard</h2>
-        <div class="admin-card">
-            <h3 class="text-lg font-semibold">Teachers</h3>
-            <p class = "text-lg font-bold">{{ $teacherCount }}</p>
-            <a href="{{ route('admin.teachers.index') }}" class="btn-secondary">Manage</a><br>
-            <a style="font-size: 14px; font-weight: 500; color: #f9fafa;" href="{{ route('admin.teachers.import') }}" class="btn-primary mt-2 inline-block">
-                Import Teachers via Excel
-            </a>
-        </div>
-        <div class="admin-card">
-            <h3 class="text-lg font-semibold">Students</h3>
-            <p class = "text-lg font-bold">{{ $studentCount }}</p>
-            <a href="{{ route('admin.users.index') }}" class="btn-secondary">Manage</a><br>
-            <a style="font-size: 14px; font-weight: 500; color: #f9fafa;" href="{{ route('admin.students.import') }}" class="btn-primary mt-2 inline-block">
-                Import Students via Excel
-            </a>
-        </div>
+
+    <div class="admin-card">
+        <h3 class="text-lg font-semibold">Teachers</h3>
+        <p class="text-lg font-bold">{{ $teacherCount }}</p>
+        <a href="{{ route('admin.teachers.index') }}" class="btn-secondary">Manage</a><br>
+        <a style="font-size: 14px; font-weight: 500; color: #f9fafa;" href="{{ route('admin.teachers.import') }}" class="btn-primary mt-2 inline-block">
+            Import Teachers via Excel
+        </a>
+    </div>
+
+    <div class="admin-card">
+        <h3 class="text-lg font-semibold">Students</h3>
+        <p class="text-lg font-bold">{{ $studentCount }}</p>
+        <a href="{{ route('admin.users.index') }}" class="btn-secondary">Manage</a><br>
+        <a style="font-size: 14px; font-weight: 500; color: #f9fafa;" href="{{ route('admin.students.import') }}" class="btn-primary mt-2 inline-block">
+            Import Students via Excel
+        </a><br>
+    </div>
+
+    <!-- Consent Report Button -->
+    @if(Auth::user()->role === 'admin')
+        <a href="{{ route('admin.consent.report') }}" class="btn-primary mt-4 inline-block">
+            Student Consent Report
+        </a>
+    @endif
+
 </div>
+
 @endsection
