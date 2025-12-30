@@ -26,9 +26,13 @@
     @if(Auth::user()->role === 'admin')
         <a href="{{ route('admin.consent.report') }}" class="btn-primary mt-4 inline-block">
             Student Consent Report
+        </a><br>
+
+        <!-- Audit Report Button -->
+        <a href="{{ route('admin.audit-report') }}" class="btn-primary mt-2 inline-block">
+            Audit Report
         </a>
     @endif
 
 </div>
-
 @endsection

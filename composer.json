@@ -15,7 +15,8 @@
         "livewire/livewire": "^3.7",
         "maatwebsite/excel": "^1.1",
         "phpoffice/phpspreadsheet": "^5.3",
-        "pion/laravel-chunk-upload": "^1.5"
+        "pion/laravel-chunk-upload": "^1.5",
+        "spatie/laravel-activitylog": "^4.10"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

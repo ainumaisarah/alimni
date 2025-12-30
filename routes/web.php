@@ -24,6 +24,7 @@ use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\AuditReportController;
 
 
 /*
@@ -354,7 +355,9 @@ Route::post('/consent', [\App\Http\Controllers\ConsentController::class, 'store'
 
 Route::middleware(['auth', '\App\Http\Middleware\IsAdmin'])->group(function () {
     Route::get('/admin/consent-report', [\App\Http\Controllers\AdminController::class, 'consentReport'])->name('admin.consent.report');
+    Route::get('/audit-report', [AuditReportController::class, 'index'])->name('admin.audit-report');
 });
+
 
 
 

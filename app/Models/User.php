@@ -32,7 +32,8 @@ class User extends Authenticatable
 
     protected $casts = [
         'consent_given_at' => 'datetime',
-
+        'last_login_at' => 'datetime',
+        'parent_consented' => 'boolean',
     ];
 
 
