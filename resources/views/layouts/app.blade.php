@@ -21,32 +21,6 @@
 
     <body class="pl-64">
         <x-banner />
-<!--
-        <button id="pwa-install-btn" style="display:none; position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 8px; z-index: 1000;">
-        Install App
-        </button>
-
-        <script>
-        let deferredPrompt;
-        const btnAdd = document.getElementById('pwa-install-btn');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            btnAdd.style.display = 'block';
-        });
-
-        btnAdd.addEventListener('click', () => {
-            if (!deferredPrompt) return;
-
-            deferredPrompt.prompt();
-
-            deferredPrompt.userChoice.then(() => {
-                deferredPrompt = null;
-                btnAdd.style.display = 'none';
-            });
-        });
-        </script> -->
 
 
         <div class="content">

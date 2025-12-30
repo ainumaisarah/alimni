@@ -141,7 +141,11 @@
     @endif
 </div>
 
-@if(!Auth::user()->consent_given_at)
+@php
+    $user = Auth::user()->fresh();
+@endphp
+
+@if(!$user->consent_given_at)
 <!-- Consent Modal -->
 <div id="consentModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300">
     <div class="consent-container shadow-lg transform scale-95 transition-transform duration-300">
@@ -150,6 +154,15 @@
             Your account was created by your school. Your personal data will be used for educational purposes only.
             Please read our <a href="{{ route('privacy.policy') }}" class="text-blue-600 underline" target="_blank">Privacy Policy</a>.
         </p>
+
+        {{-- Optional parent checkbox --}}
+        @if(Auth::user()->age < 18)
+            <div class="mb-4 text-left">
+                <input type="checkbox" id="parentConsent">
+                <label for="parentConsent">I, as a parent/guardian, acknowledge and consent to my child's use of this platform.</label>
+            </div>
+        @endif
+
         <form id="consentForm">
             @csrf
             <button type="submit" class="btn-primary center">
@@ -163,29 +176,30 @@
 document.getElementById('consentForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
+    const parentConsentCheckbox = document.getElementById('parentConsent');
+    const parentConsent = parentConsentCheckbox ? parentConsentCheckbox.checked : null;
+
     fetch("{{ route('consent.store') }}", {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
             'Accept': 'application/json',
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json', // <- comma needed here
         },
-        body: JSON.stringify({})
+        body: JSON.stringify({
+            parentConsent: parentConsent
+        })
     })
-    .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok');
-        return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
-        if(data.success){
-            const modal = document.getElementById('consentModal');
-            modal.classList.add('opacity-0');
-            setTimeout(() => modal.style.display = 'none', 300);
+        if (data.success) {
+            window.location.reload();
         }
     })
-    .catch(err => console.error('Consent AJAX error:', err));
+    .catch(err => console.error(err));
 });
 
 </script>
+
 @endif
 @endsection
