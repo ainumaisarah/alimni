@@ -68,12 +68,12 @@
 
         <div class="mb-4">
             <label for="start_time">Start Time</label>
-            <input type="time" name="start_time" id="start_time" value="{{ old('start_time') }}" class="w-full border rounded px-3 py-2" required>
+            <input type="time" name="start_time" id="start_time" value="{{ old('start_time') }}" class="rounded px-3 py-2" required>
         </div>
 
         <div class="mb-4">
             <label for="end_time">End Time</label>
-            <input type="time" name="end_time" id="end_time" value="{{ old('end_time') }}" class="w-full border rounded px-3 py-2" required>
+            <input type="time" name="end_time" id="end_time" value="{{ old('end_time') }}" class="border rounded px-3 py-2" required>
         </div>
 
         <button type="submit" class="btn-primary">Create Schedule</button>

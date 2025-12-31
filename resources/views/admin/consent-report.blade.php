@@ -19,7 +19,7 @@
                       d="M15 19l-7-7 7-7" />
             </svg>
         </a>
-        <h2 class="text-xl font-bold mb-4">PDPA Consent Report</h2>
+        <h2>Student Consent Report</h2>
     </div>
 
     <table class="table-auto w-full border">
