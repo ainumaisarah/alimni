@@ -57,10 +57,18 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => null,
+
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+
+            // ✅ THIS IS THE IMPORTANT PART
+            'dump' => [
+                'dump_binary_path' => 'C:/xampp/mysql/bin',
+                'useSingleTransaction' => true,
+            ],
         ],
+
 
         'mariadb' => [
             'driver' => 'mariadb',

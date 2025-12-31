@@ -25,6 +25,8 @@ use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\Admin\TeacherController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\AuditReportController;
+use App\Http\Controllers\BackupController;
+
 
 
 /*
@@ -360,6 +362,13 @@ Route::middleware(['auth', '\App\Http\Middleware\IsAdmin'])->group(function () {
 
 //Route::get('/admin/audit-report/export', [AuditReportController::class, 'export'])->name('admin.audit-report.export');
 Route::get('admin/audit-report/export-csv', [AuditReportController::class, 'exportCsv'])->name('admin.audit-report.export-csv');
+
+Route::middleware(['auth', '\App\Http\Middleware\IsAdmin'])->group(function () {
+    Route::get('/backups', [BackupController::class, 'index'])->name('admin.backups.index');
+    Route::post('/backups/run', [BackupController::class, 'runBackup'])->name('admin.backups.run');
+    Route::get('/backups/download/{filename}', [BackupController::class, 'download'])->name('admin.backups.download');
+    Route::delete('/backups/delete/{filename}', [BackupController::class, 'delete'])->name('admin.backups.delete');
+});
 
 
 
