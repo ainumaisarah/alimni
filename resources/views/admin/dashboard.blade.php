@@ -44,7 +44,7 @@
         </a><br>
 
         <!-- Run Backup Button -->
-        <div class="mt-4">
+        <div class="mt-2">
             <form id="backupForm" action="{{ route('admin.backups.run') }}" method="POST">
                 @csrf
                 <button type="submit" id="backupButton" class="btn-primary flex items-center gap-2">
