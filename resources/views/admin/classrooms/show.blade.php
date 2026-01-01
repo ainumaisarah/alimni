@@ -105,11 +105,6 @@
             </button>
         </form>
 
-        <a href="{{ route('admin.classrooms.index') }}"
-           class="btn-secondary mt-4 inline-block">
-            Back to Classes
-        </a>
-
     </div>
 </div>
 @endsection
