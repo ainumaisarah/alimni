@@ -29,7 +29,7 @@
                 <tr class="bg-gray-100">
                     <th class="p-2 border">Student</th>
                     <th class="p-2 border">Total Attempts</th>
-                    <th class="p-2 border">Latest Score</th>
+                    <th class="p-2 border">Average Score</th>
                     <th class="p-2 border">Review</th>
                 </tr>
             </thead>
@@ -39,8 +39,8 @@
                         <td class="p-2 border">{{ $res['student']->name }}</td>
                         <td class="p-2 border">{{ $res['totalAttempts'] }}</td>
                         <td class="p-2 border">
-                            @if($res['latestScore'] !== null)
-                                {{ $res['latestScore'] }}%
+                            @if($res['totalAttempts'] > 0)
+                                {{ round($res['attempts']->avg('score'), 2) }}%
                             @else
                                 N/A
                             @endif
@@ -51,19 +51,19 @@
                                     <option value="">Select Attempt</option>
                                     @foreach($res['attempts'] as $attempt)
                                         @php
-                                            $hasUngraded = false;
-                                            foreach($attempt->answers as $questionId => $answerValue) {
-                                                $question = $quiz->questions->firstWhere('id', $questionId);
-                                                if($question && $question->question_type === 'short') {
-                                                    $hasUngraded = true;
+                                            $attemptHasUngraded = false;
+
+                                            foreach($quiz->questions as $question) {
+                                                if ($question->question_type === 'short' && !isset($attempt->answers[$question->id.'_marks'])) {
+                                                    $attemptHasUngraded = true;
                                                     break;
                                                 }
                                             }
                                         @endphp
                                         <option value="{{ route('teacher.quizzes.review', [$quiz->id, $attempt->id]) }}">
                                             Attempt #{{ $attempt->attempt_number }} ({{ $attempt->score }}%)
-                                            @if($hasUngraded)
-                                                - Pending Short Answer Grading
+                                            @if($attemptHasUngraded)
+                                                - ⚠ Short Answer Grading
                                             @endif
                                         </option>
                                     @endforeach

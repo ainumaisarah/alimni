@@ -137,7 +137,7 @@
                                 {{-- Questions already exist --}}
                                 <a style="font-size: 14px; font-weight: 500; color: #f9fafa;" href="{{ route('teacher.questions.index', $quiz->id) }}"
                                 class="btn-primary px-3 py-1 text-sm">
-                                Manage Questions
+                                Manage Quiz
                                 </a>
                             @endif
 
