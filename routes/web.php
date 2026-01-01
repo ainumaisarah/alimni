@@ -48,7 +48,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/photo', [ProfileController::class, 'updateProfilePhoto'])->name('profile.updatePhoto');
-    Route::put('/profile/photo/remove', [ProfileController::class, 'removeProfilePhoto'])->name('profile.removePhoto');
+    Route::delete('/profile/photo', [ProfileController::class, 'removeProfilePhoto'])->name('profile.photo.delete');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
 });
 // Authenticated routes

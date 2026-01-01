@@ -116,9 +116,11 @@
         <header class="fixed top-0 right-0 left-64 h-16 bg-white flex justify-end items-center px-6 z-50">
             <div x-data="{ open: false }" class="relative">
                 <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none">
-                   <img class="h-8 w-8 rounded-full object-cover" src="{{ Auth::user()->profile_photo_path
-                                ? asset(Auth::user()->profile_photo_path)
-                                : asset('images/default-avatar.jpg') }}"
+                   <img
+                        class="h-8 w-8 rounded-full object-cover"
+                        src="{{ Auth::user()->profile_photo_path
+                            ? asset('storage/' . Auth::user()->profile_photo_path)
+                            : asset('images/default-avatar.jpg') }}"
                         alt="{{ Auth::user()->name }}"
                     >
 

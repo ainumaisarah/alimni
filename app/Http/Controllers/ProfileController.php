@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+
 
 class ProfileController extends Controller
 {
@@ -35,22 +37,30 @@ class ProfileController extends Controller
             'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $fileName = time() . '.' . $request->file('profile_photo')->getClientOriginalExtension();
-        $request->file('profile_photo')->move(public_path('images'), $fileName);
+        $path = $request->file('profile_photo')->store('profile-photos', 'public');
 
         $user = Auth::user();
-        $user->profile_photo_path = 'images/' . $fileName;
+
+        // delete old photo if exists
+        if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
+            Storage::disk('public')->delete($user->profile_photo_path);
+        }
+
+        $user->profile_photo_path = $path;
         $user->save();
 
         return back()->with('success', 'Profile photo updated successfully.');
-    }
+}
+
 
     public function removeProfilePhoto()
     {
-        $user = auth()->user();
-        if ($user->profile_photo_path && file_exists(public_path($user->profile_photo_path))) {
-            unlink(public_path($user->profile_photo_path));
+        $user = Auth::user();
+
+        if ($user->profile_photo_path && Storage::disk('public')->exists($user->profile_photo_path)) {
+            Storage::disk('public')->delete($user->profile_photo_path);
         }
+
         $user->profile_photo_path = null;
         $user->save();
 
