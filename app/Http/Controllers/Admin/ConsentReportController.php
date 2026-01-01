@@ -4,18 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Spatie\Activitylog\Models\Activity;
+use App\Models\User;
 
 class ConsentReportController extends Controller
 {
     public function index()
     {
-        // Fetch only PDPA-related and student activity logs
-        $activities = Activity::whereIn('description', [
-            'Student gave PDPA consent',
-            'Parent consented',
-        ])->latest()->get();
+        // Fetch all students
+        $students = User::where('role', 'student')
+                        ->orderBy('name')
+                        ->get();
 
-        return view('admin.consent-report', compact('activities'));
+        return view('admin.consent-report', compact('students'));
     }
 }
