@@ -350,6 +350,9 @@ Route::post(
 
 //PDPA
 Route::get('/privacy-policy', [App\Http\Controllers\PageController::class, 'privacyPolicy'])->name('privacy.policy');
+Route::get('/privacy-policy', function () {
+    return view('privacy-policy'); // points to resources/views/privacy-policy.blade.php
+})->name('privacy.policy');
 
 Route::post('/consent', [\App\Http\Controllers\ConsentController::class, 'store'])
     ->name('consent.store')

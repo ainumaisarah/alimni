@@ -116,5 +116,11 @@
         @endif
     </div>
 
+    <form action="{{ route('privacy.policy') }}" method="get" target="_blank" class="inline">
+        <button type="submit" class="btn-primary mt-2">
+            Privacy Policy
+        </button>
+    </form>
+
 </div>
 @endsection
