@@ -17,6 +17,7 @@ class Quiz extends Model
         'due_at',      // datetime when quiz closes
         'classroom_id',  // related classroom
         'subject_id',    // optional subject
+        'max_attempts'
     ];
 
     protected $dates = [

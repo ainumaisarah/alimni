@@ -8,6 +8,6 @@ class PageController extends Controller
 {
     public function privacyPolicy()
     {
-        return view('pages.privacy-policy');
+        return view('wiews.privacy-policy');
     }
 }
