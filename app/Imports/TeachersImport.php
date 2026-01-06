@@ -23,7 +23,8 @@ class TeachersImport
             if ($index === 0) continue; // skip header
 
             try {
-                if (empty($row[0]) || empty($row[1]) || empty($row[3])) {
+                // Only require name and username
+                if (empty($row[0]) || empty($row[1])) {
                     $this->errors[] = "Row " . ($index + 1) . " is missing required fields.";
                     continue;
                 }
@@ -32,17 +33,21 @@ class TeachersImport
 
                 $password = $password ?: 'password123';
 
+                // Create or update teacher
                 $teacher = User::updateOrCreate(
                     ['username' => $username],
                     ['name' => $name, 'password' => Hash::make($password), 'role' => 'teacher']
                 );
                 if ($teacher->wasRecentlyCreated) $this->createdTeachers++;
 
-                $class = Classroom::updateOrCreate(
-                    ['name' => $className],
-                    ['teacher_id' => $teacher->id]
-                );
-                if ($class->wasRecentlyCreated) $this->createdClassrooms++;
+                // Only create classroom if a name is provided
+                if (!empty($className)) {
+                    $class = Classroom::updateOrCreate(
+                        ['name' => $className],
+                        ['teacher_id' => $teacher->id]
+                    );
+                    if ($class->wasRecentlyCreated) $this->createdClassrooms++;
+                }
 
             } catch (\Exception $e) {
                 $this->errors[] = "Row " . ($index + 1) . " (Teacher: '{$username}', Class: '{$className}'): "

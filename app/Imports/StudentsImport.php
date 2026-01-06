@@ -27,6 +27,11 @@ class StudentsImport
             [$name, $username, $password, $className] = $row;
 
             try {
+                if (empty($name) || empty($username)) {
+                    $this->errors[] = "Row " . ($index + 1) . " is missing required fields (name/username).";
+                    continue;
+                }
+
                 $password = $password ?: 'alimni123';
 
                 // 1. Create or update student
@@ -39,12 +44,14 @@ class StudentsImport
                     $this->created++;
                 }
 
-                // 2. Find or create classroom
-                $class = Classroom::firstOrCreate(['name' => $className]);
+                // 2. Find or create classroom only if className is provided
+                if (!empty($className)) {
+                    $class = Classroom::firstOrCreate(['name' => $className]);
 
-                // 3. Attach student to class (avoid duplicates)
-                if (!$student->classrooms()->where('classroom_id', $class->id)->exists()) {
-                    $student->classrooms()->attach($class->id);
+                    // 3. Attach student to class (avoid duplicates)
+                    if (!$student->classrooms()->where('classroom_id', $class->id)->exists()) {
+                        $student->classrooms()->attach($class->id);
+                    }
                 }
 
             } catch (\Exception $e) {
