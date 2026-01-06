@@ -47,6 +47,7 @@ class QuizController extends Controller
             'duration' => 'nullable|integer|min:1',
             'open_at' => 'nullable|date',
             'due_at' => 'nullable|date|after_or_equal:open_at',
+            'max_attempts' => 'required|integer|min:1|max:3',
         ]);
 
         $quiz = new Quiz();
@@ -55,6 +56,7 @@ class QuizController extends Controller
         $quiz->classroom_id = $request->classroom_id;
         $quiz->teacher_id = auth()->id();
         $quiz->show_answers = $request->has('show_answers');
+        $quiz->max_attempts = $request->max_attempts;
         $quiz->duration = $request->duration;
         $quiz->open_at = $request->open_at;
         $quiz->due_at = $request->due_at;
@@ -91,6 +93,7 @@ class QuizController extends Controller
             'duration' => 'nullable|integer|min:1',
             'open_at' => 'nullable|date',
             'due_at' => 'nullable|date|after_or_equal:open_at',
+            'max_attempts' => 'required|integer|min:1|max:3',
         ]);
 
         $quiz->update([
@@ -101,6 +104,7 @@ class QuizController extends Controller
             'duration' => $validated['duration'] ?? null,
             'open_at' => $validated['open_at'] ?? null,
             'due_at' => $validated['due_at'] ?? null,
+            'max_attempts' => $validated['max_attempts'],
         ]);
 
         // Reset all student attempts
@@ -220,7 +224,7 @@ class QuizController extends Controller
         $student = auth()->user();
         $attempts = $quiz->results()->where('student_id', $student->id)->get();
         $attemptsCount = $attempts->count();
-        $maxAttempts = 3;
+        $maxAttempts = $quiz->max_attempts;
 
         $questions = $quiz->questions()->get();
 
@@ -243,7 +247,7 @@ class QuizController extends Controller
         }
 
         $attemptsCount = $quiz->results()->where('student_id', $student->id)->count();
-        $maxAttempts = 3;
+        $maxAttempts = $quiz->max_attempts;
 
         if ($attemptsCount >= $maxAttempts) {
             return redirect()->route('student.quizzes.single', $quiz->id)
@@ -261,7 +265,7 @@ class QuizController extends Controller
     {
         $student = auth()->user();
         $attemptsCount = $quiz->results()->where('student_id', $student->id)->count();
-        $maxAttempts = 3;
+        $maxAttempts = $quiz->max_attempts;
 
         if($attemptsCount >= $maxAttempts){
             return redirect()->route('student.quizzes.single', $quiz->id)

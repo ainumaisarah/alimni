@@ -57,6 +57,21 @@
             </label>
         </div>
 
+        {{-- Max Attempts --}}
+        <div class="mb-4">
+            <label class="block font-semibold mb-1">
+                Maximum Attempts (1–3)
+            </label>
+            <select name="max_attempts" class="border rounded p-2 w-60" required>
+                @for ($i = 1; $i <= 3; $i++)
+                    <option value="{{ $i }}"
+                        {{ old('max_attempts', $quiz->max_attempts ?? 1) == $i ? 'selected' : '' }}>
+                        {{ $i }}
+                    </option>
+                @endfor
+            </select>
+        </div>
+
         {{-- Duration --}}
         <div class="mb-4">
             <label class="block font-semibold mb-1">Quiz Duration (minutes, optional)</label>
