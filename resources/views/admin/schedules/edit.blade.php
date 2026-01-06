@@ -21,74 +21,90 @@
         <h2>Edit Schedule</h2>
     </div>
 
-    @if ($errors->any())
-        <div class="error-alert mb-4">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>- {{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-<div class="app-card mb-4">
-    <form action="{{ route('admin.schedules.update', $schedule->id) }}" method="POST" class="max-w-lg">
-        @csrf
-        @method('PUT')
+    <div class="app-card">
+        @if ($errors->any())
+            <div class="error-alert mb-4">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>- {{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-        <div class="mb-4">
-            <label for="classroom_id">Classroom</label>
-            <select name="classroom_id" id="classroom_id" class="w-full border rounded px-3 py-2" required>
-                <option value="" disabled>Select a classroom</option>
-                @foreach($classrooms as $classroom)
-                    <option value="{{ $classroom->id }}"
-                        {{ (old('classroom_id', $schedule->classroom_id) == $classroom->id) ? 'selected' : '' }}>
-                        {{ $classroom->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+        <form action="{{ route('admin.schedules.update', $schedule->id) }}" method="POST" class="max-w-3xl">
+            @csrf
+            @method('PUT')
 
-        <div class="mb-4">
-            <label for="teacher_id">Teacher</label>
-            <select name="teacher_id" id="teacher_id" class="w-full border rounded px-3 py-2" required>
-                <option value="" disabled>Select a teacher</option>
-                @foreach($teachers as $teacher)
-                    <option value="{{ $teacher->id }}"
-                        {{ (old('teacher_id', $schedule->teacher_id) == $teacher->id) ? 'selected' : '' }}>
-                        {{ $teacher->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+            <div class="mb-4">
+                <label>Classroom</label>
+                <select name="classroom_id" id="classroom_id" class="w-full border rounded px-3 py-2" required>
+                    <option value="" disabled>Select a classroom</option>
+                    @foreach($classrooms as $classroom)
+                        <option value="{{ $classroom->id }}"
+                                data-teacher="{{ $classroom->teacher_id }}"
+                                {{ $schedule->classroom_id == $classroom->id ? 'selected' : '' }}>
+                            {{ $classroom->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-        <div class="mb-4">
-            <label for="day">Day</label>
-            <select name="day" id="day" class="w-full border rounded px-3 py-2" required>
-                <option value="" disabled>Select a day</option>
-                @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] as $day)
-                    <option value="{{ $day }}" {{ (old('day', $schedule->day) == $day) ? 'selected' : '' }}>
-                        {{ $day }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+            <div class="mb-4">
+                <label>Teacher</label>
+                <select name="teacher_id" id="teacher_id" class="w-full border rounded px-3 py-2" required>
+                    <option value="" disabled>Select a teacher</option>
+                    @foreach($teachers as $teacher)
+                        <option value="{{ $teacher->id }}" {{ $schedule->teacher_id == $teacher->id ? 'selected' : '' }}>
+                            {{ $teacher->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-        <div class="mb-4">
-            <label for="start_time">Start Time</label><br>
-            <input type="time" name="start_time" id="start_time"
-            value="{{ old('start_time', \Carbon\Carbon::parse($schedule->start_time)->format('H:i')) }}"
-            class="border rounded px-3 py-2" required>
-        </div>
+            <hr class="my-4">
 
-        <div class="mb-4">
-            <label for="end_time">End Time</label><br>
-            <input type="time" name="end_time" id="end_time"
-            value="{{ old('end_time', \Carbon\Carbon::parse($schedule->end_time)->format('H:i')) }}"
-            class="border rounded px-3 py-2" required>
-        </div>
+            <div id="schedule-row" class="p-4 border rounded mb-4 relative">
+                <div class="mb-2">
+                    <label>Day</label>
+                    <select name="day" class="w-full border rounded px-3 py-2" required>
+                        @foreach(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'] as $day)
+                            <option value="{{ $day }}" {{ $schedule->day == $day ? 'selected' : '' }}>{{ $day }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-        <button type="submit" class="btn-primary">Update Schedule</button>
-    </form>
+                <div class="mb-2">
+                    <label>Start Time</label>
+                    <input type="time" name="start_time" value="{{ $schedule->start_time }}" class="border rounded px-3 py-2 w-full" required>
+                </div>
+
+                <div class="mb-2">
+                    <label>End Time</label>
+                    <input type="time" name="end_time" value="{{ $schedule->end_time }}" class="border rounded px-3 py-2 w-full" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Update Schedule</button>
+        </form>
+    </div>
 </div>
-</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const classroomSelect = document.getElementById('classroom_id');
+    const teacherSelect = document.getElementById('teacher_id');
+
+    // Auto-select teacher when classroom changes
+    function autoSelectTeacher() {
+        const selectedOption = classroomSelect.options[classroomSelect.selectedIndex];
+        if (!selectedOption) return;
+        const teacherId = selectedOption.getAttribute('data-teacher');
+        if (teacherId) teacherSelect.value = teacherId;
+    }
+
+    classroomSelect.addEventListener('change', autoSelectTeacher);
+    autoSelectTeacher(); // run on page load
+});
+</script>
 @endsection
