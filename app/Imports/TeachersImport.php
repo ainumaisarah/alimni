@@ -3,21 +3,63 @@
 namespace App\Imports;
 
 use App\Models\User;
+use App\Models\Classroom;
 use Illuminate\Support\Facades\Hash;
-use Excel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class TeachersImport
 {
-    /**
-     * Map each row to a User model.
-     */
-    public function model(array $row)
+    public $createdTeachers = 0;
+    public $createdClassrooms = 0;
+    public $errors = [];
+
+    public function import($file)
     {
-        return new User([
-            'name' => $row['name'] ?? '',
-            'username' => $row['username'] ?? null,
-            'password' => isset($row['password']) ? Hash::make($row['password']) : Hash::make('password123'),
-            'role' => 'teacher',
-        ]);
+        $spreadsheet = IOFactory::load($file->getPathname());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+
+        foreach ($rows as $index => $row) {
+            if ($index === 0) continue; // skip header
+
+            try {
+                if (empty($row[0]) || empty($row[1]) || empty($row[3])) {
+                    $this->errors[] = "Row " . ($index + 1) . " is missing required fields.";
+                    continue;
+                }
+
+                [$name, $username, $password, $className] = $row;
+
+                $password = $password ?: 'password123';
+
+                $teacher = User::updateOrCreate(
+                    ['username' => $username],
+                    ['name' => $name, 'password' => Hash::make($password), 'role' => 'teacher']
+                );
+                if ($teacher->wasRecentlyCreated) $this->createdTeachers++;
+
+                $class = Classroom::updateOrCreate(
+                    ['name' => $className],
+                    ['teacher_id' => $teacher->id]
+                );
+                if ($class->wasRecentlyCreated) $this->createdClassrooms++;
+
+            } catch (\Exception $e) {
+                $this->errors[] = "Row " . ($index + 1) . " (Teacher: '{$username}', Class: '{$className}'): "
+                    . $e->getMessage();
+            }
+        }
+    }
+
+    public function summary()
+    {
+        $message = "{$this->createdTeachers} new teacher(s) imported successfully";
+        $message .= ", {$this->createdClassrooms} new classroom(s) created.";
+
+        if (!empty($this->errors)) {
+            $message .= " Some errors occurred: " . implode(' | ', $this->errors);
+        }
+
+        return $message;
     }
 }

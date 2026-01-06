@@ -5,7 +5,7 @@ namespace App\Imports;
 use App\Models\User;
 use App\Models\Classroom;
 use Illuminate\Support\Facades\Hash;
-use Excel;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class StudentsImport
 {
@@ -13,57 +13,57 @@ class StudentsImport
     public $errors = [];
 
     /**
-     * Import students from an uploaded Excel file.
-     *
-     * @param \Illuminate\Http\UploadedFile $file
+     * Import students from Excel
      */
     public function import($file)
     {
-        Excel::load($file, function($reader) {
+        $spreadsheet = IOFactory::load($file->getPathname());
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
 
-            $results = $reader->get();
+        foreach ($rows as $index => $row) {
+            if ($index === 0) continue; // skip header row
 
-            foreach ($results as $row) {
-                try {
-                    // -------------------------------
-                    // 1. Find the teacher
-                    // -------------------------------
-                    $teacher = User::where('username', $row->teacher_username)
-                                   ->where('role', 'teacher')
-                                   ->first();
+            [$name, $username, $password, $className] = $row;
 
-                    if (!$teacher) {
-                        $this->errors[] = "Teacher '{$row->teacher_username}' not found for student '{$row->username}'";
-                        continue; // skip this row
-                    }
+            try {
+                $password = $password ?: 'alimni123';
 
-                    // -------------------------------
-                    // 2. Find or create the classroom
-                    // -------------------------------
-                    $class = Classroom::updateOrCreate(
-                        ['name' => $row->class_name],
-                        ['teacher_id' => $teacher->id]
-                    );
-                    // -------------------------------
-                    // 3. Create or update the student
-                    // -------------------------------
-                    $user = User::updateOrCreate(
-                        ['username' => $row->username],
-                        [
-                            'name' => $row->name,
-                            'password' => Hash::make($row->password),
-                            'role' => 'student',
-                            'classroom_id' => $class->id,
-                        ]
-                    );
+                // 1. Create or update student
+                $student = User::updateOrCreate(
+                    ['username' => $username, 'role' => 'student'],
+                    ['name' => $name, 'password' => Hash::make($password)]
+                );
 
+                if ($student->wasRecentlyCreated) {
                     $this->created++;
-
-                } catch (\Exception $e) {
-                    $this->errors[] = "Row with username '{$row->username}': " . $e->getMessage();
                 }
-            }
 
-        });
+                // 2. Find or create classroom
+                $class = Classroom::firstOrCreate(['name' => $className]);
+
+                // 3. Attach student to class (avoid duplicates)
+                if (!$student->classrooms()->where('classroom_id', $class->id)->exists()) {
+                    $student->classrooms()->attach($class->id);
+                }
+
+            } catch (\Exception $e) {
+                $this->errors[] = "Row " . ($index + 1) . " ({$username}): " . $e->getMessage();
+            }
+        }
+    }
+
+    /**
+     * Return a summary message after import
+     */
+    public function summary()
+    {
+        $message = "{$this->created} new student(s) imported successfully.";
+
+        if (!empty($this->errors)) {
+            $message .= " Some errors occurred: " . implode(' | ', $this->errors);
+        }
+
+        return $message;
     }
 }

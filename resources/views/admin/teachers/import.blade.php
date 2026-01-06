@@ -55,6 +55,8 @@
                         <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700 border">Name</th>
                         <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700 border">Username</th>
                         <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700 border">Password</th>
+                        <th class="px-4 py-2 text-center text-sm font-semibold text-gray-700 border">Class_Name</th>
+
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -62,6 +64,7 @@
                         <td class="px-4 py-2 border">Jane Smith</td>
                         <td class="px-4 py-2 border">jane123</td>
                         <td class="px-4 py-2 border">secret</td>
+                        <td class="px-4 py-2 border">11A Science</td>
                     </tr>
                 </tbody>
             </table>
