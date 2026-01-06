@@ -47,8 +47,6 @@
                     @endif
                 </td>
                 <td>
-                    <a href="{{ route('admin.users.edit', $student->id) }}" class="btn-secondary mr-3">Edit</a>
-
                     <form action="{{ route('admin.users.destroy', $student->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure you want to delete this student?');">
                         @csrf
                         @method('DELETE')
