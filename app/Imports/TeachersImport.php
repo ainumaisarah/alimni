@@ -31,7 +31,7 @@ class TeachersImport
 
                 [$name, $username, $password, $className] = $row;
 
-                $password = $password ?: 'password123';
+                $password = $password ?: 'alimni123';
 
                 // Create or update teacher
                 $teacher = User::updateOrCreate(
