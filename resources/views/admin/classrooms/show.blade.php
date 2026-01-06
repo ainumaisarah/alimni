@@ -71,7 +71,15 @@
                 Tick the checkbox next to the student you want to enroll.
             </p>
 
-            <div class="border rounded p-4 max-h-64 overflow-y-auto">
+            <!-- Search Box -->
+            <input
+                type="text"
+                id="studentSearch"
+                placeholder="Search student by name or username..."
+                class="border rounded w-full p-2 mb-3"
+            />
+
+            <div class="border rounded p-4 max-h-64 overflow-y-auto" id="studentList">
                 @forelse(
                     \App\Models\User::where('role', 'student')
                     ->whereDoesntHave('classrooms', function($q) use ($classroom) {
@@ -79,7 +87,7 @@
                     })
                     ->get() as $student
                 )
-                    <label class="flex items-center mb-2 cursor-pointer">
+                    <label class="flex items-center mb-2 cursor-pointer student-row">
                         <input
                             type="checkbox"
                             name="students[]"
@@ -107,4 +115,20 @@
 
     </div>
 </div>
+
+<!-- Search Script -->
+<script>
+    const searchInput = document.getElementById('studentSearch');
+    const studentRows = document.querySelectorAll('.student-row');
+
+    searchInput.addEventListener('keyup', function () {
+        const keyword = this.value.toLowerCase();
+
+        studentRows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(keyword) ? '' : 'none';
+        });
+    });
+</script>
+
 @endsection
