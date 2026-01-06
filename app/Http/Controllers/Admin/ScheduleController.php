@@ -54,6 +54,35 @@ class ScheduleController extends Controller
                          ->with('success', 'Schedule created successfully.');
     }
 
+public function storeMultiple(Request $request)
+{
+    $classroom_id = $request->input('classroom_id');
+    $teacher_id = $request->input('teacher_id');
+    $schedules = $request->input('schedules', []);
+
+    foreach ($schedules as $index => $schedule) {
+        $schedule['classroom_id'] = $classroom_id;
+        $schedule['teacher_id'] = $teacher_id;
+
+        validator($schedule, [
+            'classroom_id' => 'required|exists:classrooms,id',
+            'teacher_id' => 'required|exists:users,id',
+            'day' => 'required|string|max:50',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+        ])->validate();
+
+        // Create schedule
+        Schedule::create($schedule);
+    }
+
+    return redirect()->route('admin.schedules.index')
+                     ->with('success', 'Schedules created successfully.');
+}
+
+
+
+
     public function destroy($id)
     {
         $schedule = Schedule::findOrFail($id);

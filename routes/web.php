@@ -373,6 +373,14 @@ Route::middleware(['auth', '\App\Http\Middleware\IsAdmin'])->group(function () {
     Route::delete('/backups/delete/{filename}', [BackupController::class, 'delete'])->name('admin.backups.delete');
 });
 
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('schedules', ScheduleController::class);
+
+    // Add this route for multiple schedule creation
+    Route::post('schedules/multiple', [ScheduleController::class, 'storeMultiple'])
+         ->name('schedules.storeMultiple');
+});
+
 
 
 
