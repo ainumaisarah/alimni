@@ -6,8 +6,12 @@
 <div class="schedule-container" style="margin-bottom:20px;">
     <div style="background-color:#7c3636; color:white; padding:20px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
         <div>
-            <h1 style="font-size:1.5rem; font-weight:bold;">Welcome, {{ auth()->user()->name }}!</h1>
-            <p style="color:white;">Here’s your teaching schedule and recently accessed classes.</p>
+            <h1 style="font-size:1.5rem; font-weight:bold;">
+                Welcome, {{ auth()->user()->name }}!
+            </h1>
+            <p style="color:white;">
+                Here’s your teaching schedule and recently accessed classes.
+            </p>
         </div>
         <div>
             <img src="{{ asset('images/gazelle.png') }}"
@@ -39,10 +43,12 @@
     @if ($schedules->isEmpty())
         <p>You have not been assigned to any schedules yet.</p>
     @else
+
         @php
+            /* ================= DAYS ================= */
             $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-            // Time slots: 08:00 – 14:00 (30 min)
+            /* ================= TIME SLOTS ================= */
             $timeSlots = [];
             $current = \Carbon\Carbon::parse('08:00');
             $endTime = \Carbon\Carbon::parse('14:00');
@@ -52,7 +58,7 @@
                 $current->addMinutes(30);
             }
 
-            // Schedule map with merged cells
+            /* ================= SCHEDULE MAP ================= */
             $scheduleMap = [];
             $skipSlots = [];
 
@@ -64,11 +70,20 @@
                 $day = $schedule->day;
                 $startKey = $start->format('H:i');
 
+                $classroomName = $schedule->classroom->name ?? 'N/A';
+
+                // 🎨 UNIQUE pastel color per class (hash-based)
+                $hash = crc32($classroomName);
+                $hue  = $hash % 360;
+                $color = "hsl($hue, 70%, 85%)";
+
                 $scheduleMap[$day][$startKey] = [
                     'rowspan'   => $rowspan,
-                    'classroom' => $schedule->classroom->name ?? 'N/A',
+                    'classroom' => $classroomName,
+                    'color'     => $color,
                 ];
 
+                // Mark skipped cells for rowspan
                 for ($i = 1; $i < $rowspan; $i++) {
                     $skipSlots[$day][
                         $start->copy()->addMinutes(30 * $i)->format('H:i')
@@ -77,7 +92,7 @@
             }
         @endphp
 
-       <table class="border-collapse border w-full text-sm mt-3">
+        <table class="border-collapse border w-full text-sm mt-3">
             <thead>
                 <tr>
                     <th class="border px-2 py-1">Time</th>
@@ -93,34 +108,33 @@
                         <td class="border px-2 py-1 font-bold">{{ $time }}</td>
 
                         @foreach ($days as $day)
+
                             @if(isset($skipSlots[$day][$time]))
-                                {{-- skip merged slot --}}
                                 @continue
                             @endif
 
                             @if(isset($scheduleMap[$day][$time]))
-                                <td class="border px-2 py-1 bg-green-200 text-center"
+                                <td class="border px-2 py-1 text-center"
                                     rowspan="{{ $scheduleMap[$day][$time]['rowspan'] }}"
-                                    style="position: relative;">
+                                    style="background-color: {{ $scheduleMap[$day][$time]['color'] }};
+                                           position: relative;">
 
                                     <div style="
                                         position: absolute;
-                                        top: 0;
-                                        bottom: 0;
-                                        left: 0;
-                                        right: 0;
+                                        inset: 0;
                                         display: flex;
-                                        flex-direction: column;
                                         justify-content: center;
                                         align-items: center;
                                         font-weight: 600;
                                     ">
                                         {{ $scheduleMap[$day][$time]['classroom'] }}
                                     </div>
+
                                 </td>
                             @else
                                 <td class="border px-2 py-1">&nbsp;</td>
                             @endif
+
                         @endforeach
                     </tr>
                 @endforeach
@@ -128,4 +142,5 @@
         </table>
     @endif
 </div>
+
 @endsection

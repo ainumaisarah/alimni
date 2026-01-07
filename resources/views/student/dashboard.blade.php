@@ -6,8 +6,12 @@
 <div class="schedule-container" style="margin-bottom:20px;">
     <div style="background-color:#7c3636; color:white; padding:20px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
         <div>
-            <h1 style="font-size:1.5rem; font-weight:bold;">Welcome, {{ auth()->user()->name }}!</h1>
-            <p style="color:white;">Here’s your latest class schedule and recently accessed classes.</p>
+            <h1 style="font-size:1.5rem; font-weight:bold;">
+                Welcome, {{ auth()->user()->name }}!
+            </h1>
+            <p style="color:white;">
+                Here’s your latest class schedule and recently accessed classes.
+            </p>
         </div>
         <div>
             <img src="{{ asset('images/gazelle.png') }}"
@@ -23,7 +27,8 @@
     <h2>Recently Accessed Classes</h2>
     <div style="display:flex; gap:10px; flex-wrap:wrap;">
         @foreach($recentClassrooms as $classroom)
-            <a href="{{ route('classes.show', $classroom->id) }}" style="background:#f3f3f3; padding:10px; border-radius:8px; text-decoration:none; color:black; flex:1 1 200px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+            <a href="{{ route('classes.show', $classroom->id) }}"
+               style="background:#f3f3f3; padding:10px; border-radius:8px; text-decoration:none; color:black; flex:1 1 200px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
                 <div style="font-weight:bold;">{{ $classroom->name }}</div>
             </a>
         @endforeach
@@ -39,9 +44,10 @@
         <p>You are not assigned to a class or there are no schedules yet.</p>
     @else
         @php
+            /* ================= DAYS ================= */
             $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
-            // Generate 30-minute slots (08:00 – 14:00)
+            /* ================= TIME SLOTS ================= */
             $timeSlots = [];
             $current = \Carbon\Carbon::parse('08:00');
             $endTime = \Carbon\Carbon::parse('14:00');
@@ -51,7 +57,7 @@
                 $current->addMinutes(30);
             }
 
-            // Prepare schedule map + skipped cells
+            /* ================= SCHEDULE MAP ================= */
             $scheduleMap = [];
             $skipSlots = [];
 
@@ -63,12 +69,21 @@
                 $day = $schedule->day;
                 $startKey = $start->format('H:i');
 
+                $classroomName = $schedule->classroom->name ?? 'N/A';
+
+                // 🎨 UNIQUE pastel color per classroom
+                $hash = crc32($classroomName);
+                $hue  = $hash % 360;
+                $color = "hsl($hue, 70%, 85%)";
+
                 $scheduleMap[$day][$startKey] = [
                     'rowspan'   => $rowspan,
-                    'classroom' => $schedule->classroom->name ?? 'N/A',
+                    'classroom' => $classroomName,
                     'teacher'   => $schedule->teacher->name ?? 'N/A',
+                    'color'     => $color,
                 ];
 
+                // Mark skipped cells for rowspan
                 for ($i = 1; $i < $rowspan; $i++) {
                     $skipSlots[$day][
                         $start->copy()->addMinutes(30 * $i)->format('H:i')
@@ -90,13 +105,11 @@
             <tbody>
                 @foreach ($timeSlots as $time)
                     <tr>
-                        {{-- Time column --}}
                         <td class="border px-2 py-1 font-bold">{{ $time }}</td>
 
-                        {{-- Day columns --}}
                         @foreach ($days as $day)
 
-                            {{-- Skip slots covered by rowspan --}}
+                            {{-- Skip rowspan-covered slots --}}
                             @if (!empty($skipSlots[$day][$time]))
                                 @continue
                             @endif
@@ -104,9 +117,12 @@
                             {{-- Scheduled class --}}
                             @if (!empty($scheduleMap[$day][$time]))
                                 <td
-                                    class="border px-2 py-1 bg-blue-200 text-center"
+                                    class="border px-2 py-1 text-center"
                                     rowspan="{{ $scheduleMap[$day][$time]['rowspan'] }}"
-                                    style="position: relative;"
+                                    style="
+                                        background-color: {{ $scheduleMap[$day][$time]['color'] }};
+                                        position: relative;
+                                    "
                                 >
                                     <div style="
                                         position: absolute;
@@ -122,7 +138,7 @@
                                             {{ $scheduleMap[$day][$time]['classroom'] }}
                                         </div>
 
-                                        <div class="text-xs text-gray-700">
+                                        <div style="font-size: 0.75rem; opacity: 0.8;">
                                             {{ $scheduleMap[$day][$time]['teacher'] }}
                                         </div>
                                     </div>
@@ -146,20 +162,25 @@
 @endphp
 
 @if(!$user->consent_given_at)
-<!-- Consent Modal -->
+<!-- ================= Consent Modal ================= -->
 <div id="consentModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300">
     <div class="consent-container shadow-lg transform scale-95 transition-transform duration-300">
         <h2 class="text-xl font-bold mb-4">Consent Notice</h2>
+
         <p class="mt-4 mb-6 font-semibold">
             Your account was created by your school. Your personal data will be used for educational purposes only.
-            Please read our <a href="{{ route('privacy.policy') }}" class="text-blue-600 underline" target="_blank">Privacy Policy</a>.
+            Please read our
+            <a href="{{ route('privacy.policy') }}" class="text-blue-600 underline" target="_blank">
+                Privacy Policy
+            </a>.
         </p>
 
-        {{-- Optional parent checkbox --}}
         @if(Auth::user()->age < 18)
             <div class="mb-4 text-left">
                 <input type="checkbox" id="parentConsent">
-                <label for="parentConsent">I, as a parent/guardian, acknowledge and consent to my child's use of this platform.</label>
+                <label for="parentConsent">
+                    I, as a parent/guardian, acknowledge and consent to my child's use of this platform.
+                </label>
             </div>
         @endif
 
@@ -184,11 +205,9 @@ document.getElementById('consentForm').addEventListener('submit', function(e) {
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
             'Accept': 'application/json',
-            'Content-Type': 'application/json', // <- comma needed here
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-            parentConsent: parentConsent
-        })
+        body: JSON.stringify({ parentConsent })
     })
     .then(res => res.json())
     .then(data => {
@@ -198,8 +217,7 @@ document.getElementById('consentForm').addEventListener('submit', function(e) {
     })
     .catch(err => console.error(err));
 });
-
 </script>
-
 @endif
+
 @endsection
