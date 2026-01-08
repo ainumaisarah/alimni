@@ -14,13 +14,23 @@
         <h2 class="mb-4">Questions for: {{ $quiz->title }}</h2>
     </div>
 
-    <a href="{{ route('teacher.quizzes.results', $quiz->id) }}" class="btn-primary px-4 py-2 text-sm">
-        View Result
-    </a>
+    {{-- Action Buttons --}}
+    <div class="flex gap-2 mb-4">
+        <a href="{{ route('teacher.quizzes.showQuiz', $quiz->id) }}"
+           class="btn-primary px-4 py-2 text-sm">
+            Show Quiz
+        </a>
 
-    <a href="{{ route('teacher.questions.create', $quiz->id) }}" class="btn-primary px-4 py-2 rounded mb-4 inline-block">
-        Add Question
-    </a>
+        <a href="{{ route('teacher.quizzes.results', $quiz->id) }}"
+           class="btn-primary px-4 py-2 text-sm">
+            View Result
+        </a>
+
+        <a href="{{ route('teacher.questions.create', $quiz->id) }}"
+           class="btn-primary px-4 py-2 rounded text-sm">
+            Add Question
+        </a>
+    </div>
 
     {{-- Separate MCQs --}}
     @php
@@ -81,11 +91,11 @@
                         <td class="px-4 py-2 border text-center">{{ $question->marks_short }}</td>
                         <td class="px-4 py-2 border text-center">
                             <a href="{{ route('teacher.questions.edit', [$quiz->id, $question->id]) }}"
-                            class="btn-secondary px-4 py-2 text-sm">Edit</a>
+                               class="btn-secondary px-4 py-2 text-sm">Edit</a>
 
                             <form action="{{ route('teacher.questions.destroy', [$quiz->id, $question->id]) }}"
-                                method="POST" class="inline-block"
-                                onsubmit="return confirm('Delete this question?')">
+                                  method="POST" class="inline-block"
+                                  onsubmit="return confirm('Delete this question?')">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn-danger">Delete</button>
@@ -96,7 +106,6 @@
             </tbody>
         </table>
     @endif
-
 
     @if($questions->count() === 0)
         <p class="empty-message mt-4">No questions added yet.</p>

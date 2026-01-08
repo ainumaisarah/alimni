@@ -213,6 +213,27 @@ class QuizController extends Controller
                         ->with('success', 'Grades saved successfully.');
     }
 
+    // =========================
+// TEACHER SHOW QUIZ
+// =========================
+
+/**
+ * Show the quiz to the teacher (read-only view, like student view)
+ */
+public function showQuiz(Quiz $quiz)
+{
+    // Make sure the authenticated teacher owns this quiz
+    if ($quiz->teacher_id !== auth()->id()) {
+        abort(403, 'Unauthorized access to this quiz.');
+    }
+
+    // Get all questions
+    $questions = $quiz->questions()->get();
+
+    // Return a view similar to student show
+    return view('teacher.quizzes.show', compact('quiz', 'questions'));
+}
+
 
     // =========================
     // STUDENT METHODS

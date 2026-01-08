@@ -381,6 +381,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
          ->name('schedules.storeMultiple');
 });
 
+Route::get('teacher/quizzes/{quiz}/show', [QuizController::class, 'showQuiz'])
+    ->name('teacher.quizzes.showQuiz');
 
 
 
