@@ -114,20 +114,40 @@ public function storeMultiple(Request $request)
         return view('admin.schedules.edit', compact('schedule', 'classrooms', 'teachers'));
     }
 
-    public function update(Request $request, $id)
-    {
-        $validated = $request->validate([
+public function update(Request $request, $id)
+{
+    $classroom_id = $request->input('classroom_id');
+    $teacher_id = $request->input('teacher_id');
+    $schedules = $request->input('schedules', []);
+
+    if (empty($schedules)) {
+        return redirect()->back()->withErrors('No schedules provided.');
+    }
+
+    // Optionally: delete old schedules for this classroom/teacher before re-adding
+    Schedule::where('id', $id)->delete(); // or delete all schedules for this classroom if you want multiple
+
+    foreach ($schedules as $schedule) {
+        if (empty($schedule['day']) || empty($schedule['start_time']) || empty($schedule['end_time'])) {
+            continue;
+        }
+
+        $schedule['classroom_id'] = $classroom_id;
+        $schedule['teacher_id'] = $teacher_id;
+
+        validator($schedule, [
             'classroom_id' => 'required|exists:classrooms,id',
             'teacher_id' => 'required|exists:users,id',
             'day' => 'required|string|max:50',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
-        ]);
+        ])->validate();
 
-        $schedule = Schedule::findOrFail($id);
-        $schedule->update($validated);
-
-        return redirect()->route('admin.schedules.index')
-                         ->with('success', 'Schedule updated successfully.');
+        Schedule::create($schedule);
     }
+
+    return redirect()->route('admin.schedules.index')
+                     ->with('success', 'Schedule updated successfully.');
+}
+
 }
