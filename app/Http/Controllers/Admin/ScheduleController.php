@@ -60,7 +60,16 @@ public function storeMultiple(Request $request)
     $teacher_id = $request->input('teacher_id');
     $schedules = $request->input('schedules', []);
 
+    if (empty($schedules)) {
+        return redirect()->back()->withErrors('No schedules provided.');
+    }
+
     foreach ($schedules as $index => $schedule) {
+        // Skip empty rows
+        if (empty($schedule['day']) || empty($schedule['start_time']) || empty($schedule['end_time'])) {
+            continue;
+        }
+
         $schedule['classroom_id'] = $classroom_id;
         $schedule['teacher_id'] = $teacher_id;
 
@@ -72,14 +81,12 @@ public function storeMultiple(Request $request)
             'end_time' => 'required|date_format:H:i|after:start_time',
         ])->validate();
 
-        // Create schedule
         Schedule::create($schedule);
     }
 
     return redirect()->route('admin.schedules.index')
                      ->with('success', 'Schedules created successfully.');
 }
-
 
 
 
