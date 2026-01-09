@@ -10,20 +10,35 @@ use Illuminate\Http\Request;
 
 class ScheduleController extends Controller
 {
-    public function index()
-{
+    public function index(Request $request)
+    {
+        // Optional teacher filter (Teacher POV)
+        $teacherId = $request->query('teacher_id');
+
         // Load schedules with classrooms and teachers
-        $schedules = Schedule::with(['classroom', 'teacher'])->get();
+        $schedules = Schedule::with(['classroom', 'teacher'])
+            ->when($teacherId, function ($q) use ($teacherId) {
+                $q->where('teacher_id', $teacherId);
+            })
+            ->orderBy('teacher_id')
+            ->orderBy('day')
+            ->orderBy('start_time')
+            ->get();
 
         // Get classroom IDs that already have schedules
-        $scheduledClassroomIds = $schedules->pluck('classroom_id');
+        $scheduledClassroomIds = $schedules->pluck('classroom_id')->unique();
 
         // Get classrooms without any schedule
         $unscheduledClassrooms = Classroom::whereNotIn('id', $scheduledClassroomIds)->get();
 
+        // Get teachers for dropdown (Teacher POV selector)
+        $teachers = User::where('role', 'teacher')->get();
+
         return view('admin.schedules.index', compact(
             'schedules',
-            'unscheduledClassrooms'
+            'unscheduledClassrooms',
+            'teachers',
+            'teacherId'
         ));
     }
 
@@ -65,6 +80,7 @@ public function storeMultiple(Request $request)
     }
 
     foreach ($schedules as $index => $schedule) {
+
         // Skip empty rows
         if (empty($schedule['day']) || empty($schedule['start_time']) || empty($schedule['end_time'])) {
             continue;
@@ -73,6 +89,9 @@ public function storeMultiple(Request $request)
         $schedule['classroom_id'] = $classroom_id;
         $schedule['teacher_id'] = $teacher_id;
 
+        // -------------------------------
+        // Basic validation
+        // -------------------------------
         validator($schedule, [
             'classroom_id' => 'required|exists:classrooms,id',
             'teacher_id' => 'required|exists:users,id',
@@ -81,14 +100,38 @@ public function storeMultiple(Request $request)
             'end_time' => 'required|date_format:H:i|after:start_time',
         ])->validate();
 
+        // -------------------------------
+        // 🔴 CLASH CHECK (IMPORTANT FIX)
+        // -------------------------------
+        $clash = Schedule::where('teacher_id', $teacher_id)
+            ->where('day', $schedule['day'])
+            ->where(function ($q) use ($schedule) {
+                $q->whereBetween('start_time', [$schedule['start_time'], $schedule['end_time']])
+                  ->orWhereBetween('end_time', [$schedule['start_time'], $schedule['end_time']])
+                  ->orWhere(function ($q2) use ($schedule) {
+                      $q2->where('start_time', '<=', $schedule['start_time'])
+                         ->where('end_time', '>=', $schedule['end_time']);
+                  });
+            })
+            ->exists();
+
+        if ($clash) {
+            return redirect()->back()
+                ->withErrors(
+                    "Schedule clash detected: This teacher is already assigned on {$schedule['day']} from {$schedule['start_time']} to {$schedule['end_time']}."
+                )
+                ->withInput();
+        }
+
+        // -------------------------------
+        // Save if no clash
+        // -------------------------------
         Schedule::create($schedule);
     }
 
     return redirect()->route('admin.schedules.index')
                      ->with('success', 'Schedules created successfully.');
 }
-
-
 
     public function destroy($id)
     {

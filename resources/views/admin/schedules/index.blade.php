@@ -39,6 +39,25 @@
 
     <h3 class="mb-2 font-semibold">Scheduled Classes</h3>
 
+    <form method="GET" class="mb-4 max-w-sm">
+    <label class="block text-sm font-medium mb-1">
+        View schedule by teacher
+    </label>
+
+    <select name="teacher_id"
+            onchange="this.form.submit()"
+            class="w-full border rounded px-3 py-2">
+        <option value="">All teachers</option>
+
+        @foreach($teachers as $teacher)
+            <option value="{{ $teacher->id }}"
+                {{ request('teacher_id') == $teacher->id ? 'selected' : '' }}>
+                {{ $teacher->name }}
+            </option>
+        @endforeach
+    </select>
+</form>
+
 <table class="table-auto w-full border-collapse text-sm">
     <thead>
         <tr class="bg-gray-100 text-left">
