@@ -62,7 +62,7 @@
                     $start = \Carbon\Carbon::parse($schedule->start_time)->format('H:i');
                     $end = \Carbon\Carbon::parse($schedule->end_time)->format('H:i');
                     $slot = (strtotime($end) - strtotime($start)) / 1800;
-                    $times = ['08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00'];
+                    $times = ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','12:30','13:00'];
                 @endphp
 
                 <div class="schedule-row border rounded p-4 mb-4 relative">
