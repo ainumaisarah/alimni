@@ -141,10 +141,24 @@
                                         <div class="flex flex-col items-center justify-center gap-1">
                                             <span>{{ $scheduleMap[$day][$time]['classroom'] }}</span>
 
+                                            {{-- Edit --}}
                                             <a href="{{ route('admin.schedules.edit', $scheduleMap[$day][$time]['schedule_id']) }}"
                                             class="text-xs text-blue-700 underline hover:text-blue-900">
                                                 Edit
                                             </a>
+
+                                            {{-- Delete --}}
+                                            <form action="{{ route('admin.schedules.destroy', $scheduleMap[$day][$time]['schedule_id']) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Are you sure you want to delete this schedule?');">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button type="submit"
+                                                        class="text-xs text-red-600 underline hover:text-red-800">
+                                                    Delete
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 @else
