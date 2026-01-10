@@ -5,31 +5,22 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Schedule;
 use App\Models\Classroom;
-use App\Models\User; // For teachers
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ScheduleController extends Controller
 {
-   public function index(Request $request)
+    public function index(Request $request)
     {
-        // 1️⃣ Get selected teacher id from dropdown
         $teacherId = $request->query('teacher_id');
 
-        // 2️⃣ Get all teachers (for dropdown only)
         $teachers = User::where('role', 'teacher')->get();
 
-        // 3️⃣ Get ONE selected teacher (Teacher POV)
-        $selectedTeacher = null;
+        $selectedTeacher = $teacherId
+            ? User::with('schedules.classroom')->find($teacherId)
+            : null;
 
-        if ($teacherId) {
-            $selectedTeacher = User::with(['schedules.classroom'])
-                ->where('id', $teacherId)
-                ->first();
-        }
-
-        // 4️⃣ Unscheduled classrooms (global)
         $scheduledClassroomIds = Schedule::pluck('classroom_id')->unique();
-
         $unscheduledClassrooms = Classroom::whereNotIn('id', $scheduledClassroomIds)->get();
 
         return view('admin.schedules.index', compact(
@@ -44,106 +35,88 @@ class ScheduleController extends Controller
     {
         $classrooms = Classroom::all();
         $teachers = User::where('role', 'teacher')->get();
+        $selectedClassroomId = $request->query('classroom_id');
 
-        // 👇 get classroom_id from query string
-    $selectedClassroomId = $request->query('classroom_id');
-
-        return view('admin.schedules.create', compact('classrooms', 'teachers','selectedClassroomId'));
+        return view('admin.schedules.create', compact(
+            'classrooms',
+            'teachers',
+            'selectedClassroomId'
+        ));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'classroom_id' => 'required|exists:classrooms,id',
-            'teacher_id' => 'required|exists:users,id',
-            'day' => 'required|string|max:50',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
+            'teacher_id'   => 'required|exists:users,id',
+            'day'          => 'required|string|max:50',
+            'start_time'   => 'required|date_format:H:i',
+            'end_time'     => 'required|date_format:H:i|after:start_time',
         ]);
+
+        $clash = $this->checkClash(
+            $validated['teacher_id'],
+            $validated['day'],
+            $validated['start_time'],
+            $validated['end_time']
+        );
+
+        if ($clash) {
+            return redirect()->back()
+                ->withErrors($clash)
+                ->withInput();
+        }
 
         Schedule::create($validated);
 
         return redirect()->route('admin.schedules.index')
-                         ->with('success', 'Schedule created successfully.');
+            ->with('success', 'Schedule created successfully.');
     }
 
-public function storeMultiple(Request $request)
-{
-    $classroom_id = $request->input('classroom_id');
-    $teacher_id = $request->input('teacher_id');
-    $schedules = $request->input('schedules', []);
-
-    if (empty($schedules)) {
-        return redirect()->back()->withErrors('No schedules provided.');
-    }
-
-    foreach ($schedules as $index => $schedule) {
-
-        // Skip empty rows
-        if (empty($schedule['day']) || empty($schedule['start_time']) || empty($schedule['end_time'])) {
-            continue;
-        }
-
-        $schedule['classroom_id'] = $classroom_id;
-        $schedule['teacher_id'] = $teacher_id;
-
-        // -------------------------------
-        // Basic validation
-        // -------------------------------
-        validator($schedule, [
-            'classroom_id' => 'required|exists:classrooms,id',
-            'teacher_id' => 'required|exists:users,id',
-            'day' => 'required|string|max:50',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
-        ])->validate();
-
-        // -------------------------------
-        // 🔴 CLASH CHECK (IMPORTANT FIX)
-        // -------------------------------
-        $clash = Schedule::where('teacher_id', $teacher_id)
-            ->where('day', $schedule['day'])
-            ->where(function ($q) use ($schedule) {
-                $q->whereBetween('start_time', [$schedule['start_time'], $schedule['end_time']])
-                  ->orWhereBetween('end_time', [$schedule['start_time'], $schedule['end_time']])
-                  ->orWhere(function ($q2) use ($schedule) {
-                      $q2->where('start_time', '<=', $schedule['start_time'])
-                         ->where('end_time', '>=', $schedule['end_time']);
-                  });
-            })
-            ->exists();
-
-        if ($clash) {
-            return redirect()->back()
-                ->withErrors(
-                    "Schedule clash detected: This teacher is already assigned on {$schedule['day']} from {$schedule['start_time']} to {$schedule['end_time']}."
-                )
-                ->withInput();
-        }
-
-        // -------------------------------
-        // Save if no clash
-        // -------------------------------
-        Schedule::create($schedule);
-    }
-
-    return redirect()->route('admin.schedules.index')
-                     ->with('success', 'Schedules created successfully.');
-}
-
-    public function destroy($id)
+    public function storeMultiple(Request $request)
     {
-        $schedule = Schedule::findOrFail($id);
-        $schedule->delete();
+        $classroom_id = $request->input('classroom_id');
+        $teacher_id = $request->input('teacher_id');
+        $schedules = $request->input('schedules', []);
+
+        if (empty($schedules)) {
+            return redirect()->back()->withErrors('No schedules provided.');
+        }
+
+        foreach ($schedules as $schedule) {
+            if (empty($schedule['day']) || empty($schedule['start_time']) || empty($schedule['end_time'])) {
+                continue;
+            }
+
+            $schedule['classroom_id'] = $classroom_id;
+            $schedule['teacher_id'] = $teacher_id;
+
+            validator($schedule, [
+                'classroom_id' => 'required|exists:classrooms,id',
+                'teacher_id' => 'required|exists:users,id',
+                'day' => 'required|string|max:50',
+                'start_time' => 'required|date_format:H:i',
+                'end_time' => 'required|date_format:H:i|after:start_time',
+            ])->validate();
+
+            $clash = $this->checkClash(
+                $teacher_id,
+                $schedule['day'],
+                $schedule['start_time'],
+                $schedule['end_time']
+            );
+
+            if ($clash) {
+                return redirect()->back()
+                    ->withErrors($clash)
+                    ->withInput();
+            }
+
+            Schedule::create($schedule);
+        }
 
         return redirect()->route('admin.schedules.index')
-                         ->with('success', 'Schedule deleted successfully.');
-    }
-
-    public function home()
-    {
-        $schedules = Schedule::with(['classroom', 'teacher'])->get();
-        return view('admin.home', compact('schedules'));
+            ->with('success', 'Schedules created successfully.');
     }
 
     public function edit($id)
@@ -155,40 +128,73 @@ public function storeMultiple(Request $request)
         return view('admin.schedules.edit', compact('schedule', 'classrooms', 'teachers'));
     }
 
-public function update(Request $request, $id)
-{
-    $classroom_id = $request->input('classroom_id');
-    $teacher_id = $request->input('teacher_id');
-    $schedules = $request->input('schedules', []);
+    public function update(Request $request, Schedule $schedule)
+    {
+        $request->validate([
+            'classroom_id' => 'required|exists:classrooms,id',
+            'teacher_id'   => 'required|exists:users,id',
+            'schedules'    => 'required|array',
+        ]);
 
-    if (empty($schedules)) {
-        return redirect()->back()->withErrors('No schedules provided.');
-    }
+        $item = $request->schedules[0]; // only single schedule edit
 
-    // Optionally: delete old schedules for this classroom/teacher before re-adding
-    Schedule::where('id', $id)->delete(); // or delete all schedules for this classroom if you want multiple
+        $clash = $this->checkClash(
+            $request->teacher_id,
+            $item['day'],
+            $item['start_time'],
+            $item['end_time'],
+            $schedule->id
+        );
 
-    foreach ($schedules as $schedule) {
-        if (empty($schedule['day']) || empty($schedule['start_time']) || empty($schedule['end_time'])) {
-            continue;
+        if ($clash) {
+            return redirect()->back()
+                ->withErrors($clash)
+                ->withInput();
         }
 
-        $schedule['classroom_id'] = $classroom_id;
-        $schedule['teacher_id'] = $teacher_id;
+        $schedule->update([
+            'classroom_id' => $request->classroom_id,
+            'teacher_id'   => $request->teacher_id,
+            'day'          => $item['day'],
+            'start_time'   => $item['start_time'],
+            'end_time'     => $item['end_time'],
+        ]);
 
-        validator($schedule, [
-            'classroom_id' => 'required|exists:classrooms,id',
-            'teacher_id' => 'required|exists:users,id',
-            'day' => 'required|string|max:50',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
-        ])->validate();
-
-        Schedule::create($schedule);
+        return redirect()->route('admin.schedules.index')
+            ->with('success', 'Schedule updated successfully.');
     }
 
-    return redirect()->route('admin.schedules.index')
-                     ->with('success', 'Schedule updated successfully.');
-}
+    public function destroy($id)
+    {
+        $schedule = Schedule::findOrFail($id);
+        $schedule->delete();
 
+        return redirect()->route('admin.schedules.index')
+            ->with('success', 'Schedule deleted successfully.');
+    }
+
+    protected function checkClash($teacher_id, $day, $start_time, $end_time, $excludeId = null)
+    {
+        $query = Schedule::where('teacher_id', $teacher_id)
+            ->where('day', $day);
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        $exists = $query->where(function ($q) use ($start_time, $end_time) {
+            $q->whereBetween('start_time', [$start_time, $end_time])
+              ->orWhereBetween('end_time', [$start_time, $end_time])
+              ->orWhere(function ($q2) use ($start_time, $end_time) {
+                  $q2->where('start_time', '<=', $start_time)
+                     ->where('end_time', '>=', $end_time);
+              });
+        })->exists();
+
+        if ($exists) {
+            return "Schedule clash detected: This teacher is already assigned on {$day} from {$start_time} to {$end_time}.";
+        }
+
+        return false;
+    }
 }
