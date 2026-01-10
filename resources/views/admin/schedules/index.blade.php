@@ -99,6 +99,7 @@
                     'rowspan' => $rowspan,
                     'classroom' => $classroom,
                     'color' => $color,
+                    'schedule_id' => $schedule->id,
                 ];
 
                 for ($i = 1; $i < $rowspan; $i++) {
@@ -134,9 +135,17 @@
 
                                 @if(isset($scheduleMap[$day][$time]))
                                     <td rowspan="{{ $scheduleMap[$day][$time]['rowspan'] }}"
-                                        class="border text-center font-medium"
+                                        class="border text-center font-medium relative"
                                         style="background: {{ $scheduleMap[$day][$time]['color'] }}">
-                                        {{ $scheduleMap[$day][$time]['classroom'] }}
+
+                                        <div class="flex flex-col items-center justify-center gap-1">
+                                            <span>{{ $scheduleMap[$day][$time]['classroom'] }}</span>
+
+                                            <a href="{{ route('admin.schedules.edit', $scheduleMap[$day][$time]['schedule_id']) }}"
+                                            class="text-xs text-blue-700 underline hover:text-blue-900">
+                                                Edit
+                                            </a>
+                                        </div>
                                     </td>
                                 @else
                                     <td class="border">&nbsp;</td>
