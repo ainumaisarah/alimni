@@ -39,7 +39,7 @@
 
     <h3 class="mb-2 font-semibold">Scheduled Classes</h3>
 
-    <form method="GET" class="mb-4 max-w-sm">
+    <form method="GET" class="mb-6 max-w-sm">
     <label class="block text-sm font-medium mb-1">
         View schedule by teacher
     </label>
@@ -47,60 +47,109 @@
     <select name="teacher_id"
             onchange="this.form.submit()"
             class="w-full border rounded px-3 py-2">
-        <option value="">All teachers</option>
+        <option value="">Select a teacher</option>
 
         @foreach($teachers as $teacher)
             <option value="{{ $teacher->id }}"
-                {{ request('teacher_id') == $teacher->id ? 'selected' : '' }}>
+                {{ $teacherId == $teacher->id ? 'selected' : '' }}>
                 {{ $teacher->name }}
             </option>
         @endforeach
     </select>
 </form>
 
-<table class="table-auto w-full border-collapse text-sm">
-    <thead>
-        <tr class="bg-gray-100 text-left">
-            <th class="border px-4 py-2 w-1/6 text-center">Classroom</th>
-            <th class="border px-4 py-2 w-1/6 text-center">Teacher</th>
-            <th class="border px-4 py-2 w-1/6 text-center">Day</th>
-            <th class="border px-4 py-2 w-1/6 text-center">Start Time</th>
-            <th class="border px-4 py-2 w-1/6 text-center">End Time</th>
-            <th class="border px-4 py-2 w-1/6 text-center">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @forelse($schedules->groupBy(function($item) {
-            return $item->classroom_id.'-'.$item->teacher_id;
-        }) as $group)
-            @foreach($group as $index => $schedule)
-                <tr class="hover:bg-gray-50">
-                    @if($index === 0)
-                        <td class="border px-4 py-2 text-center align-middle" rowspan="{{ $group->count() }}">{{ $schedule->classroom->name }}</td>
-                        <td class="border px-4 py-2 text-center align-middle" rowspan="{{ $group->count() }}">{{ $schedule->teacher->name }}</td>
-                    @endif
-                    <td class="border px-4 py-2 text-center">{{ $schedule->day }}</td>
-                    <td class="border px-4 py-2 text-center">{{ $schedule->start_time }}</td>
-                    <td class="border px-4 py-2 text-center">{{ $schedule->end_time }}</td>
-                    <td class="border px-4 py-2 text-center align-middle">
-                        <div class="flex flex-row justify-center items-center gap-2 whitespace-nowrap">
-                            <a href="{{ route('admin.schedules.edit', $schedule->id) }}" class="btn-secondary">Edit</a>
-                            <form action="{{ route('admin.schedules.destroy', $schedule->id) }}" method="POST" onsubmit="return confirm('Delete this schedule?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-danger">Delete</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-            @endforeach
-        @empty
-            <tr>
-                <td colspan="6" class="empty-message text-center py-4">No schedules found.</td>
-            </tr>
-        @endforelse
-    </tbody>
-</table>
+@if ($selectedTeacher)
+
+    <div class="schedule-container mb-10">
+        <h2 class="text-lg font-bold mb-3">
+            Teaching Schedule – {{ $selectedTeacher->name }}
+        </h2>
+
+        @php
+            $schedules = $selectedTeacher->schedules;
+
+            $days = ['Monday','Tuesday','Wednesday','Thursday','Friday'];
+
+            $timeSlots = [];
+            $current = \Carbon\Carbon::parse('08:00');
+            $endTime = \Carbon\Carbon::parse('14:00');
+
+            while ($current < $endTime) {
+                $timeSlots[] = $current->format('H:i');
+                $current->addMinutes(30);
+            }
+
+            $scheduleMap = [];
+            $skipSlots = [];
+
+            foreach ($schedules as $schedule) {
+                $start = \Carbon\Carbon::parse($schedule->start_time);
+                $end   = \Carbon\Carbon::parse($schedule->end_time);
+
+                $rowspan = $start->diffInMinutes($end) / 30;
+                $day = $schedule->day;
+                $startKey = $start->format('H:i');
+
+                $classroom = $schedule->classroom->name ?? 'N/A';
+
+                $hash = crc32($classroom);
+                $color = "hsl(" . ($hash % 360) . ", 70%, 85%)";
+
+                $scheduleMap[$day][$startKey] = [
+                    'rowspan' => $rowspan,
+                    'classroom' => $classroom,
+                    'color' => $color,
+                ];
+
+                for ($i = 1; $i < $rowspan; $i++) {
+                    $skipSlots[$day][
+                        $start->copy()->addMinutes(30 * $i)->format('H:i')
+                    ] = true;
+                }
+            }
+        @endphp
+
+        @if ($schedules->isEmpty())
+            <p class="text-gray-500 text-sm">No schedules assigned.</p>
+        @else
+            <table class="border-collapse border w-full text-sm">
+                <thead>
+                    <tr>
+                        <th class="border px-2 py-1">Time</th>
+                        @foreach ($days as $day)
+                            <th class="border px-2 py-1">{{ $day }}</th>
+                        @endforeach
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach ($timeSlots as $time)
+                        <tr>
+                            <td class="border px-2 py-1 font-semibold">{{ $time }}</td>
+
+                            @foreach ($days as $day)
+                                @if(isset($skipSlots[$day][$time]))
+                                    @continue
+                                @endif
+
+                                @if(isset($scheduleMap[$day][$time]))
+                                    <td rowspan="{{ $scheduleMap[$day][$time]['rowspan'] }}"
+                                        class="border text-center font-medium"
+                                        style="background: {{ $scheduleMap[$day][$time]['color'] }}">
+                                        {{ $scheduleMap[$day][$time]['classroom'] }}
+                                    </td>
+                                @else
+                                    <td class="border">&nbsp;</td>
+                                @endif
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    </div>
+@endif
+
 
 </div>
 @endsection

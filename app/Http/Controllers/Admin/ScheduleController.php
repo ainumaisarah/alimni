@@ -10,34 +10,32 @@ use Illuminate\Http\Request;
 
 class ScheduleController extends Controller
 {
-    public function index(Request $request)
+   public function index(Request $request)
     {
-        // Optional teacher filter (Teacher POV)
+        // 1️⃣ Get selected teacher id from dropdown
         $teacherId = $request->query('teacher_id');
 
-        // Load schedules with classrooms and teachers
-        $schedules = Schedule::with(['classroom', 'teacher'])
-            ->when($teacherId, function ($q) use ($teacherId) {
-                $q->where('teacher_id', $teacherId);
-            })
-            ->orderBy('teacher_id')
-            ->orderBy('day')
-            ->orderBy('start_time')
-            ->get();
-
-        // Get classroom IDs that already have schedules
-        $scheduledClassroomIds = $schedules->pluck('classroom_id')->unique();
-
-        // Get classrooms without any schedule
-        $unscheduledClassrooms = Classroom::whereNotIn('id', $scheduledClassroomIds)->get();
-
-        // Get teachers for dropdown (Teacher POV selector)
+        // 2️⃣ Get all teachers (for dropdown only)
         $teachers = User::where('role', 'teacher')->get();
 
+        // 3️⃣ Get ONE selected teacher (Teacher POV)
+        $selectedTeacher = null;
+
+        if ($teacherId) {
+            $selectedTeacher = User::with(['schedules.classroom'])
+                ->where('id', $teacherId)
+                ->first();
+        }
+
+        // 4️⃣ Unscheduled classrooms (global)
+        $scheduledClassroomIds = Schedule::pluck('classroom_id')->unique();
+
+        $unscheduledClassrooms = Classroom::whereNotIn('id', $scheduledClassroomIds)->get();
+
         return view('admin.schedules.index', compact(
-            'schedules',
-            'unscheduledClassrooms',
             'teachers',
+            'selectedTeacher',
+            'unscheduledClassrooms',
             'teacherId'
         ));
     }
